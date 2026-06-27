@@ -24,8 +24,10 @@ pub struct StrandState {
     pub predicted_introns: PredictedIntronMap,
     pub begins: Vec<f64>,
     pub ends: Vec<f64>,
-    pub start_peaks: Vec<(u32, f64)>,
-    pub end_peaks: Vec<(u32, f64)>,
+    /// Peaks as (forward-strand position, score, strand) — strand recorded per
+    /// Perl analyze_gene_boundaries so augmentation can split by strand.
+    pub start_peaks: Vec<(u32, f64, char)>,
+    pub end_peaks: Vec<(u32, f64, char)>,
     pub fwd_intron_vec: IntronVec,
     pub rev_intron_vec: IntronVec,
 }
@@ -154,7 +156,7 @@ pub fn process_features(
         } else {
             *pos
         };
-        state.start_peaks.push((fwd_pos, *score));
+        state.start_peaks.push((fwd_pos, *score, genomic_strand));
     }
     for (pos, score) in &end_peaks_raw {
         let fwd_pos = if genomic_strand == '-' {
@@ -162,7 +164,7 @@ pub fn process_features(
         } else {
             *pos
         };
-        state.end_peaks.push((fwd_pos, *score));
+        state.end_peaks.push((fwd_pos, *score, genomic_strand));
     }
 
     // Score exons
