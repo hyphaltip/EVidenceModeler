@@ -97,6 +97,23 @@ original design sketch.
       after each prediction.
     Format depends on the score fields above, so do scoring+filter first.
 
+## 0a. Live parity status (testing/Contig1)
+
+**10 of 11 Perl genes match exactly.** Fixes landed since the audit: byte-exact
+`analyze_peaks`; faithful `augment_intergenic_from_start/stop_peaks` (peaks now
+carry strand); internal-exon recovery in `recover_partial_prediction`.
+
+**The one remaining span diff** is the first gene: Rust `1018-3150` vs Perl
+`842-3150`. Root-caused: the genemark `initial+ 842-1127` exon IS created
+correctly (verified: start+donor present, good_phases [1,2]); but a competing
+`1018-1127` *internal* exon built from high-weight transcript evidence
+(`alignAssembly`, weight 10) has a larger base score, so the trellis starts the
+gene there (a 5'-partial). Perl prefers 842. The divergence is in how
+transcript-alignment evidence creates/weights competing internal exons
+(`load_evidence` / `instantiate_evidence_based_exons` and which exon accrues the
+transcript per-base contribution in `score_exons`) — needs a `load_evidence`
+deep-dive vs the Perl. NOT a creation/peak/trellis-structure bug.
+
 ## 0b. Approximation audit (directive: EXACT port first, no heuristics)
 
 Governing rule: byte-for-byte parity with the Perl is the bar; no approximation
