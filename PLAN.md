@@ -99,9 +99,26 @@ original design sketch.
 
 ## 0a. Live parity status (testing/Contig1)
 
-**10 of 11 Perl genes match exactly.** Low-support filter ported faithfully and
+**ALL 11 Perl genes match exactly — 11/11 gene spans + 79/79 exons identical
+(coord + type) (commit ed52b06).** Low-support filter ported faithfully and
 verified against the golden header values: `raw_noncoding` matches ~exactly
 (e.g. 3619.01 vs 3619.02; 6165.00, 4113.00 exact), S-ratios within ~0.5%.
+
+**842 SOLVED — it was a missing post-trellis step, NOT a base-score tie-break.**
+The earlier diagnosis below was wrong. Perl's `--debug` `final_path` dump proves
+the trellis itself picks the 5'-partial `internal 1018-1127` (identical to Rust).
+The `842-1127 initial` in the golden output is produced by
+`convert_5prime_partials_to_complete_genes_where_possible` (Perl line 3643),
+which runs AFTER `filter_predictions_low_support` and BEFORE tail recursion: for
+each multi-exon 5'-partial whose gene-start exon is `internal`, it finds the
+best-scoring overlapping `initial` exon (same orient, identical `end3` +
+`end_frame`) in the GLOBAL pool and replaces the gene-start exon, then re-`_init`s.
+Ported in `consensus.rs` (`is_5prime_partial` + `convert_5prime_partials_to_complete_genes`,
+called after the filter); `prediction.rs::finalize` now also recomputes `lend/rend`
+(Perl `_init`). Confirmed via Perl debug dumps (run `evidence_modeler.pl --debug`
+in `testing/smalltest_perl.partitions/Contig1`): `exon_list.out` (per-exon
+base_score), `intergenic.bps` (Rust ig matched Perl exactly: 842..1017 = 352 both),
+`final_path` (the trellis path).
 
 **Score residuals → one remaining missing step:** `prediction_score` runs
 slightly high and `offset` slightly low across genes. Traced to the still-missing
@@ -112,29 +129,14 @@ shorter than `2×median_gap`. Needed for byte-exact scores; the `gaps` are alrea
 on `EvidenceChain`. NOTE: this is NOT the 842 fix (it lowers `base(842)`, shifting
 toward 1018 — opposite of what's needed).
 
-**The 842 gene (1018 vs 842) — fully root-caused, fix not yet found.** Both
-candidates are correctly created: genemark `initial+ 842-1127` (genemark-only
-evidence) and `internal 1018-1127` (from gap2.2, a legit 12-block EST chain with
-a real acceptor at 1016). It's a pure base-score tie-break the trellis resolves
-to 1018 in Rust but 842 in Perl. base() should compute identically in both, so
-the definitive next diagnostic is to dump Perl's actual exon base_scores for
-842-1127 vs 1018-1127 (run `evidence_modeler.pl` with `$DEBUG`/`$SEE`, or build
-ParaFly) and compare to Rust — that pinpoints which scoring term diverges.
-
- Fixes landed since the audit: byte-exact
-`analyze_peaks`; faithful `augment_intergenic_from_start/stop_peaks` (peaks now
-carry strand); internal-exon recovery in `recover_partial_prediction`.
-
-**The one remaining span diff** is the first gene: Rust `1018-3150` vs Perl
-`842-3150`. Root-caused: the genemark `initial+ 842-1127` exon IS created
-correctly (verified: start+donor present, good_phases [1,2]); but a competing
-`1018-1127` *internal* exon built from high-weight transcript evidence
-(`alignAssembly`, weight 10) has a larger base score, so the trellis starts the
-gene there (a 5'-partial). Perl prefers 842. The divergence is in how
-transcript-alignment evidence creates/weights competing internal exons
-(`load_evidence` / `instantiate_evidence_based_exons` and which exon accrues the
-transcript per-base contribution in `score_exons`) — needs a `load_evidence`
-deep-dive vs the Perl. NOT a creation/peak/trellis-structure bug.
+**[RESOLVED — see "842 SOLVED" above]** The earlier root-cause hypothesis (a
+base-score tie-break in `load_evidence`/`score_exons`) was WRONG. The trellis
+correctly picks 1018 in both Perl and Rust; the 842 comes from the post-trellis
+`convert_5prime_partials` step, now ported. The intergenic and base scores were
+verified to match Perl (ig 842..1017 = 352 in both). Fixes that landed along the
+way: byte-exact `analyze_peaks`; faithful `augment_intergenic_from_start/stop_peaks`
+(peaks carry strand); internal-exon recovery in `recover_partial_prediction`;
+`convert_5prime_partials_to_complete_genes`.
 
 ## 0b. Approximation audit (directive: EXACT port first, no heuristics)
 
