@@ -99,6 +99,11 @@ impl EvmPrediction {
         }
         self.total_score = score;
         self.intron_coords = intron_coords;
+
+        // Perl _init also recomputes the prediction span from member exons.
+        let (lend, rend) = span_of_indices(&self.exon_indices, exons);
+        self.lend = lend;
+        self.rend = rend;
     }
 
     pub fn is_eliminated(&self) -> bool {

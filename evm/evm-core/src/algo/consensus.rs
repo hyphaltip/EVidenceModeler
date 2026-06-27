@@ -2,7 +2,7 @@
 
 use std::collections::HashSet;
 use anyhow::Result;
-use crate::types::exon::{Exon, ExonPhase};
+use crate::types::exon::{Exon, ExonPhase, ExonType};
 use crate::types::prediction::{EvmPrediction, PredMode};
 use crate::algo::trellis::{build_trellis, traverse_path};
 use crate::algo::filter::filter_predictions_low_support;
@@ -130,6 +130,16 @@ pub fn generate_consensus_gene_predictions(
         mode.as_str(),
     );
 
+    // Convert 5'-partial genes to complete genes where an overlapping initial
+    // exon exists (Perl convert_5prime_partials_to_complete_genes_where_possible,
+    // runs after the filter, before reporting / tail recursion).
+    convert_5prime_partials_to_complete_genes(
+        &mut predictions,
+        &mut local_exons,
+        params.exons,
+        params.introns_to_score,
+    );
+
     let preds_remain: Vec<&EvmPrediction> = predictions.iter()
         .filter(|p| !p.is_eliminated)
         .collect();
@@ -189,6 +199,73 @@ pub fn generate_consensus_gene_predictions(
 
     *recursion_count -= 1;
     Ok(())
+}
+
+/// A prediction is 5'-partial if none of its exons is an initial or single exon
+/// (Perl `EVM_prediction::is_5prime_partial`).
+fn is_5prime_partial(pred: &EvmPrediction, exons: &[Exon]) -> bool {
+    !pred.exon_indices.iter().any(|&i| {
+        matches!(exons[i].exon_type, ExonType::Initial | ExonType::Single)
+    })
+}
+
+/// Faithful port of Perl `convert_5prime_partials_to_complete_genes_where_possible`.
+///
+/// For each multi-exon 5'-partial prediction whose gene-start exon is `internal`,
+/// search the global exon pool for an overlapping `initial` exon with the same
+/// orientation, identical 3' coordinate (`end3`) and end frame, and replace the
+/// internal gene-start exon with the best-scoring such initial exon. The
+/// prediction is then re-initialised (span / score / introns recomputed).
+fn convert_5prime_partials_to_complete_genes(
+    predictions: &mut [EvmPrediction],
+    local_exons: &mut Vec<Exon>,
+    search_pool: &[Exon],
+    introns_to_score: &IntronScoreMap,
+) {
+    for pred in predictions.iter_mut() {
+        if !is_5prime_partial(pred, local_exons) { continue; }
+        // Only multi-exon genes (Perl skips single-exon).
+        if pred.exon_indices.len() < 2 { continue; }
+
+        let orient = pred.orient;
+        // exon_indices are sorted by end5 ascending (finalize). The gene-start
+        // exon is the first for '+' and the last for '-' (Perl reverses for '-').
+        let gene_start_pos = if orient == '-' { pred.exon_indices.len() - 1 } else { 0 };
+        let gs_idx = pred.exon_indices[gene_start_pos];
+        let gs = &local_exons[gs_idx];
+
+        // Perl only converts when the gene-start exon is internal.
+        if gs.exon_type != ExonType::Internal { continue; }
+
+        let (gs_l, gs_r) = gs.coords_sorted();
+        let gs_end3 = gs.end3;
+        let gs_end_frame = gs.end_frame;
+
+        // Find the best overlapping initial exon (Perl find_overlapping_exons:
+        // end5 < rendRange && end3 > lendRange — strict overlap on sorted coords).
+        let mut best: Option<&Exon> = None;
+        for e in search_pool {
+            let (el, er) = e.coords_sorted();
+            if !(el < gs_r && er > gs_l) { continue; }
+            if e.exon_type != ExonType::Initial { continue; }
+            if e.orientation.as_char() != orient { continue; }
+            if e.end3 != gs_end3 { continue; }
+            if e.end_frame != gs_end_frame { continue; }
+            match best {
+                Some(b) if b.base_score >= e.base_score => {}
+                _ => best = Some(e),
+            }
+        }
+
+        if let Some(b) = best {
+            // Splice the replacement exon into the local pool and the prediction,
+            // then re-init (Perl replace_exons -> _init).
+            let new_idx = local_exons.len();
+            local_exons.push(b.clone());
+            pred.exon_indices[gene_start_pos] = new_idx;
+            pred.finalize(local_exons, introns_to_score);
+        }
+    }
 }
 
 /// Format a prediction as EVM output text.
