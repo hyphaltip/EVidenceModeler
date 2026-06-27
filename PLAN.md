@@ -97,6 +97,42 @@ original design sketch.
       after each prediction.
     Format depends on the score fields above, so do scoring+filter first.
 
+## 0b. Approximation audit (directive: EXACT port first, no heuristics)
+
+Governing rule: byte-for-byte parity with the Perl is the bar; no approximation
+may stand in for a real algorithm. Status of every known approximation/gap:
+
+**Confirmed faithful (verified vs Perl):** `score_exons`; `populate_intergenic_scores`
+(prediction-span method); reverse transpose; prediction `finalize` scoring;
+trellis boundary placement + `score_boundary_condition`; `are_compatible_exons`.
+
+**Confirmed approximate / divergent — to fix in dependency order:**
+1. `augment_intergenic_from_peaks` — crude ±500 smear, currently DISABLED; port
+   Perl `augment_intergenic_from_start/stop_peaks` (~360 lines; needs
+   `find_closest_exon_within_range`, `START_STOP_RANGE`=500). Fixes the 2 remaining
+   5' diffs (1018 vs 842, 12430 vs 14459). **ACTIVE NEXT.**
+2. `filter_predictions_low_support` — heuristic, not Perl `noncoding_equivalent`/
+   `score_ratio` (lines 3436-3550). Unblocked (total_score exists).
+3. `convert_5prime_partials` — stubbed TODO, does nothing.
+4. `format_prediction` — output text not matching Perl `toString` (B2).
+5. `decrement_coding_using_protein_alignment_introns` — MISSING entirely
+   (Perl main flow line 726).
+
+**Not yet verified (audit before claiming parity):** `analyze_peaks` (feeds #1);
+`recombine` DP (`combine_predictions`/`join_intronic_preds`);
+`recover_partial_prediction`; cross-strand intron-vector merge; `gff3_to_proteins`
+translation + ID assignment; `partition::get_range_list`; PASA
+`supplement_terminal_exons` (only with --terminal_exons).
+
+**Mechanisms to guarantee exactness (to add):**
+- Byte-level golden test: assert Rust `evm.out` == Perl `evm.out` (fixture exists).
+- Per-function cross-check: mirror Perl `$DEBUG` intermediate dumps (intergenic,
+  intron vecs, peaks, exons, trellis) and diff each vector at the source.
+
+**Phase G (post-parity, NOT part of the port):** once bit-for-bit faithful, use
+the fast Rust EVM as a trustworthy baseline to curate gold-standard annotation
+and re-tune/retrain scoring — with the faithful port as the regression anchor.
+
 ## 1. Where we actually are
 
 The Rust workspace under `evm/` is **fully scaffolded** and matches the original
