@@ -6,15 +6,24 @@ use crate::types::exon::{Exon, ExonPhase};
 use crate::types::prediction::{EvmPrediction, PredMode};
 use crate::algo::trellis::{build_trellis, traverse_path};
 use crate::algo::filter::filter_predictions_low_support;
-use crate::algo::introns::{IntronScoreMap, IntronVec};
+use crate::algo::introns::{IntronScoreMap, IntronEvidenceMap, IntronVec};
 use crate::algo::intergenic::{IntergenicScores, get_intergenic_regions};
 use crate::algo::coding_scores::CodingScores;
+use crate::types::evidence::EvWeightMap;
+use crate::types::genome::MaskVec;
 
 /// Parameters controlling the recursive search.
 pub struct ConsensusParams<'a> {
     pub exons: &'a mut Vec<Exon>,
     pub introns_to_score: &'a IntronScoreMap,
+    pub introns_to_evidence: &'a IntronEvidenceMap,
+    pub ev_weights: &'a EvWeightMap,
+    pub mask: &'a MaskVec,
+    /// Augmented intergenic scores (start/stop peak augmentation applied) — used
+    /// by the trellis on the first build.
     pub intergenic_scores: &'a IntergenicScores,
+    /// Base (non-augmented) intergenic scores — used by the low-support filter.
+    pub base_intergenic_scores: &'a IntergenicScores,
     pub acceptable_linkages: &'a HashSet<(String, String)>,
     pub phased_connections: &'a HashSet<(String, String)>,
     pub intergenic_connections: &'a HashSet<(String, String)>,
@@ -112,9 +121,12 @@ pub fn generate_consensus_gene_predictions(
     filter_predictions_low_support(
         &mut predictions,
         &local_exons,
-        params.coding_scores,
+        params.base_intergenic_scores,
         params.fwd_intron_vec,
         params.rev_intron_vec,
+        params.introns_to_evidence,
+        params.ev_weights,
+        params.mask,
         mode.as_str(),
     );
 

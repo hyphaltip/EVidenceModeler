@@ -144,6 +144,7 @@ fn main() -> Result<()> {
     // Merge exon pools (reversing coordinates for rev strand)
     let mut all_exons: Vec<evm_core::types::exon::Exon> = Vec::new();
     let mut all_introns_to_score = std::collections::HashMap::new();
+    let mut all_introns_to_evidence: std::collections::HashMap<String, Vec<(String, String)>> = std::collections::HashMap::new();
     let mut all_predicted_introns = std::collections::HashMap::new();
     let mut all_coding_scores = evm_core::algo::coding_scores::new_coding_scores(seq_len);
     let mut all_start_peaks = Vec::new();
@@ -154,6 +155,7 @@ fn main() -> Result<()> {
     for state in [fwd_state].into_iter().flatten() {
         all_exons.extend(state.exons);
         for (k, v) in state.introns_to_score { *all_introns_to_score.entry(k).or_insert(0.0) += v; }
+        for (k, v) in state.introns_to_evidence { all_introns_to_evidence.entry(k).or_default().extend(v); }
         for (k, v) in state.predicted_introns { *all_predicted_introns.entry(k).or_insert(0.0) += v; }
         for (i, &v) in state.coding_scores.iter().enumerate() { all_coding_scores[i] += v; }
         all_start_peaks.extend(state.start_peaks);
@@ -178,6 +180,8 @@ fn main() -> Result<()> {
         }
         all_exons.extend(state.exons);
         for (k, v) in state.introns_to_score { *all_introns_to_score.entry(k).or_insert(0.0) += v; }
+        for (k, v) in state.introns_to_evidence { all_introns_to_evidence.entry(k).or_default().extend(v); }
+        for (k, v) in state.predicted_introns { *all_predicted_introns.entry(k).or_insert(0.0) += v; }
         for (i, &v) in state.coding_scores.iter().enumerate() { all_coding_scores[i] += v; }
         all_start_peaks.extend(state.start_peaks);
         all_end_peaks.extend(state.end_peaks);
@@ -185,7 +189,10 @@ fn main() -> Result<()> {
         for (i, &v) in state.rev_intron_vec.iter().enumerate() { if i < all_rev_intron_vec.len() { all_rev_intron_vec[i] += v; } }
     }
 
-    let mut ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, cli.intergenic_adjust);
+    // Base intergenic (non-augmented) for the low-support filter; augmented copy
+    // (start/stop peak augmentation) for the trellis.
+    let ig_base = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, cli.intergenic_adjust);
+    let mut ig_scores = ig_base.clone();
     augment_intergenic_from_start_stop_peaks(
         &mut ig_scores, &all_start_peaks, &all_end_peaks, &all_exons, &mask,
         seq_len as u32, sum_pred_weights, 500,
@@ -199,7 +206,11 @@ fn main() -> Result<()> {
     let mut params = ConsensusParams {
         exons: &mut all_exons,
         introns_to_score: &all_introns_to_score,
+        introns_to_evidence: &all_introns_to_evidence,
+        ev_weights: &ev_weights,
+        mask: &mask,
         intergenic_scores: &ig_scores,
+        base_intergenic_scores: &ig_base,
         acceptable_linkages: &acceptable,
         phased_connections: &phased,
         intergenic_connections: &intergenic_conns,

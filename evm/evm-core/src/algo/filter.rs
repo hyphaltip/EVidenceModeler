@@ -2,78 +2,140 @@
 
 use crate::types::prediction::EvmPrediction;
 use crate::types::exon::{Exon, ExonType};
-use crate::algo::coding_scores::CodingScores;
-use crate::algo::introns::IntronVec;
+use crate::types::evidence::EvWeightMap;
+use crate::types::genome::MaskVec;
+use crate::algo::introns::{IntronVec, IntronEvidenceMap};
+use crate::algo::intergenic::{IntergenicScores, calc_intergenic_score};
 
 /// Minimum coding/noncoding score ratio; predictions below this are eliminated.
 const MIN_CODING_NONCODING_SCORE_RATIO: f64 = 0.75;
 /// Minimum total coding length for nested/intergenic gene searches.
 const MIN_CODING_LENGTH: u32 = 300;
+/// Minimum total coding length under STANDARD mode (50 aa).
+const MIN_CODING_LENGTH_STANDARD: u32 = 150;
 
-/// Filter predictions that have insufficient evidence support.
+/// Filter low-support predictions — faithful port of Perl
+/// `filter_predictions_low_support`.
 ///
-/// A prediction is eliminated if:
-/// 1. The ratio of its coding score to its intergenic baseline is too low, or
-/// 2. Its total CDS length is below `MIN_CODING_LENGTH` (for nested/intergenic modes).
+/// For each prediction computes the noncoding-equivalent score and the
+/// coding/noncoding score ratio, then eliminates it if the ratio is below
+/// `MIN_CODING_NONCODING_SCORE_RATIO` or the coding length is below the
+/// mode-dependent minimum (150 for STANDARD, else 300). The computed
+/// `raw_noncoding`, `offset_noncoding`, `noncoding_equivalent`, and
+/// `score_ratio` are recorded on each prediction for the output header.
+///
+/// `base_intergenic` must be the NON-augmented intergenic vector (Perl resets
+/// the intergenic scores at the first filter call, undoing the start/stop peak
+/// augmentation used only for the trellis).
 pub fn filter_predictions_low_support(
-    predictions: &mut Vec<EvmPrediction>,
+    predictions: &mut [EvmPrediction],
     exons: &[Exon],
-    coding_scores: &CodingScores,
+    base_intergenic: &IntergenicScores,
     fwd_intron_vec: &IntronVec,
     rev_intron_vec: &IntronVec,
+    introns_to_evidence: &IntronEvidenceMap,
+    ev_weights: &EvWeightMap,
+    mask: &MaskVec,
     mode: &str,
 ) {
+    let min_coding_length = if mode == "STANDARD" { MIN_CODING_LENGTH_STANDARD } else { MIN_CODING_LENGTH };
+
     for pred in predictions.iter_mut() {
-        if pred.is_eliminated { continue; }
-
         let (lend, rend) = pred.get_span();
+        let prediction_score = pred.total_score;
 
-        // Compute total CDS length
-        let cds_len: u32 = pred.exon_indices.iter()
-            .map(|&i| exons[i].length())
-            .sum();
+        // Base intergenic over the prediction span.
+        let noncoding_score = calc_intergenic_score(base_intergenic, lend, rend);
 
-        // For intron/intergenic re-search modes, enforce minimum coding length
-        if mode != "STANDARD" && cds_len < MIN_CODING_LENGTH {
-            pred.is_eliminated = true;
-            continue;
+        // Predicted introns (both strands) scored as intergenic over the span.
+        let mut noncoding_intron_addition = 0.0;
+        for i in lend..=rend {
+            noncoding_intron_addition += fwd_intron_vec.get(i as usize).copied().unwrap_or(0.0)
+                + rev_intron_vec.get(i as usize).copied().unwrap_or(0.0);
         }
 
-        // Compute average coding score per base over the span
-        let span = (rend - lend + 1) as f64;
-        if span <= 0.0 { continue; }
+        // Offset: same-strand predicted-intron support that should not count as
+        // noncoding for this prediction's own introns.
+        let orient = pred.orient;
+        let intron_vec = if orient == '+' { fwd_intron_vec } else { rev_intron_vec };
+        let mut offset = 0.0;
+        for &(simple_lend, simple_rend) in &pred.intron_coords {
+            let key = get_intron_key(simple_lend, simple_rend, orient);
+            let (ilend, irend) = intron_key_to_span_sorted(&key);
+            let intron_len = adjust_feature_length_for_mask(ilend, irend, mask);
+            if intron_len == 0 { continue; }
+            // existing per-base contribution = sum of ab-initio weights for this intron
+            let existing_per_base: f64 = introns_to_evidence.get(&key)
+                .map(|evs| evs.iter().filter_map(|(_acc, ev_type)| {
+                    ev_weights.get(ev_type).filter(|e| e.ev_class.is_abinitio()).map(|e| e.weight)
+                }).sum())
+                .unwrap_or(0.0);
+            offset += calc_intergenic_score(base_intergenic, ilend, irend);
+            for i in ilend..=irend {
+                if mask.get(i as usize) { continue; }
+                offset += intron_vec.get(i as usize).copied().unwrap_or(0.0) - existing_per_base;
+            }
+        }
 
-        let coding_sum: f64 = (lend..=rend)
-            .map(|i| coding_scores[i as usize].max(0.0))
-            .sum();
-        let coding_avg = coding_sum / span;
+        let raw_noncoding = noncoding_score + noncoding_intron_addition;
+        pred.raw_noncoding = raw_noncoding;
+        pred.offset_noncoding = offset;
 
-        // Compute average intron score over the span (use the strand of first exon)
-        let strand = exons[pred.exon_indices[0]].orientation;
-        let intron_vec = if strand == crate::types::exon::Orientation::Fwd {
-            fwd_intron_vec
+        let mut noncoding_equivalent = raw_noncoding - offset;
+        if noncoding_equivalent <= 0.0 {
+            noncoding_equivalent = 0.0001 * prediction_score;
+        }
+        pred.noncoding_equivalent = noncoding_equivalent;
+
+        let score_ratio = if prediction_score == 0.0 && noncoding_equivalent == 0.0 {
+            0.0
         } else {
-            rev_intron_vec
+            round2(prediction_score / noncoding_equivalent)
         };
-        let intron_sum: f64 = (lend..=rend)
-            .map(|i| intron_vec.get(i as usize).copied().unwrap_or(0.0))
-            .sum();
-        let intron_avg = intron_sum / span;
+        pred.score_ratio = score_ratio;
 
-        // Baseline: the better of coding or intron averages
-        let baseline = coding_avg.max(intron_avg);
-        if baseline <= 0.0 { continue; }
+        let coding_length: u32 = pred.exon_indices.iter().map(|&i| exons[i].length()).sum();
 
-        // Compute total prediction score
-        let pred_score: f64 = pred.exon_indices.iter()
-            .map(|&i| exons[i].sum_score.max(0.0))
-            .sum();
-
-        let ratio = pred_score / (baseline * span);
-        if ratio < MIN_CODING_NONCODING_SCORE_RATIO {
+        if score_ratio < MIN_CODING_NONCODING_SCORE_RATIO || coding_length < min_coding_length {
             pred.is_eliminated = true;
         }
     }
+}
+
+/// Round to 2 decimals exactly as Perl `sprintf("%.2f", x)` then numeric compare.
+fn round2(x: f64) -> f64 {
+    format!("{:.2}", x).parse::<f64>().unwrap_or(x)
+}
+
+/// Perl `get_intron_key`: from a simple intron span (lend, rend) and orient,
+/// produce the donor/acceptor-adjusted key matching `INTRONS_TO_SCORE`.
+fn get_intron_key(lend: u32, rend: u32, orient: char) -> String {
+    let (l, r) = if lend <= rend { (lend, rend) } else { (rend, lend) };
+    let (end5, end3) = if orient == '+' { (l, r.saturating_sub(1)) } else { (r, l + 1) };
+    format!("{}_{}", end5, end3)
+}
+
+/// Perl `intron_key_to_intron_span`, returning a sorted (lend, rend).
+fn intron_key_to_span_sorted(key: &str) -> (u32, u32) {
+    let parts: Vec<&str> = key.split('_').collect();
+    let end5: u32 = parts.get(0).and_then(|s| s.parse().ok()).unwrap_or(0);
+    let end3: u32 = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
+    let (a, b) = if end5 < end3 {
+        (end5, end3.saturating_sub(1))   // '+' orient
+    } else {
+        (end5, end3 + 1)                 // '-' orient
+    };
+    if a <= b { (a, b) } else { (b, a) }
+}
+
+/// Perl `adjust_feature_length_for_mask`: count of non-masked positions in [lend, rend].
+fn adjust_feature_length_for_mask(lend: u32, rend: u32, mask: &MaskVec) -> u32 {
+    let (l, r) = if lend <= rend { (lend, rend) } else { (rend, lend) };
+    let mut n = 0u32;
+    for i in l..=r {
+        if !mask.get(i as usize) { n += 1; }
+    }
+    n
 }
 
 /// For predictions that lack a proper start codon (5' partials), try to find
