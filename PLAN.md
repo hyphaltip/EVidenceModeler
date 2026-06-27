@@ -99,7 +99,29 @@ original design sketch.
 
 ## 0a. Live parity status (testing/Contig1)
 
-**10 of 11 Perl genes match exactly.** Fixes landed since the audit: byte-exact
+**10 of 11 Perl genes match exactly.** Low-support filter ported faithfully and
+verified against the golden header values: `raw_noncoding` matches ~exactly
+(e.g. 3619.01 vs 3619.02; 6165.00, 4113.00 exact), S-ratios within ~0.5%.
+
+**Score residuals → one remaining missing step:** `prediction_score` runs
+slightly high and `offset` slightly low across genes. Traced to the still-missing
+`decrement_coding_using_protein_alignment_introns` (Perl line 4206; constants
+`INTRON_MEDIAN_FACTOR=2`, `MIN_ALIGNMENT_GAP_SIZE_INFER_INTRON`): it subtracts the
+protein weight from coding scores over protein-alignment gaps (inferred introns)
+shorter than `2×median_gap`. Needed for byte-exact scores; the `gaps` are already
+on `EvidenceChain`. NOTE: this is NOT the 842 fix (it lowers `base(842)`, shifting
+toward 1018 — opposite of what's needed).
+
+**The 842 gene (1018 vs 842) — fully root-caused, fix not yet found.** Both
+candidates are correctly created: genemark `initial+ 842-1127` (genemark-only
+evidence) and `internal 1018-1127` (from gap2.2, a legit 12-block EST chain with
+a real acceptor at 1016). It's a pure base-score tie-break the trellis resolves
+to 1018 in Rust but 842 in Perl. base() should compute identically in both, so
+the definitive next diagnostic is to dump Perl's actual exon base_scores for
+842-1127 vs 1018-1127 (run `evidence_modeler.pl` with `$DEBUG`/`$SEE`, or build
+ParaFly) and compare to Rust — that pinpoints which scoring term diverges.
+
+ Fixes landed since the audit: byte-exact
 `analyze_peaks`; faithful `augment_intergenic_from_start/stop_peaks` (peaks now
 carry strand); internal-exon recovery in `recover_partial_prediction`.
 
