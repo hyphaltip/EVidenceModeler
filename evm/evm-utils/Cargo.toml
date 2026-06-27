@@ -1,0 +1,27 @@
+[package]
+name    = "evm-utils"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "evidence_modeler"
+path = "src/bin/evidence_modeler.rs"
+
+[[bin]]
+name = "partition_evm_inputs"
+path = "src/bin/partition_evm_inputs.rs"
+
+[[bin]]
+name = "recombine_evm_outputs"
+path = "src/bin/recombine_evm_outputs.rs"
+
+[[bin]]
+name = "gff3_file_to_proteins"
+path = "src/bin/gff3_file_to_proteins.rs"
+
+[dependencies]
+evm-core   = { path = "../evm-core" }
+anyhow     = { workspace = true }
+clap       = { workspace = true }
+env_logger = { workspace = true }
+log        = { workspace = true }
