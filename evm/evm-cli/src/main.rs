@@ -342,7 +342,7 @@ fn run_evm_on_partition(
     use evm_core::io::weights::read_weights_file;
     use evm_core::types::genome::{GenomeSequence, MaskVec};
     use evm_core::algo::splice_sites::parse_stop_codons;
-    use evm_core::algo::intergenic::{populate_intergenic_scores, augment_intergenic_from_peaks};
+    use evm_core::algo::intergenic::populate_intergenic_scores;
     use evm_core::algo::process::{process_features, ProcessConfig};
     use evm_core::algo::consensus::{generate_consensus_gene_predictions, ConsensusParams};
     
@@ -437,11 +437,11 @@ fn run_evm_on_partition(
         for (i, &v) in state.rev_intron_vec.iter().enumerate() { if i < all_rev_intron_vec.len() { all_rev_intron_vec[i] += v; } }
     }
 
-    // Populate intergenic scores
-    let mut ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, intergenic_adjust);
-    let mut all_peaks = all_start_peaks.clone();
-    all_peaks.extend(all_end_peaks);
-    augment_intergenic_from_peaks(&mut ig_scores, &all_peaks, 500);
+    // Populate intergenic scores.
+    // NOTE: crude peak augmentation disabled (corrupted boundary scoring); a
+    // faithful Perl augment_intergenic_from_start/stop_peaks port is the next step.
+    let ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, intergenic_adjust);
+    let _ = (&all_start_peaks, &all_end_peaks);
 
     let (acceptable, phased, intergenic_conns, frame_pairs) =
         evm_core::types::exon::build_acceptable_linkages();

@@ -12,7 +12,7 @@ use evm_core::io::gff3::read_gff3_file;
 use evm_core::io::weights::read_weights_file;
 use evm_core::types::genome::{GenomeSequence, MaskVec};
 use evm_core::algo::splice_sites::parse_stop_codons;
-use evm_core::algo::intergenic::{populate_intergenic_scores, augment_intergenic_from_peaks};
+use evm_core::algo::intergenic::populate_intergenic_scores;
 use evm_core::algo::process::{process_features, ProcessConfig};
 use evm_core::algo::consensus::{generate_consensus_gene_predictions, ConsensusParams};
 use evm_core::types::exon::build_acceptable_linkages;
@@ -185,10 +185,12 @@ fn main() -> Result<()> {
         for (i, &v) in state.rev_intron_vec.iter().enumerate() { if i < all_rev_intron_vec.len() { all_rev_intron_vec[i] += v; } }
     }
 
-    let mut ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, cli.intergenic_adjust);
-    let mut all_peaks = all_start_peaks.clone();
-    all_peaks.extend(all_end_peaks);
-    augment_intergenic_from_peaks(&mut ig_scores, &all_peaks, 500);
+    let ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, cli.intergenic_adjust);
+    // NOTE: the previous crude peak augmentation (smearing each peak ±500 onto the
+    // intergenic vector) corrupted the trellis boundary scoring and is disabled.
+    // A faithful port of Perl augment_intergenic_from_start/stop_peaks is the next
+    // step (will use all_start_peaks / all_end_peaks).
+    let _ = (&all_start_peaks, &all_end_peaks);
 
     let (acceptable, phased, intergenic_conns, frame_pairs) = build_acceptable_linkages();
 

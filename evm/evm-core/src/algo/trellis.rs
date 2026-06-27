@@ -94,9 +94,37 @@ pub fn are_compatible_exons(
 }
 
 /// Score the connection between a boundary node and an exon (or vice-versa).
-/// Boundary conditions always return 0 (no extra score).
-pub fn score_boundary_condition(_boundary: &Exon, _other: &Exon) -> f64 {
-    0.0
+///
+/// Mirrors the Perl `score_boundary_condition`: a feature may extend to the
+/// sequence terminus, scoring the flanking region as intergenic.
+/// - left bound → exon B: intergenic over (bound_end3, exonB_lend - 1)
+/// - exon A → right bound: intergenic over (exonA_rend + 1, bound_end5)
+/// - both bound: not allowed (incompatible).
+///
+/// `exon_a` is the upstream (left) node, `exon_b` the downstream (right) node.
+pub fn score_boundary_condition(
+    exon_a: &Exon,
+    exon_b: &Exon,
+    intergenic_scores: &IntergenicScores,
+) -> CompatResult {
+    let a_bound = exon_a.exon_type == ExonType::Bound;
+    let b_bound = exon_b.exon_type == ExonType::Bound;
+
+    if a_bound && b_bound {
+        return CompatResult::Incompatible;
+    }
+
+    if a_bound {
+        // left boundary → exon B; bound has end5 == end3 == range_lend.
+        let (b_lend, _) = exon_b.coords_sorted();
+        let s = calc_intergenic_score(intergenic_scores, exon_a.end3, b_lend.saturating_sub(1));
+        CompatResult::Compatible(s)
+    } else {
+        // exon A → right boundary; bound has end5 == end3 == range_rend.
+        let (_, a_rend) = exon_a.coords_sorted();
+        let s = calc_intergenic_score(intergenic_scores, a_rend + 1, exon_b.end5);
+        CompatResult::Compatible(s)
+    }
 }
 
 /// Build the trellis over `exons` restricted to [range_lend, range_rend].
@@ -118,26 +146,28 @@ pub fn build_trellis(
 ) -> Option<usize> {
     if exons.is_empty() { return None; }
 
-    // Reset link and sum_score
-    for exon in exons.iter_mut() {
-        exon.sum_score = exon.base_score;
-        exon.link = None;
-    }
+    // Sort real exons by 5' end (Perl re-sorts inside build_trellis).
+    exons.sort_by_key(|e| e.end5);
 
-    // Add boundary sentinel nodes
-    let _left_bound_idx = exons.len();
+    // Add boundary sentinel nodes in Perl order: left bound at the FRONT,
+    // right bound at the END. Layout: [left_bound, exons…, right_bound].
     let mut left_bound = Exon::new(range_lend, range_lend);
     left_bound.exon_type = ExonType::Bound;
     left_bound.start_frame = 1;
     left_bound.end_frame = 1;
-    exons.push(left_bound);
+    exons.insert(0, left_bound);
 
-    let _right_bound_idx = exons.len();
     let mut right_bound = Exon::new(range_rend, range_rend);
     right_bound.exon_type = ExonType::Bound;
     right_bound.start_frame = 1;
     right_bound.end_frame = 1;
     exons.push(right_bound);
+
+    // Reset link and sum_score for every node (bounds included).
+    for exon in exons.iter_mut() {
+        exon.sum_score = exon.base_score;
+        exon.link = None;
+    }
 
     let num_exons = exons.len();
     let mut highest_score = 0.0f64;
@@ -152,8 +182,7 @@ pub fn build_trellis(
 
         let i_type_bound = exons[i].exon_type == ExonType::Bound;
 
-        let j_start = if i == 0 { 0 } else { i - 1 };
-        let mut j = j_start as isize;
+        let mut j = (i - 1) as isize;
 
         while j >= 0
             && (compare_count < max_prev_exons_compare || !found_compatible)
@@ -165,8 +194,10 @@ pub fn build_trellis(
             let j_type_bound = exons[ji].exon_type == ExonType::Bound;
 
             let join_score = if i_type_bound || j_type_bound {
-                // boundary condition: always 0
-                Some(score_boundary_condition(&exons[ji], &exons[i]))
+                match score_boundary_condition(&exons[ji], &exons[i], intergenic_scores) {
+                    CompatResult::Compatible(s) => Some(s),
+                    CompatResult::Incompatible => None,
+                }
             } else {
                 match are_compatible_exons(
                     &exons[ji],
