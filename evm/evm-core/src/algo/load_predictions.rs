@@ -259,6 +259,15 @@ fn recover_partial_prediction(
             add_or_update_exon(model_id, end5, end3, ExonType::Terminal, phase, ev_type, ev_class, weight,
                 genome_seq, genome_features, mask, coding_scores, exons, exons_via_coords, genomic_seq_len);
         }
+        // Candidate internal exons (Perl try_recover_partial_prediction line 1076):
+        // acceptor at end5-2 and donor at end3+1. Internal exons are added for
+        // every valid reading phase (the Perl add_exon validates phase).
+        if has_acceptor && has_donor {
+            for phase in determine_good_phases(genome_features, end5, end3) {
+                add_or_update_exon(model_id, end5, end3, ExonType::Internal, phase, ev_type, ev_class, weight,
+                    genome_seq, genome_features, mask, coding_scores, exons, exons_via_coords, genomic_seq_len);
+            }
+        }
     }
     add_introns(model_id, coordsets, genomic_strand, weight, ev_type, ev_class,
         min_intron_length, genome_features, mask,
