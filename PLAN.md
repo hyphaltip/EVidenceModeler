@@ -50,6 +50,53 @@ original design sketch.
     (`evidence_modeler.rs` / `main.rs` merge loops); Perl builds the fwd/rev
     intron vectors once at the end from the accumulated `%PREDICTED_INTRONS`.
 
+- **2026-06-27 — Phase B investigation deepened (roadmap for the remaining
+  diffs).** Mapped the exact Perl logic and Rust gaps for the remaining 4
+  model diffs + format. Key findings:
+  - **Prediction scoring is unimplemented.** `trellis::traverse_path` builds
+    `EvmPrediction`s but never sets `total_score` (stays 0.0). Perl's
+    `prediction_score` (= `EVM_prediction::get_score`, set to the trellis path
+    total) drives both the header `score(...)` and the filter ratio. This must
+    be implemented first — everything downstream depends on it.
+  - **The low-support filter is a heuristic, not the Perl formula.** Port
+    `filter_predictions_low_support` (Perl lines 3436-3550) faithfully:
+    `noncoding = calc_intergenic_score(lend,rend)`;
+    `noncoding_intron_addition = Σ FWD_PRED_INTRON_VEC[i]+REV_PRED_INTRON_VEC[i]`
+    over span; per-intron `offset += calc_intergenic_score(intron) + Σ
+    (strand_intron_vec[i] − predicted_intron_contrib/intron_len)`;
+    `raw_noncoding = noncoding + intron_addition`;
+    `noncoding_equivalent = max(raw_noncoding − offset, 0.0001·score)`;
+    `score_ratio = score/noncoding_equivalent`; eliminate if
+    `ratio < 0.75` (`MIN_CODING_NONCODING_SCORE_RATIO`) or
+    `coding_length < (STANDARD?150:300)`. Store raw_noncoding/offset/
+    noncoding_equivalent/score_ratio on the prediction for the header.
+    Needs merged `predicted_introns` (the shim currently does NOT merge the
+    reverse strand's `predicted_introns`).
+  - **Missing single-exon gene `3632-4546` is a TRELLIS-CREATION issue, not a
+    filter one** — it does not appear even with `--report-elm`, so it is never
+    produced as a candidate path. Investigate single-exon (`single-`)
+    candidate creation in `load_predictions` (reverse pass) and/or its
+    selection/seeding in `build_trellis` (isolated single exon between two
+    multi-exon genes via intergenic transitions). The 3 inputs are complete
+    single-CDS reverse predictions at 3632-4546.
+  - **Three terminal-boundary diffs** (`44377-50459` vs `-50843`,
+    `57662-` vs `57371-`, `-63283` vs `-63134`): terminal-exon selection /
+    start-stop-peak augmentation in trellis/consensus.
+  - **Output format spec (Phase B2)** is fully nailed down from the Perl
+    `toString` methods (Exon @4847, EVM_prediction @5112):
+    - per-recursion: `!! Predictions spanning range L - R [R<n>]` (only when a
+      pred survives filter or `--report-elm`).
+    - header: `# EVM prediction: Mode:<m> S-ratio: <ratio> <lend>-<rend>
+      orient(<o>) score(%.2f) noncoding_equivalent(%.2f) raw_noncoding(%.2f)
+      offset(%.2f) ` (+` *** ELIMINATED *** ` if eliminated).
+    - exon row: `end5\tend3\t<type><orient>\t<startFrame>\t<endFrame>\t` then
+      `{acc;class},`-joined evidence (trailing comma chopped). Frames are 1-6,
+      NOT gff 0-2. Type carries the orient suffix (`initial+`,`single-`,…).
+    - intron row: `e5\te3\tINTRON\t\t\t{acc;type},…`; e5/e3 swapped for `-`.
+    - components (exons+introns) sorted ascending by first coord; blank line
+      after each prediction.
+    Format depends on the score fields above, so do scoring+filter first.
+
 ## 1. Where we actually are
 
 The Rust workspace under `evm/` is **fully scaffolded** and matches the original
