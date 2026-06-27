@@ -103,6 +103,11 @@ pub fn generate_consensus_gene_predictions(
         return Ok(());
     }
 
+    // Compute prediction_score / orientation / intron coords (Perl _init parity).
+    for pred in predictions.iter_mut() {
+        pred.finalize(&local_exons, params.introns_to_score);
+    }
+
     // Filter low-support predictions
     filter_predictions_low_support(
         &mut predictions,

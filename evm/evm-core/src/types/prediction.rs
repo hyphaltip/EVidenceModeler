@@ -29,8 +29,19 @@ pub struct EvmPrediction {
     pub lend: u32,
     /// Rightmost coordinate of the prediction span (1-based).
     pub rend: u32,
-    /// Total evidence-weighted score of this prediction.
+    /// Total evidence-weighted score of this prediction
+    /// (Σ exon base scores + Σ intron scores), matching Perl prediction_score.
     pub total_score: f64,
+    /// Strand orientation of the prediction ('+'/'-'), from its first exon.
+    pub orient: char,
+    /// Simple intron gap coordinates (lend, rend) between consecutive exons,
+    /// ordered 5'→3'. Used by the low-support filter and the output writer.
+    pub intron_coords: Vec<(u32, u32)>,
+    /// Noncoding scores computed by the low-support filter (Perl parity).
+    pub raw_noncoding: f64,
+    pub offset_noncoding: f64,
+    pub noncoding_equivalent: f64,
+    pub score_ratio: f64,
 }
 
 impl EvmPrediction {
@@ -43,7 +54,51 @@ impl EvmPrediction {
             lend,
             rend,
             total_score: 0.0,
+            orient: '+',
+            intron_coords: Vec::new(),
+            raw_noncoding: 0.0,
+            offset_noncoding: 0.0,
+            noncoding_equivalent: 0.0,
+            score_ratio: 0.0,
         }
+    }
+
+    /// Compute `total_score`, `orient`, and `intron_coords` from the member
+    /// exons and the intron score map — mirrors the Perl `EVM_prediction::_init`
+    /// (prediction_score = Σ exon coding scores + Σ intron scores; introns keyed
+    /// by donor/acceptor-adjusted coordinates).
+    pub fn finalize(&mut self, exons: &[Exon], introns_to_score: &std::collections::HashMap<String, f64>) {
+        // Perl sorts the prediction's exons by end5 ascending.
+        self.exon_indices.sort_by_key(|&i| exons[i].end5);
+        if self.exon_indices.is_empty() { return; }
+
+        self.orient = exons[self.exon_indices[0]].orientation.as_char();
+
+        let mut score = 0.0;
+        let mut intron_coords = Vec::new();
+        for w in self.exon_indices.windows(2) {
+            let a = &exons[w[0]];
+            let b = &exons[w[1]];
+            // Donor/acceptor-adjusted key coordinates (Perl _get_exon_pair_intron_score).
+            let (i5, i3) = if self.orient == '+' {
+                (a.end3 + 1, b.end5.saturating_sub(2))
+            } else {
+                (b.end3.saturating_sub(1), a.end5 + 2)
+            };
+            let key = format!("{}_{}", i5, i3);
+            if let Some(&s) = introns_to_score.get(&key) {
+                score += s;
+            }
+            // Simple intron gap coordinates (exonA_rend+1, exonB_lend-1).
+            let a_rend = a.end5.max(a.end3);
+            let b_lend = b.end5.min(b.end3);
+            intron_coords.push((a_rend + 1, b_lend.saturating_sub(1)));
+        }
+        for &i in &self.exon_indices {
+            score += exons[i].base_score;
+        }
+        self.total_score = score;
+        self.intron_coords = intron_coords;
     }
 
     pub fn is_eliminated(&self) -> bool {
