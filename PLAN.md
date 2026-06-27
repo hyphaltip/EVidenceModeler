@@ -23,6 +23,33 @@ original design sketch.
   match the Perl reference (170 lines); both the per-line format and the gene
   models differ. That diff is the Phase B work-list.
 
+- **2026-06-27 — Phase B underway.** Golden reference captured at
+  `evm/tests/fixtures/Contig1.perl.evm.out` (11 genes). Two algorithmic fixes
+  landed, each cross-checked against the Perl source:
+  1. **Reverse-strand transpose** (`transpose_exons_back_to_forward_strand`
+     parity): the merge flipped coordinates but not `orientation`/reading frame,
+     so the trellis never started a reverse gene. Now sets `orientation = Rev`
+     and remaps frames 1→4/2→5/3→6. Brought back all reverse-strand genes.
+  2. **Intergenic scoring** (`populate_intergenic_regions` parity): was inverting
+     the coding-score vector; now sums each ABINITIO type's weight across the
+     gaps between that type's neighbouring genes. Removed two spurious short
+     genes caused by wrong noncoding scores.
+
+  **Current parity on Contig1: 7 of 11 Perl genes match exactly** (was 0 reverse
+  + spurious before). Remaining diffs — the Phase B3 work-list:
+  - Missing: single-exon reverse gene `3632-4546` (`single-`, backed by 3
+    complete ab-initio CDS predictions) — produces nothing in that region.
+  - Terminal-coordinate diffs: `44377-50459` vs Perl `-50843`; `57662-59941`
+    vs `57371-`; `61745-63283` vs `-63134`. All terminal-exon / start-stop-peak
+    boundary selection.
+  - **Output text format** still differs from Perl (`#EVM prediction mode:...`
+    vs `# EVM prediction: Mode:... S-ratio ... orient ... score ...`; exon-row
+    columns and evidence formatting differ) — Phase B2, not yet started.
+  - Known still-divergent internals to verify next: reverse-strand coding /
+    intron vectors are merged by **raw index without transposing**
+    (`evidence_modeler.rs` / `main.rs` merge loops); Perl builds the fwd/rev
+    intron vectors once at the end from the accumulated `%PREDICTED_INTRONS`.
+
 ## 1. Where we actually are
 
 The Rust workspace under `evm/` is **fully scaffolded** and matches the original
