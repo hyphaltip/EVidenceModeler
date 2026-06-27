@@ -3,10 +3,13 @@
 /// Analyse a positional score vector using a sliding window and return
 /// peaks where the windowed score exceeds `threshold`.
 ///
-/// Mimics the Perl `analyze_peaks()` subroutine:
+/// Faithful port of the Perl `analyze_peaks()` subroutine:
 /// - Slide a window of `window_size` positions.
-/// - Track the best score/position within each non-overlapping window span.
-/// - Emit a peak when `best_score > threshold` and the window has moved past.
+/// - Track the best score/position; when the leading edge moves more than
+///   `window_size` past the current best position, emit it (if it exceeds the
+///   threshold) and reset.
+/// - Matches Perl exactly, including that the final in-progress window is NOT
+///   emitted after the loop ends.
 pub fn analyze_peaks(
     vector: &[f64],     // 1-indexed; index 0 is unused
     seq_len: usize,
@@ -46,10 +49,8 @@ pub fn analyze_peaks(
         }
     }
 
-    // Emit final window
-    if best_score_so_far > threshold {
-        found_peaks.push((best_pos_so_far as u32, best_score_so_far));
-    }
+    // NOTE: Perl does NOT emit the final in-progress window after the loop;
+    // we match that exactly (do not add a trailing emit here).
 
     found_peaks
 }
