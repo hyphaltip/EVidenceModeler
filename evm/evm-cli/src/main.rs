@@ -400,12 +400,18 @@ fn run_evm_on_partition(
     };
     let rev_state = if !forward_only {
         let mut s = process_features('-', &rev_cfg)?;
-        // Transpose exon coordinates back to forward strand
+        // Transpose exons back to forward strand: revcomp coords, remap
+        // reading frames 1->4/2->5/3->6, flip orientation (mirrors Perl
+        // transpose_exons_back_to_forward_strand).
+        use evm_core::types::exon::Orientation;
         for exon in s.exons.iter_mut() {
             let new_e5 = seq_len as u32 - exon.end5 + 1;
             let new_e3 = seq_len as u32 - exon.end3 + 1;
             exon.end5 = new_e5;
             exon.end3 = new_e3;
+            exon.start_frame = match exon.start_frame { 1 => 4, 2 => 5, 3 => 6, o => o };
+            exon.end_frame = match exon.end_frame { 1 => 4, 2 => 5, 3 => 6, o => o };
+            exon.orientation = Orientation::Rev;
         }
         Some(s)
     } else { None };
@@ -432,7 +438,7 @@ fn run_evm_on_partition(
     }
 
     // Populate intergenic scores
-    let mut ig_scores = populate_intergenic_scores(seq_len, &all_coding_scores, &mask, intergenic_adjust);
+    let mut ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, intergenic_adjust);
     let mut all_peaks = all_start_peaks.clone();
     all_peaks.extend(all_end_peaks);
     augment_intergenic_from_peaks(&mut ig_scores, &all_peaks, 500);

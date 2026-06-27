@@ -185,7 +185,7 @@ fn main() -> Result<()> {
         for (i, &v) in state.rev_intron_vec.iter().enumerate() { if i < all_rev_intron_vec.len() { all_rev_intron_vec[i] += v; } }
     }
 
-    let mut ig_scores = populate_intergenic_scores(seq_len, &all_coding_scores, &mask, cli.intergenic_adjust);
+    let mut ig_scores = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, cli.intergenic_adjust);
     let mut all_peaks = all_start_peaks.clone();
     all_peaks.extend(all_end_peaks);
     augment_intergenic_from_peaks(&mut ig_scores, &all_peaks, 500);
