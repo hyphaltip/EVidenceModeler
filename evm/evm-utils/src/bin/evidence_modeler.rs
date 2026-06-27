@@ -77,6 +77,17 @@ struct Cli {
     max_prev_exons_compare: usize,
 }
 
+/// Map a forward-strand reading frame (1,2,3) to its reverse-strand
+/// equivalent (4,5,6) when transposing reverse exons back to forward coords.
+fn fwd_frame_to_rev(frame: evm_core::types::exon::ExonPhase) -> evm_core::types::exon::ExonPhase {
+    match frame {
+        1 => 4,
+        2 => 5,
+        3 => 6,
+        other => other,
+    }
+}
+
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
     let cli = Cli::parse();
@@ -152,12 +163,18 @@ fn main() -> Result<()> {
     }
 
     if let Some(mut state) = rev_state_raw {
-        // Transpose reverse strand exon coordinates
+        // Transpose reverse-strand exons back to the forward coordinate system.
+        // Mirrors Perl transpose_exons_back_to_forward_strand: revcomp the
+        // coordinates, remap reading frames 1→4/2→5/3→6, and flip orientation.
+        use evm_core::types::exon::Orientation;
         for exon in state.exons.iter_mut() {
             let new_e5 = seq_len as u32 - exon.end5 + 1;
             let new_e3 = seq_len as u32 - exon.end3 + 1;
             exon.end5 = new_e5;
             exon.end3 = new_e3;
+            exon.start_frame = fwd_frame_to_rev(exon.start_frame);
+            exon.end_frame = fwd_frame_to_rev(exon.end_frame);
+            exon.orientation = Orientation::Rev;
         }
         all_exons.extend(state.exons);
         for (k, v) in state.introns_to_score { *all_introns_to_score.entry(k).or_insert(0.0) += v; }
