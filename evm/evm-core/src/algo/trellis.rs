@@ -1,6 +1,6 @@
 //! Dynamic-programming trellis: finding the highest-scoring path through exons.
 
-use std::collections::{HashSet, HashMap};
+use std::collections::HashSet;
 use crate::types::exon::{Exon, ExonType, ExonPhase};
 use crate::types::prediction::EvmPrediction;
 use crate::algo::introns::IntronScoreMap;
@@ -125,14 +125,14 @@ pub fn build_trellis(
     }
 
     // Add boundary sentinel nodes
-    let left_bound_idx = exons.len();
+    let _left_bound_idx = exons.len();
     let mut left_bound = Exon::new(range_lend, range_lend);
     left_bound.exon_type = ExonType::Bound;
     left_bound.start_frame = 1;
     left_bound.end_frame = 1;
     exons.push(left_bound);
 
-    let right_bound_idx = exons.len();
+    let _right_bound_idx = exons.len();
     let mut right_bound = Exon::new(range_rend, range_rend);
     right_bound.exon_type = ExonType::Bound;
     right_bound.start_frame = 1;

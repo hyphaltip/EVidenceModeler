@@ -1,6 +1,6 @@
 //! Recursive consensus gene prediction — trellis + recursion on tail/intergenic regions.
 
-use std::collections::{HashSet, HashMap};
+use std::collections::HashSet;
 use anyhow::Result;
 use crate::types::exon::{Exon, ExonPhase};
 use crate::types::prediction::{EvmPrediction, PredMode};
@@ -181,14 +181,14 @@ fn format_prediction(
     mode: &PredMode,
     recursion_count: usize,
 ) -> String {
-    use crate::types::exon::{ExonType, exon_phase_to_gff_phase};
+    use crate::types::exon::exon_phase_to_gff_phase;
     let prefix = if pred.is_eliminated { "#ELIMINATED EVM prediction" } else { "#EVM prediction" };
     let mut s = format!(
         "{} mode:{} span:{}-{} [R{}]\n",
         prefix, mode.as_str(), pred.lend, pred.rend, recursion_count
     );
 
-    let mut ev_info = String::new();
+    let _ev_info = String::new();
     for &idx in &pred.exon_indices {
         let exon = &exons[idx];
         let (end5, end3) = (exon.end5, exon.end3);

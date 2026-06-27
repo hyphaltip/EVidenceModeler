@@ -3,7 +3,7 @@
 //! Replaces gff3_file_to_proteins.pl + Gene_obj.pm + Nuc_translator.pm.
 
 use std::collections::HashMap;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use crate::io::fasta::read_fasta_hash;
 use crate::io::gff3::read_gff3_file;
 use crate::translate::codon_table::translate;

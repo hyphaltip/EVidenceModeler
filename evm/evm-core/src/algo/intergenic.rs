@@ -1,7 +1,6 @@
 //! Intergenic region scoring.
 
 use crate::types::genome::MaskVec;
-use crate::types::exon::Exon;
 use crate::algo::coding_scores::CodingScores;
 
 pub type IntergenicScores = Vec<f64>;

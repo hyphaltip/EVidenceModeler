@@ -4,10 +4,8 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::Path;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::Parser;
-use log::info;
 
 use evm_core::io::fasta::read_fasta_file;
 use evm_core::io::gff3::read_gff3_file;

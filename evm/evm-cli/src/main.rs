@@ -21,7 +21,7 @@ use evm_core::gff3_convert::gff3_to_bed::gff3_to_bed;
 const VERSION: &str = "EVidenceModeler-v2.1.0-rust";
 
 #[derive(Parser, Debug)]
-#[command(name = "EVidenceModeler", version, about = "Evidence Modeler — Rust implementation")]
+#[command(name = "EVidenceModeler", version = VERSION, about = "Evidence Modeler — Rust implementation")]
 struct Cli {
     /// Sample ID (used for naming outputs)
     #[arg(long)]
@@ -122,21 +122,12 @@ struct Cli {
     /// Intergenic score adjustment factor (default: 1.0)
     #[arg(long, name = "INTERGENIC_SCORE_ADJUST_FACTOR", default_value_t = 1.0)]
     intergenic_adjust: f64,
-
-    /// Print version and exit
-    #[arg(long)]
-    version: bool,
 }
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     let cli = Cli::parse();
-
-    if cli.version {
-        eprintln!("{}", VERSION);
-        return Ok(());
-    }
 
     let segment_size = cli.segment_size.or(cli.segment_size2)
         .context("--segmentSize is required")?;
@@ -199,8 +190,8 @@ fn main() -> Result<()> {
     let evm_ckpt = format!("{}/run_evm_cmds.ok", checkpts_dir);
     if !Path::new(&evm_ckpt).exists() {
         info!("Running EVM on {} partitions...", entries.len());
-        let weights = read_weights_file(&cli.weights)?;
-        let stop_codons_parsed = evm_core::algo::splice_sites::parse_stop_codons(&cli.stop_codons)?;
+        let _weights = read_weights_file(&cli.weights)?;
+        let _stop_codons_parsed = evm_core::algo::splice_sites::parse_stop_codons(&cli.stop_codons)?;
 
         // Build list of per-partition work items
         let work_items: Vec<_> = entries.iter()
@@ -320,7 +311,7 @@ fn main() -> Result<()> {
 /// Run the EVM algorithm on a single partition directory.
 #[allow(clippy::too_many_arguments)]
 fn run_evm_on_partition(
-    accession: &str,
+    _accession: &str,
     data_dir: &str,
     genome_basename: &str,
     gene_pred_global: &str,
@@ -338,7 +329,7 @@ fn run_evm_on_partition(
     intergenic_adjust: f64,
 ) -> Result<()> {
     let output_path = format!("{}/evm.out", data_dir);
-    let log_path = format!("{}/evm.out.log", data_dir);
+    let _log_path = format!("{}/evm.out.log", data_dir);
 
     // Skip if already done
     let ckpt = format!("{}/evm.done.ok", data_dir);
@@ -354,7 +345,7 @@ fn run_evm_on_partition(
     use evm_core::algo::intergenic::{populate_intergenic_scores, augment_intergenic_from_peaks};
     use evm_core::algo::process::{process_features, ProcessConfig};
     use evm_core::algo::consensus::{generate_consensus_gene_predictions, ConsensusParams};
-    use evm_core::types::exon::build_acceptable_linkages;
+    
     use evm_core::types::prediction::PredMode;
 
     let genome_path = format!("{}/{}", data_dir, genome_basename);
@@ -398,16 +389,16 @@ fn run_evm_on_partition(
         chain_termini_window: 250,
     };
 
-    let mut fwd_state = if !reverse_only {
+    let fwd_state = if !reverse_only {
         Some(process_features('+', &cfg)?)
     } else { None };
 
-    let mut rev_genome = genome_seq.to_reverse_complement();
+    let rev_genome = genome_seq.to_reverse_complement();
     let rev_cfg = ProcessConfig {
         genome_seq: &rev_genome,
         ..cfg
     };
-    let mut rev_state = if !forward_only {
+    let rev_state = if !forward_only {
         let mut s = process_features('-', &rev_cfg)?;
         // Transpose exon coordinates back to forward strand
         for exon in s.exons.iter_mut() {

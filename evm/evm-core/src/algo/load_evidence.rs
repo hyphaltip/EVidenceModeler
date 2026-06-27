@@ -1,7 +1,6 @@
 //! Load protein/transcript alignment evidence and create evidence-based exons.
 
 use std::collections::HashMap;
-use anyhow::Result;
 use crate::types::exon::{Exon, ExonType, Orientation, end_frame};
 use crate::types::evidence::{EvWeightMap, EvidenceChain, EvClass};
 use crate::types::genome::{FeatureVec, MaskVec, FEAT_DONOR, FEAT_ACCEPTOR};
@@ -106,7 +105,7 @@ pub fn instantiate_evidence_based_exons(
     begins: &mut Vec<f64>,
     ends: &mut Vec<f64>,
     genome_features: &FeatureVec,
-    genome_seq: &[u8],
+    _genome_seq: &[u8],
     mask: &MaskVec,
     ev_weights: &EvWeightMap,
     genomic_strand: char,
@@ -139,7 +138,7 @@ pub fn instantiate_evidence_based_exons(
         for (link_idx, &(end5, end3)) in links.iter().enumerate() {
             // Internal alignment segments (not first/last) can contribute exons
             // if they have proper splice boundaries
-            let got_acceptor = genome_features.get((end5 - 2) as usize) == FEAT_ACCEPTOR
+            let got_acceptor = genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR
                 && link_idx != 0 && link_idx != num_links - 1;
             let got_donor = genome_features.get((end3 + 1) as usize) == FEAT_DONOR
                 && link_idx != 0 && link_idx != num_links - 1;

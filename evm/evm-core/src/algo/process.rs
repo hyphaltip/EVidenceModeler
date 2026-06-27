@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 use anyhow::Result;
-use crate::types::genome::{GenomeSequence, FeatureVec, MaskVec};
+use crate::types::genome::{GenomeSequence, MaskVec};
 use crate::types::exon::Exon;
 use crate::types::evidence::EvWeightMap;
 use crate::algo::splice_sites::populate_genome_features;
@@ -150,7 +150,7 @@ pub fn process_features(
     // Transpose peaks back to forward-strand coordinates if processing reverse
     for (pos, score) in &start_peaks_raw {
         let fwd_pos = if genomic_strand == '-' {
-            (seq_len as u32 - pos + 1)
+            seq_len as u32 - pos + 1
         } else {
             *pos
         };
@@ -158,7 +158,7 @@ pub fn process_features(
     }
     for (pos, score) in &end_peaks_raw {
         let fwd_pos = if genomic_strand == '-' {
-            (seq_len as u32 - pos + 1)
+            seq_len as u32 - pos + 1
         } else {
             *pos
         };

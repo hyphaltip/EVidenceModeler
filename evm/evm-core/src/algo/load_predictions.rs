@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 use anyhow::Result;
-use crate::types::exon::{Exon, ExonType, Orientation, ExonPhase, end_frame, gff_phase_to_exon_phase};
+use crate::types::exon::{Exon, ExonType, Orientation, ExonPhase, end_frame};
 use crate::types::evidence::{EvWeightMap, EvClass};
 use crate::types::genome::{FeatureVec, MaskVec, FEAT_START, FEAT_STOP, FEAT_DONOR, FEAT_ACCEPTOR};
 use crate::algo::introns::{add_introns, IntronScoreMap, IntronEvidenceMap, PredictedIntronMap};
@@ -95,7 +95,7 @@ pub fn load_prediction_data(
             let (end5, end3) = coordsets[0];
             // Single exon: needs start at end5 and stop at end3-2
             if genome_features.get(end5 as usize) == FEAT_START
-                && genome_features.get((end3 - 2) as usize) == FEAT_STOP
+                && genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP
                 && (end3 - end5 + 1) >= 3
             {
                 add_or_update_exon(
@@ -116,8 +116,8 @@ pub fn load_prediction_data(
                 cds_len += exon_len;
 
                 let has_start    = genome_features.get(end5 as usize) == FEAT_START;
-                let has_stop     = genome_features.get((end3 - 2) as usize) == FEAT_STOP;
-                let has_acceptor = genome_features.get((end5 - 2) as usize) == FEAT_ACCEPTOR;
+                let has_stop     = genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP;
+                let has_acceptor = genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR;
                 let has_donor    = genome_features.get((end3 + 1) as usize) == FEAT_DONOR;
 
                 let exon_type = if i == 0 && has_start && has_donor && exon_len >= 3 {
@@ -174,19 +174,19 @@ fn add_or_update_exon(
     exon_type: ExonType,
     start_frame: ExonPhase,
     ev_type: &str,
-    ev_class: &EvClass,
+    _ev_class: &EvClass,
     _weight: f64,
     genome_seq: &[u8],
     genome_features: &FeatureVec,
-    mask: &MaskVec,
+    _mask: &MaskVec,
     _coding_scores: &mut CodingScores,
     exons: &mut Vec<Exon>,
     exons_via_coords: &mut HashMap<String, usize>,
-    genomic_seq_len: usize,
+    _genomic_seq_len: usize,
 ) {
     // Validate phase
     let check_end3 = match exon_type {
-        ExonType::Terminal | ExonType::Single => end3 - 3,
+        ExonType::Terminal | ExonType::Single => end3.saturating_sub(3),
         _ => end3,
     };
     let good_phases = determine_good_phases(genome_features, end5, check_end3);
@@ -245,8 +245,8 @@ fn recover_partial_prediction(
     for &(end5, end3) in coordsets {
         let exon_len = end3 - end5 + 1;
         let has_start    = genome_features.get(end5 as usize) == FEAT_START;
-        let has_stop     = genome_features.get((end3 - 2) as usize) == FEAT_STOP;
-        let has_acceptor = genome_features.get((end5 - 2) as usize) == FEAT_ACCEPTOR;
+        let has_stop     = genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP;
+        let has_acceptor = genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR;
         let has_donor    = genome_features.get((end3 + 1) as usize) == FEAT_DONOR;
 
         if has_start && has_donor && exon_len >= 3 {

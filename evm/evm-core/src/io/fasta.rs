@@ -1,7 +1,7 @@
 //! Streaming FASTA reader.
 
 use std::io::{self, BufRead};
-use anyhow::{bail, Result};
+use anyhow::Result;
 
 /// A single FASTA record.
 #[derive(Debug, Clone)]
