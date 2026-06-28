@@ -41,16 +41,18 @@ pub fn populate_intergenic_scores(
         };
         if !entry.ev_class.is_abinitio() { continue; }
 
-        let parent = rec.raw_attributes.split("Parent=").nth(1)
-            .and_then(|s| s.split(|c| c == ';' || c == ' ').next())
-            .unwrap_or("")
-            .to_string();
-        if parent.is_empty() { continue; }
+        // Perl get_gene_predictions groups CDS by the FULL attribute column
+        // ($x[8]), not by Parent. This matters when otherwise-identical CDS of
+        // one model carry a differing attribute suffix (e.g. `5_prime_partial=true`):
+        // Perl then treats them as separate "genes", creating an intergenic gap
+        // in the intron between them. Group by the raw attribute string to match.
+        let group_key = rec.raw_attributes.clone();
+        if group_key.is_empty() { continue; }
 
         let lend = rec.start.min(rec.end);
         let rend = rec.start.max(rec.end);
         let models = per_type.entry(rec.source.clone()).or_default();
-        let span = models.entry(parent).or_insert((lend, rend));
+        let span = models.entry(group_key).or_insert((lend, rend));
         span.0 = span.0.min(lend);
         span.1 = span.1.max(rend);
     }
