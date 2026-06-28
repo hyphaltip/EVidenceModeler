@@ -9,7 +9,7 @@ use crate::algo::splice_sites::populate_genome_features;
 use crate::algo::coding_scores::{new_coding_scores, CodingScores};
 use crate::algo::introns::{IntronScoreMap, IntronEvidenceMap, PredictedIntronMap, populate_intron_vectors, IntronVec};
 use crate::algo::load_predictions::load_prediction_data;
-use crate::algo::load_evidence::{parse_evidence_chains, instantiate_evidence_based_exons};
+use crate::algo::load_evidence::{parse_evidence_chains, instantiate_evidence_based_exons, decrement_coding_using_protein_alignment_introns};
 use crate::algo::peaks::analyze_peaks;
 use crate::algo::coding_scores::score_exons;
 use crate::io::gff3::Gff3Record;
@@ -142,6 +142,18 @@ pub fn process_features(
             &mut state.exons_via_coords,
             cfg.min_intron_length,
             seq_len,
+        );
+
+        // Decrement coding coverage over inferred protein-alignment introns
+        // (Perl decrement_coding_using_protein_alignment_introns, runs after the
+        // protein evidence load, before gene-boundary peak analysis).
+        decrement_coding_using_protein_alignment_introns(
+            recs,
+            cfg.ev_weights,
+            cfg.mask,
+            seq_len,
+            genomic_strand,
+            &mut state.coding_scores,
         );
     }
 

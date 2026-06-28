@@ -86,10 +86,14 @@ pub fn parse_evidence_chains(
         chain.lend = *all_coords.iter().min().unwrap_or(&0);
         chain.rend = *all_coords.iter().max().unwrap_or(&0);
 
-        // Build gap list
+        // Build gap list. Perl re-sorts each link's coordinates (min,max) before
+        // computing the gap, so this is correct for reverse-orient chains in the
+        // '?' parse where links are stored end5>end3.
         for w in chain.links.windows(2) {
-            let gap_l = w[0].1 + 1;
-            let gap_r = w[1].0 - 1;
+            let prev_max = w[0].0.max(w[0].1);
+            let curr_min = w[1].0.min(w[1].1);
+            let gap_l = prev_max + 1;
+            let gap_r = curr_min.saturating_sub(1);
             if gap_r > gap_l {
                 chain.gaps.push((gap_l, gap_r));
             }
@@ -97,6 +101,70 @@ pub fn parse_evidence_chains(
         chains.push(chain);
     }
     chains
+}
+
+/// Protein-alignment gaps at most `INTRON_MEDIAN_FACTOR × median gap` are treated
+/// as inferred (imperfect) introns and decrement the coding coverage.
+const INTRON_MEDIAN_FACTOR: f64 = 2.0;
+/// Alignment gaps shorter than this are simple alignment gaps, not introns, and
+/// are excluded from the median-gap estimate.
+const MIN_ALIGNMENT_GAP_SIZE_INFER_INTRON: u32 = 30;
+
+/// Median of a slice of gap lengths (Perl `median`: mean of the two central
+/// values for an even count, the central value for an odd count; 0 if empty).
+fn median(nums: &[u32]) -> f64 {
+    if nums.is_empty() { return 0.0; }
+    let mut v: Vec<u32> = nums.to_vec();
+    v.sort_unstable();
+    let n = v.len();
+    let mid = n / 2;
+    if n % 2 == 0 {
+        (v[mid - 1] as f64 + v[mid] as f64) / 2.0
+    } else {
+        v[mid] as f64
+    }
+}
+
+/// Faithful port of Perl `decrement_coding_using_protein_alignment_introns`.
+///
+/// Protein alignments whose internal gaps look like introns (length at most
+/// `INTRON_MEDIAN_FACTOR × median gap`, where the median is taken over *all*
+/// strand gaps ≥ `MIN_ALIGNMENT_GAP_SIZE_INFER_INTRON`) subtract the alignment's
+/// weight from the coding-score vector over the gap span — preventing protein
+/// alignment coverage from scoring across introns as if it were coding. Runs
+/// per strand after protein evidence is loaded, before peak analysis.
+pub fn decrement_coding_using_protein_alignment_introns(
+    records: &[Gff3Record],
+    ev_weights: &EvWeightMap,
+    mask: &MaskVec,
+    genomic_seq_len: usize,
+    genomic_strand: char,
+    coding_scores: &mut CodingScores,
+) {
+    // Median gap length is computed over all chains (strand '?'), matching Perl.
+    let all_chains = parse_evidence_chains('?', records, ev_weights, genomic_seq_len);
+    let mut gap_lengths: Vec<u32> = Vec::new();
+    for chain in &all_chains {
+        for &(l, r) in &chain.gaps {
+            let len = r - l + 1;
+            if len >= MIN_ALIGNMENT_GAP_SIZE_INFER_INTRON {
+                gap_lengths.push(len);
+            }
+        }
+    }
+    let max_gap_length = INTRON_MEDIAN_FACTOR * median(&gap_lengths);
+
+    // Apply decrements using strand-specific chains.
+    let chains = parse_evidence_chains(genomic_strand, records, ev_weights, genomic_seq_len);
+    for chain in &chains {
+        let weight = ev_weights.get(&chain.ev_type).map(|e| e.weight).unwrap_or(0.0);
+        for &(end5, end3) in &chain.gaps {
+            let gap_length = end3.abs_diff(end5) + 1;
+            if (gap_length as f64) <= max_gap_length {
+                add_match_coverage(coding_scores, mask, end5, end3, -weight, &chain.ev_class);
+            }
+        }
+    }
 }
 
 /// Instantiate evidence-based exons from the parsed chains.
