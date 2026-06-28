@@ -37,6 +37,17 @@ coordspan offset at whitespace token index 6 (was matching `S-ratio:`); (4) keep
 INTRON rows; (5) blank-line separator between preds; (6) `extract_partition_lend`
 mirrors `/(\d+)-(\d+)$/`. Added 2 recombine unit tests.
 
+**Code-review follow-up (commit d05fd6a):** `recombine_outputs` now fails loudly
+(`anyhow` error) when a partition dir name can't be parsed, instead of
+`unwrap_or(1)` silently defaulting to lend=1/offset=0 (silent coord corruption);
+matches Perl `... =~ /(\d+)-(\d+)$/ or die`. Re-verified multi-partition gff3/bed
+still byte-identical. Other review findings left as latent (only reachable on
+non-occurring malformed input) per the parity-first directive: Rust `split('\t')`
+keeps trailing empty cols where Perl drops them; header token-6 rewrite is guarded
+(`len>6` + int-int parse) where Perl rewrites unconditionally; `cols.len()>=3`/parse
+guard skips rows Perl would keep. Plus 2 cleanups (extract_partition_lend double
+`rev()`; eager `Vec<String>` header clone).
+
 ### What landed this session
 1. **CLI flag parity (C4):** `evm-cli` clap now uses Perl's exact long names
    (`--sample_id`, `--gene_predictions`, `--segmentSize`, `--CPU`, …) via explicit
