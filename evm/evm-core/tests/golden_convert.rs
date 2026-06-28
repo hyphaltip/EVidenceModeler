@@ -6,6 +6,10 @@
 //! set of (header, sequence) records because the Perl `gff3_file_to_proteins.pl`
 //! emits records in hash order (non-deterministic); the per-record content is
 //! exact.
+//!
+//! `multicontig_gff3_ordering_matches_perl` verifies that the multi-contig
+//! concatenation (Contig1 then Contig2 in listing order) matches the Perl
+//! `find … -regex .*evm.out.gff3 -exec cat {}` golden output.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -103,4 +107,40 @@ fn gff3_to_proteins_matches_perl() {
 #[test]
 fn gff3_to_cds_matches_perl() {
     check_sequences(SeqType::Cds, "Contig1.perl.EVM.cds");
+}
+
+/// Verify multi-contig GFF3 concatenation order.
+///
+/// Simulates two contigs (Contig1 + Contig2, same underlying evm.out) and
+/// checks that Rust produces the same GFF3 as Perl's
+/// `find … -regex .*evm.out.gff3 -exec cat {}` (which returns them in
+/// filesystem/alphabetical order — matching partition listing order).
+#[test]
+fn multicontig_gff3_ordering_matches_perl() {
+    // Convert the same evm.out for both contigs into temp files.
+    let gff3_c1 = tmp("multicontig_c1.gff3");
+    let gff3_c2 = tmp("multicontig_c2.gff3");
+    evm_output_to_gff3(
+        fixture("Contig1.perl.evm.out").to_str().unwrap(),
+        "Contig1",
+        gff3_c1.to_str().unwrap(),
+    ).unwrap();
+    evm_output_to_gff3(
+        fixture("Contig1.perl.evm.out").to_str().unwrap(),
+        "Contig2",
+        gff3_c2.to_str().unwrap(),
+    ).unwrap();
+
+    // Concatenate in listing order (Contig1 then Contig2), mirroring the
+    // orchestrator's concatenate_gff3_outputs and Perl's find order.
+    let got = format!(
+        "{}{}",
+        fs::read_to_string(&gff3_c1).unwrap(),
+        fs::read_to_string(&gff3_c2).unwrap(),
+    );
+    let want = fs::read_to_string(fixture("multicontig.perl.EVM.gff3")).unwrap();
+    assert_eq!(got, want, "multi-contig GFF3 differs from Perl golden");
+
+    let _ = fs::remove_file(&gff3_c1);
+    let _ = fs::remove_file(&gff3_c2);
 }
