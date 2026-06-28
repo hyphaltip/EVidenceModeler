@@ -9,6 +9,45 @@ original design sketch.
 
 ---
 
+## 00c. SESSION HANDOFF (2026-06-28, session 2) — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 31/31
+(26 unit + 5 golden integration).**
+
+### What landed this session
+1. **Multi-contig parity confirmed (2-contig × 1-partition AND 2-contig × 3-partition):**
+   Created synthetic 2-contig genome (Contig1 + Contig2 = Contig1-copy) and ran both
+   Perl and Rust pipelines end-to-end. All four EVM.{gff3,bed,pep,cds} byte-identical
+   (pep/cds modulo FASTA record order). `concatenate_gff3_outputs` listing-order
+   matches Perl `find … -exec cat` filesystem order.
+2. **Golden test `multicontig_gff3_ordering_matches_perl`** added (5th golden test) +
+   fixture `multicontig.perl.EVM.gff3` (382 lines, Contig1+Contig2 in listing order).
+3. **`--forwardStrandOnly` / `--reverseStrandOnly` parity** verified end-to-end:
+   Perl evm.out and Rust evm.out are byte-identical on Contig1 for both flags
+   (fwd-only: 99 lines / 6 genes; rev-only: 72 lines / 5 genes).
+4. **Fixed evm-utils CLI `name =` bug:** `#[arg(name = "...")]` sets VALUE placeholder
+   in clap 4, not the flag name — changed to `#[arg(long = "...")]` for
+   `--forwardStrandOnly`, `--reverseStrandOnly`, `--report_ELM`,
+   `--INTERGENIC_SCORE_ADJUST_FACTOR` in the `evidence_modeler` shim.
+5. **5'/3'-partial GFF3 tags** analysis: these are NEVER emitted by `EVM_to_GFF3.pl`
+   because the script does not call `Gene_obj::create_all_sequence_types()` (which
+   would set `is_5prime_partial`/`is_3prime_partial`). The Rust converter is already
+   in parity — no work needed.
+
+### What remains (see §00b for earlier items)
+- **`join_intronic_preds` nesting** — untested; needs a dataset with a gene fully
+  enclosed within another gene's introns. Code is implemented but unexercised.
+- **`EVM_elm` source** — code handles eliminated models (sets source="EVM_elm"),
+  but no fixture exercises this path. No known production dataset exercises it.
+- **`min_intron_length` / `terminal_intergenic_re_search` CLI parity for `evidence_modeler` shim:**
+  the shim uses `--min-intron-length` (hyphens, clap default), while Perl uses
+  `--min_intron_length` (underscores). The orchestrator calls the library directly
+  so this is low priority for the shim binary.
+- **Phase D (utility-script parity), Phase E (optimization), Phase F (CI/Docker):**
+  not yet started — these are post-parity phases.
+
+---
+
 ## 00b. SESSION HANDOFF (2026-06-28) — Phase C END-TO-END PARITY — START HERE
 
 **Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 30/30
