@@ -210,8 +210,13 @@ pub fn recombine_outputs(
     for entry in entries {
         if entry.is_partitioned {
             if let Some(pdir) = &entry.partition_dir {
-                // Extract lend from partition dir name "..._LEND-REND"
-                let lend = extract_partition_lend(pdir).unwrap_or(1);
+                // Extract lend from partition dir name "..._LEND-REND". Perl
+                // `recombine_EVM_partial_outputs.pl` does
+                // `$partition_dir =~ /(\d+)-(\d+)$/ or die` — fail loudly rather
+                // than silently defaulting to a wrong (lend=1, offset=0) mapping.
+                let lend = extract_partition_lend(pdir).ok_or_else(|| {
+                    anyhow::anyhow!("Error, cannot extract coords from partition dir {}", pdir)
+                })?;
                 base_to_partitions
                     .entry(entry.base_dir.clone())
                     .or_default()
