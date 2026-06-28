@@ -61,59 +61,42 @@ pub fn parse_and_add_predictions(
     Ok(())
 }
 
-/// Parse a single prediction text block and adjust coordinates.
+/// Parse a single prediction text block and adjust coordinates. Faithful port
+/// of Perl `process_prediction`: the header's coordspan (whitespace-token index
+/// 6, e.g. `842-3150`) and every data row's first two tab columns are offset by
+/// `partition_lend - 1`. INTRON rows are retained (Perl keeps them).
 fn process_prediction_text(text: &str, partition_lend: u32) -> Option<PartitionPred> {
     let offset = partition_lend.saturating_sub(1);
     let mut lines_iter = text.lines();
 
-    // First line is the header
+    // First line is the header. Offset the coordspan at positional index 6.
     let header_line = lines_iter.next()?;
-    let header_parts: Vec<&str> = header_line.split_whitespace().collect();
-
-    // Find coord span in header: look for "span:lend-rend" or positional field 6 (0-indexed)
-    let coordspan = header_parts.iter()
-        .find(|s| s.contains('-'))
-        .and_then(|s| {
-            // might be "span:100-500" or just "100-500"
-            let s = s.trim_start_matches("span:");
-            let parts: Vec<&str> = s.split('-').collect();
-            if parts.len() == 2 {
-                let l: u32 = parts[0].parse().ok()?;
-                let r: u32 = parts[1].parse().ok()?;
-                Some((l + offset, r + offset))
-            } else { None }
-        });
+    let mut header_parts: Vec<String> = header_line.split_whitespace().map(|s| s.to_string()).collect();
+    if header_parts.len() > 6 {
+        if let Some((l, r)) = header_parts[6].split_once('-') {
+            if let (Ok(l), Ok(r)) = (l.parse::<u32>(), r.parse::<u32>()) {
+                header_parts[6] = format!("{}-{}", l + offset, r + offset);
+            }
+        }
+    }
+    let mut new_text = format!("{}\n", header_parts.join(" "));
 
     let mut exon_types: Vec<String> = Vec::new();
     let mut all_coords: Vec<u32> = Vec::new();
-    let mut new_text = {
-        let parts: Vec<String> = header_parts.iter().map(|&s| {
-            if let Some((l, r)) = coordspan {
-                if s.contains('-') && s.trim_start_matches("span:").contains('-') {
-                    let stripped = s.trim_start_matches("span:");
-                    if stripped.split('-').count() == 2 {
-                        let prefix = if s.starts_with("span:") { "span:" } else { "" };
-                        return format!("{}{}-{}", prefix, l, r);
-                    }
-                }
-            }
-            s.to_string()
-        }).collect();
-        format!("{}\n", parts.join(" "))
-    };
 
     for data_line in lines_iter {
-        let cols: Vec<&str> = data_line.splitn(6, '\t').collect();
+        let cols: Vec<&str> = data_line.split('\t').collect();
         if cols.len() >= 3 {
             if let (Ok(e5), Ok(e3)) = (cols[0].parse::<u32>(), cols[1].parse::<u32>()) {
                 let etype = cols[2].to_string();
-                if etype == "INTRON" { continue; }
                 let new_e5 = e5 + offset;
                 let new_e3 = e3 + offset;
                 all_coords.push(new_e5);
                 all_coords.push(new_e3);
                 exon_types.push(etype);
-                let rest: String = cols[3..].join("\t");
+                // Perl: split on '\t', overwrite x[0]/x[1], rejoin ALL columns —
+                // x[2] is the exon type (e.g. `initial+`), which must be kept.
+                let rest: String = cols[2..].join("\t");
                 new_text.push_str(&format!("{}\t{}\t{}\n", new_e5, new_e3, rest));
             }
         }
@@ -250,11 +233,14 @@ pub fn recombine_outputs(
             .with_context(|| format!("Cannot create {}", out_path))?;
 
         log::debug!("Writing combined output to {}", out_path);
+        // Perl prints "$pred_text\n" — pred.text already ends in '\n', so the
+        // extra newline yields a blank line separating predictions (which
+        // EVM_to_GFF3 relies on to delimit gene models).
         for pred in &final_preds {
-            write!(out, "{}", pred.text)?;
+            write!(out, "{}\n", pred.text)?;
             for nested in &pred.intronic_preds {
                 writeln!(out, "!! Intron-containing prediction")?;
-                write!(out, "{}", nested.text)?;
+                write!(out, "{}\n", nested.text)?;
             }
         }
     }
@@ -262,9 +248,54 @@ pub fn recombine_outputs(
 }
 
 fn extract_partition_lend(pdir: &str) -> Option<u32> {
-    // Partition dir ends with _LEND-REND
+    // Perl: `$partition_dir =~ /(\d+)-(\d+)$/` — the lend is the run of digits
+    // immediately before the final `<digits>` group (robust to accessions that
+    // themselves contain '-' or '_').
     let name = std::path::Path::new(pdir).file_name()?.to_str()?;
-    let last = name.split('_').last()?;
-    let lend_str = last.split('-').next()?;
-    lend_str.parse().ok()
+    let (head, rend) = name.rsplit_once('-')?;
+    if rend.is_empty() || !rend.chars().all(|c| c.is_ascii_digit()) { return None; }
+    let lend: String = head.chars().rev().take_while(|c| c.is_ascii_digit()).collect();
+    if lend.is_empty() { return None; }
+    lend.chars().rev().collect::<String>().parse().ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extract_partition_lend_matches_perl_regex() {
+        // /(\d+)-(\d+)$/ → lend is the first capture
+        assert_eq!(extract_partition_lend("partitions/Contig1/Contig1_20001-50000"), Some(20001));
+        assert_eq!(extract_partition_lend("Contig1_1-30000"), Some(1));
+        // accession containing '-' / '_' must not confuse the extractor
+        assert_eq!(extract_partition_lend("a/scaf-2_b/scaf-2_b_40001-63304"), Some(40001));
+    }
+
+    #[test]
+    fn process_prediction_offsets_coords_and_keeps_type_column() {
+        // partition_lend = 20001 → offset 20000 added to header coordspan (token 6)
+        // and to the first two tab columns of each data row. The exon-type column
+        // (`initial+` / `INTRON`) must be preserved (Perl rejoins ALL columns).
+        let text = "\
+# EVM prediction: Mode:STANDARD S-ratio:1.00 g1 100-310 + score(1.0) noncoding(0.0) raw(0.0) offset(0.0)
+100\t200\tinitial+\t1\t1\t{src_a;src}
+201\t250\tINTRON\t\t\t{src_b;src}
+251\t310\tterminal+\t1\t3\t{src_a;src}
+";
+        let pred = process_prediction_text(text, 20001).expect("parsed");
+        // header token 6 (0-based) was the coordspan `100-310`
+        let header = pred.text.lines().next().unwrap();
+        let tok6 = header.split_whitespace().nth(6).unwrap();
+        assert_eq!(tok6, "20100-20310");
+        // data rows: coords offset by 20000, type column intact
+        let rows: Vec<&str> = pred.text.lines().skip(1).collect();
+        assert_eq!(rows[0], "20100\t20200\tinitial+\t1\t1\t{src_a;src}");
+        assert_eq!(rows[1], "20201\t20250\tINTRON\t\t\t{src_b;src}");
+        assert_eq!(rows[2], "20251\t20310\tterminal+\t1\t3\t{src_a;src}");
+        // gene span + completeness (initial + terminal → complete)
+        assert_eq!(pred.lend, 20100);
+        assert_eq!(pred.rend, 20310);
+        assert!(matches!(pred.class, PredClass::Complete));
+    }
 }

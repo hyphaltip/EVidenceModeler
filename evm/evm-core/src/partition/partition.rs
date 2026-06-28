@@ -223,7 +223,10 @@ pub fn run_partition(
             });
         } else {
             for (lend, rend) in ranges {
-                let part_dir = format!("{}/{}_{}_{}", acc_dir, acc_adj, lend, rend);
+                // Perl naming: "${accession}_${range_lend}-${range_rend}" — note
+                // the hyphen between lend and rend (recombine extracts the range
+                // via /(\d+)-(\d+)$/).
+                let part_dir = format!("{}/{}_{}-{}", acc_dir, acc_adj, lend, rend);
                 if !std::path::Path::new(&part_dir).exists() {
                     fs::create_dir_all(&part_dir)?;
                 }
