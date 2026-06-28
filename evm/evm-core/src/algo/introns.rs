@@ -114,6 +114,20 @@ pub fn intron_key_to_span(key: &str) -> Option<(u32, u32)> {
     Some((end5, end3))
 }
 
+/// Perl `intron_key_to_intron_span`: parse the key and shift the acceptor base
+/// to the exon-adjacent position — for '+' (end5 < end3) returns (end5, end3-1),
+/// for '-' returns (end5, end3+1). This is the span Perl uses both when
+/// populating the per-base predicted-intron vectors and in the filter offset
+/// loop, and differs from the raw key span by one base at the acceptor end.
+pub fn intron_key_to_intron_span(key: &str) -> Option<(u32, u32)> {
+    let (end5, end3) = intron_key_to_span(key)?;
+    if end5 < end3 {
+        Some((end5, end3.saturating_sub(1))) // '+'
+    } else {
+        Some((end5, end3 + 1)) // '-'
+    }
+}
+
 /// Determine strand of an intron from its key (end5 < end3 → '+').
 pub fn intron_key_strand(key: &str) -> char {
     if let Some((e5, e3)) = intron_key_to_span(key) {
@@ -133,7 +147,10 @@ pub fn populate_intron_vectors(
     let mut rev_vec = vec![0.0f64; seq_len + 2];
 
     for (key, &score) in predicted_introns {
-        let (end5, end3) = match intron_key_to_span(key) {
+        // Perl distributes the score over the exon-adjacent intron span
+        // (`intron_key_to_intron_span`), NOT the raw key span — this is one base
+        // shorter at the acceptor end and is what the filter offset loop reads.
+        let (end5, end3) = match intron_key_to_intron_span(key) {
             Some(v) => v,
             None => continue,
         };
@@ -156,4 +173,41 @@ pub fn populate_intron_vectors(
     }
 
     (fwd_vec, rev_vec)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn intron_key_to_intron_span_shifts_acceptor() {
+        // Perl `intron_key_to_intron_span`: '+' (end5 < end3) drops one base at
+        // the acceptor (end3-1); '-' (end5 > end3) adds one (end3+1).
+        assert_eq!(intron_key_to_intron_span("100_200"), Some((100, 199)));
+        assert_eq!(intron_key_to_intron_span("200_100"), Some((200, 101)));
+    }
+
+    #[test]
+    fn predicted_intron_vector_distributes_over_exon_adjacent_span() {
+        // Regression for task #16 (filter offset residual): the per-base
+        // predicted-intron vector must spread the score over the
+        // `intron_key_to_intron_span` span (D..A-1 for '+'), NOT the raw key
+        // span (D..A). Build a single forward intron "10_20" with score 50.
+        // The exon-adjacent span is 10..=19 (10 bases) → 5.0 per base, and base
+        // 20 (the raw acceptor) must receive nothing.
+        let mut predicted: PredictedIntronMap = HashMap::new();
+        predicted.insert("10_20".to_string(), 50.0);
+        let mask = MaskVec::new(64);
+        let (fwd, rev) = populate_intron_vectors(&predicted, &mask, 50);
+
+        for i in 10..=19 {
+            assert!((fwd[i] - 5.0).abs() < 1e-9, "base {i} expected 5.0, got {}", fwd[i]);
+        }
+        assert_eq!(fwd[20], 0.0, "raw acceptor base 20 must stay zero");
+        assert_eq!(fwd[9], 0.0);
+        // Total conserved == the intron score.
+        let total: f64 = fwd.iter().sum();
+        assert!((total - 50.0).abs() < 1e-9, "total {total} != 50.0");
+        assert!(rev.iter().all(|&v| v == 0.0), "reverse vector must stay zero");
+    }
 }

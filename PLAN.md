@@ -11,22 +11,29 @@ original design sketch.
 
 ## 00. SESSION HANDOFF (2026-06-27, latest) — START HERE
 
-**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 22/22.**
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 24/24.**
 
-### Current parity on testing/Contig1 (single partition)
+### Current parity on testing/Contig1 (single partition) — FULL PARITY
 Rust `evm.out` vs Perl golden (`testing/smalltest_perl.partitions/Contig1/evm.out`,
 also fixture `evm/tests/fixtures/Contig1.perl.evm.out`):
-- **170 lines == 170 lines.**
+- **170 lines == 170 lines; evidence-order-normalized diff is EMPTY (byte-identical).**
 - **11/11 gene spans, 79/79 exons** identical (coord+type+frame).
 - **All exon/intron rows + evidence SETS identical** (0 non-header diffs with
   evidence-order normalization).
 - **All 208 exon base_scores byte-exact** vs Perl `exon_list.out`.
 - **ig_base byte-exact** vs Perl `intergenic.bps` (0/63304 positions differ).
-- Header `score(...)` exact; `raw_noncoding(...)` matches to <0.1 on all 11.
-- **ONLY remaining diff:** the filter `offset(...)` field is ~10–27 too low on
-  10/11 genes → `S-ratio` off by ~0.1–0.3, `noncoding_equivalent` off by ~the
-  same. Cosmetic; does NOT change gene selection. This is **task #16** and the
-  top next item. See "Offset residual" below.
+- Header `score(...)`, `raw_noncoding(...)`, `offset(...)`, `noncoding_equivalent(...)`,
+  `S-ratio` all byte-exact on all 11 genes.
+- **Task #16 (offset residual) SOLVED.** Root cause: Rust `populate_intron_vectors`
+  distributed the predicted-intron score over the RAW key span (D..A) instead of
+  Perl's `intron_key_to_intron_span` span (D..A-1 for '+', A..D+1 for '-'; Perl
+  `populate_forward_reverse_pred_intron_vectors` line 2974). Because the build-time
+  `intron_score` covers D..A+1 but the filter offset loop iterates D..A-1
+  subtracting `existing_per_base`, the wrong distribution made offset ≈ ½ of Perl's
+  (residual `2·weight/intron` collapsed to `~weight/intron`). Fix: added
+  `intron_key_to_intron_span()` in `introns.rs` and used it when populating the
+  per-base vectors. `raw_noncoding` is unchanged (total over the full prediction
+  span is conserved). Regression test in `introns.rs::tests`.
 
 ### What was completed THIS session (commits, newest first)
 - `e5cade3` intergenic grouping by **full attribute column** (Perl
@@ -47,7 +54,11 @@ now **sorts evidence tokens canonically** (in `consensus.rs::format_prediction`)
 so its output is reproducible. The golden-comparison oracle must normalize
 evidence order on both sides (see the `norm()` awk one-liner used in this session).
 
-### Offset residual (task #16) — next diagnostic
+### Offset residual (task #16) — SOLVED (see parity section above)
+The fix landed in `algo/introns.rs::populate_intron_vectors` (use
+`intron_key_to_intron_span`, not the raw key span). The diagnostic notes below are
+retained for history.
+
 `filter.rs` `offset` = Σ over the prediction's own introns of
 `calc_intergenic_score(intron_span)` + Σ_i(`pred_intron_vec[i]` − `existing_per_base`).
 intergenic part is now exact; `existing_per_base` = sum of ab-initio weights for
