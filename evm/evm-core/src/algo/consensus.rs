@@ -158,11 +158,17 @@ pub fn generate_consensus_gene_predictions(
         predictions.iter().fold((range_rend, range_lend), |(l, r), p| (l.min(p.lend), r.max(p.rend)))
     };
 
-    // Emit predictions
+    // Emit predictions: one "!!" range line for the call, then each prediction's
+    // block followed by a blank line (Perl prints `toString() . "\n"`).
+    output.push(format!(
+        "!! Predictions spanning range {} - {} [R{}]\n",
+        pred_span_lend, pred_span_rend, *recursion_count
+    ));
     for pred in &predictions {
         if pred.is_eliminated && !params.report_elm { continue; }
-        let text = format_prediction(pred, &local_exons, &mode, *recursion_count);
+        let text = format_prediction(pred, &local_exons, params.introns_to_evidence, mode.as_str());
         output.push(text);
+        output.push("\n".to_string());
     }
 
     // Recursion: tail regions
@@ -268,35 +274,84 @@ fn convert_5prime_partials_to_complete_genes(
     }
 }
 
-/// Format a prediction as EVM output text.
+/// Format a prediction as EVM output text — faithful port of Perl
+/// `EVM_prediction::toString` (header + coordinate-sorted exon/intron rows).
 fn format_prediction(
     pred: &EvmPrediction,
     exons: &[Exon],
-    mode: &PredMode,
-    recursion_count: usize,
+    introns_to_evidence: &IntronEvidenceMap,
+    mode: &str,
 ) -> String {
-    use crate::types::exon::exon_phase_to_gff_phase;
-    let prefix = if pred.is_eliminated { "#ELIMINATED EVM prediction" } else { "#EVM prediction" };
-    let mut s = format!(
-        "{} mode:{} span:{}-{} [R{}]\n",
-        prefix, mode.as_str(), pred.lend, pred.rend, recursion_count
-    );
+    let orient = pred.orient;
 
-    let _ev_info = String::new();
+    // Header line. score_ratio is stored pre-rounded (Perl sprintf "%.2f");
+    // the remaining numeric fields are formatted with two decimals here.
+    let mut s = format!(
+        "# EVM prediction: Mode:{} S-ratio: {:.2} {}-{} orient({}) score({:.2}) \
+noncoding_equivalent({:.2}) raw_noncoding({:.2}) offset({:.2}) ",
+        mode, pred.score_ratio, pred.lend, pred.rend, orient,
+        pred.total_score, pred.noncoding_equivalent, pred.raw_noncoding, pred.offset_noncoding,
+    );
+    if pred.is_eliminated {
+        s.push_str(" *** ELIMINATED *** ");
+    }
+    s.push('\n');
+
+    // Build the interleaved, coordinate-sorted component list (Perl orders by
+    // the first stored coordinate of each exon/intron).
+    enum Comp<'a> { Exon(&'a Exon), Intron(u32, u32, String) }
+    let mut components: Vec<(u32, Comp)> = Vec::new();
+
+    for &(intron_lend, intron_rend) in &pred.intron_coords {
+        // Display coords: 5'→3' for the strand.
+        let (intron_end5, intron_end3) = if orient == '+' {
+            (intron_lend, intron_rend)
+        } else {
+            (intron_rend, intron_lend)
+        };
+        // Evidence key: donor/acceptor-adjusted (Perl: '+' end3--, '-' end3++).
+        let (key5, key3) = if orient == '+' {
+            (intron_end5, intron_end3 - 1)
+        } else {
+            (intron_end5, intron_end3 + 1)
+        };
+        let key = format!("{}_{}", key5, key3);
+        let ev = introns_to_evidence.get(&key).cloned().unwrap_or_default();
+        // Perl emits evidence in hash-iteration order, which is non-deterministic
+        // across runs; sort canonically so Rust output is reproducible.
+        let mut toks: Vec<String> = ev.iter().map(|(acc, et)| format!("{{{};{}}}", acc, et)).collect();
+        toks.sort();
+        let ev_str = toks.join(",");
+        components.push((intron_end5, Comp::Intron(intron_end5, intron_end3, ev_str)));
+    }
+
     for &idx in &pred.exon_indices {
         let exon = &exons[idx];
-        let (end5, end3) = (exon.end5, exon.end3);
-        let phase = exon_phase_to_gff_phase(exon.start_frame);
-        let etype = exon.exon_type.as_str();
-        // Collect evidence strings
-        let ev_str: Vec<String> = exon.evidence.iter()
-            .map(|(acc, et)| format!("{}/{}", et, acc))
-            .collect();
-        s.push_str(&format!(
-            "{}\t{}\t{}\t{}\t{}\n",
-            end5, end3, etype, phase,
-            ev_str.join(";")
-        ));
+        components.push((exon.end5, Comp::Exon(exon)));
+    }
+
+    components.sort_by_key(|(c, _)| *c);
+
+    for (_, comp) in &components {
+        match comp {
+            Comp::Exon(exon) => {
+                let mut row = format!(
+                    "{}\t{}\t{}{}\t{}\t{}\t",
+                    exon.end5, exon.end3, exon.exon_type.as_str(), exon.orientation.as_char(),
+                    exon.start_frame, exon.end_frame,
+                );
+                // Sort evidence canonically (see intron note above).
+                let mut toks: Vec<String> = exon.evidence.iter()
+                    .map(|(acc, et)| format!("{{{};{}}}", acc, et)).collect();
+                toks.sort();
+                row.push_str(&toks.join(","));
+                s.push_str(&row);
+                s.push('\n');
+            }
+            Comp::Intron(e5, e3, ev_str) => {
+                s.push_str(&format!("{}\t{}\tINTRON\t\t\t{}\n", e5, e3, ev_str));
+            }
+        }
     }
 
     s
