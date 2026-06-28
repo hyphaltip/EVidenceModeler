@@ -9,7 +9,86 @@ original design sketch.
 
 ---
 
-## 00. SESSION HANDOFF (2026-06-27, latest) — START HERE
+## 00b. SESSION HANDOFF (2026-06-28) — Phase C END-TO-END PARITY — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 28/28
+(24 unit + 4 new golden integration).**
+
+**Phase C is functionally DONE on the single-partition `testing/` dataset.** The
+full `EVidenceModeler` Rust orchestrator runs end-to-end and its outputs match the
+Perl golden:
+- `smalltest.EVM.gff3` — **byte-identical**.
+- `smalltest.EVM.bed` — **byte-identical**.
+- `smalltest.EVM.pep` / `.cds` — **identical per-record** (Perl emits FASTA records
+  in hash order = non-deterministic; oracle sorts records by header. Headers AND
+  sequences byte-exact).
+- `smalltest.partitions.listing` + all partitioned input files — byte-identical.
+
+### What landed this session
+1. **CLI flag parity (C4):** `evm-cli` clap now uses Perl's exact long names
+   (`--sample_id`, `--gene_predictions`, `--segmentSize`, `--CPU`, …) via explicit
+   `long = "..."`. Was kebab-case (`--sample-id`) → not a drop-in. Wired
+   `--trellis_search_limit` → `max_prev_exons_compare`; added parity flags
+   (`stitch_ends`, `exec_dir`, `limit_range_*`, etc.) accepted (some unused).
+2. **GFF3 converter rewrite (`evm_to_gff3.rs`)** — faithful port of `EVM_to_GFF3.pl`
+   + `Gene_obj::to_GFF3_format`: emits `exon` rows (were missing); correct CDS phase
+   = compose `%phase_conversion` (1→0,2→1,3→2,4→0,5→1,6→2) THEN GFF3 swap 1↔2 →
+   net `{1,4}→0,{2,5}→2,{3,6}→1`; `Name=EVM%20prediction%20X` (uri-escaped); exon
+   order 5'→3' (asc '+' / desc '-'); model_id increments on blank lines.
+3. **BED converter rewrite (`gff3_to_bed.rs`)** — `Gene_obj::to_BED_format`: name =
+   `ID=<model>;<TU>;<com_name>` spaces→`_`; thick = CDS span; itemRgb `0`; blocks
+   from exon features asc; final `sort -k1,1 -k2,2g -k3,3g`.
+4. **PEP/CDS (`gff3_to_proteins.rs`):** header now
+   `>{model} {TU}  {com_name} {contig}:lend-rend(orient)` (double space from empty
+   locus_string); **protein translation trims the transcription-first CDS exon's
+   GFF3 phase** (5'-partial models like gene 11, first-exon phase 1, were
+   mistranslated `RLH*`). CDS/cDNA keep full sequence. Added `uri_unescape` in
+   `gff3_convert/mod.rs` (decodes gff3 `Name`).
+5. **De-duplicated the per-partition driver:** new
+   `evm_core::pipeline::run_single_partition` is the single shared impl; both the
+   `evidence_modeler` shim and the orchestrator's `run_evm_on_partition` call it
+   (removed the ~120-line copy the old PLAN flagged as a drift risk).
+6. **Golden integration test** `evm-core/tests/golden_convert.rs` (4 tests) +
+   fixtures `evm/tests/fixtures/Contig1.perl.EVM.{gff3,bed,pep,cds}` +
+   `Contig1.genome.fasta`.
+
+### Reproduce the Perl golden (ParaFly unbuilt → run stages by hand)
+In a scratch dir with the 5 `testing/` inputs:
+```
+perl <repo>/EvmUtils/partition_EVM_inputs.pl --genome genome.fasta \
+  --gene_predictions gene_predictions.gff3 --protein_alignments protein_alignments.gff3 \
+  --transcript_alignments transcript_alignments.gff3 --segmentSize 100000 --overlapSize 10000 \
+  --partition_dir smalltest.partitions --partition_listing smalltest.partitions.listing
+# (run evidence_modeler.pl in smalltest.partitions/Contig1 → evm.out, see §00)
+perl <repo>/EvmUtils/recombine_EVM_partial_outputs.pl --partitions smalltest.partitions.listing --output_file_name evm.out
+perl <repo>/EvmUtils/convert_EVM_outputs_to_GFF3.pl --partitions smalltest.partitions.listing --output evm.out --genome genome.fasta
+find ./smalltest.partitions -regex ".*evm.out.gff3" -exec cat {} \; > smalltest.EVM.gff3
+perl <repo>/EvmUtils/gff3_file_to_proteins.pl smalltest.EVM.gff3 genome.fasta prot > smalltest.EVM.pep
+perl <repo>/EvmUtils/gff3_file_to_proteins.pl smalltest.EVM.gff3 genome.fasta CDS  > smalltest.EVM.cds
+bash -c "set -eou pipefail && perl <repo>/EvmUtils/gene_gff3_to_bed.pl smalltest.EVM.gff3 | sort -k1,1 -k2,2g -k3,3g > smalltest.EVM.bed"
+```
+Rust end-to-end: `EVidenceModeler --sample_id smalltest --genome genome.fasta
+--weights ./weights.txt --gene_predictions … --segmentSize 100000 --overlapSize 10000`.
+
+### What is NOT yet covered (next session)
+- **Multi-partition / multi-contig:** `testing/` is one contig, ONE partition (N).
+  Recombine DP (`recombine_EVM_partial_outputs.pl`: `join_intronic_preds` +
+  `combine_predictions`) and the partition-`lend` coordinate offset in
+  `EVM_to_GFF3.pl` (`+= partition_lend - 1`) are UNTESTED. Need a synthetic
+  genome > segmentSize with overlap, plus a contig that actually splits, to
+  exercise C1 windowing + C2 recombine. **Top next item.**
+- **Eliminated models** (`EVM_elm` source, `*** ELIMINATED ***`) and **5'/3'
+  partial** GFF3 tags (`5_prime_partial=true`) — no fixture exercises them
+  (this dataset has 0). The GFF3 converter does NOT yet emit the partial tags
+  (would need start/stop-codon detection on the gene model).
+- **Alternate genetic code / `--forwardStrandOnly` / `--reverseStrandOnly`** end-to-end.
+- The orchestrator `concatenate_gff3_outputs` uses a Rust loop; Perl uses
+  `find … -regex .*evm.out.gff3 -exec cat`. Equivalent for one contig; verify
+  ordering for many contigs.
+
+---
+
+## 00. SESSION HANDOFF (2026-06-27, latest)
 
 **Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 24/24.**
 

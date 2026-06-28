@@ -28,6 +28,7 @@ impl SeqType {
 struct GeneModel {
     gene_id: String,
     model_id: String,
+    com_name: String,
     contig: String,
     strand: char,
     cds_exons: Vec<(u32, u32, u8)>, // (start, end, gff3_phase)
@@ -51,9 +52,11 @@ pub fn extract_sequences(
             "mRNA" => {
                 let model_id = rec.attr("ID").unwrap_or("").to_string();
                 let gene_id = rec.attr("Parent").unwrap_or("").to_string();
+                let com_name = super::uri_unescape(rec.attr("Name").unwrap_or(""));
                 models.insert(model_id.clone(), GeneModel {
                     gene_id: gene_id.clone(),
                     model_id: model_id.clone(),
+                    com_name,
                     contig: rec.seqid.clone(),
                     strand: rec.strand,
                     cds_exons: Vec::new(),
@@ -97,9 +100,15 @@ pub fn extract_sequences(
             }
         };
 
+        // Mirror gff3_file_to_proteins.pl line 128:
+        //   ">$isoform_id $gene_id $locus_string $com_name $asmbl:lend-rend(orient)"
+        // with an empty $locus_string (no pub_locus), which leaves a double
+        // space between $gene_id and $com_name. Perl blanks com_name when it
+        // equals the model id.
+        let com_name = if model.com_name == model.model_id { "" } else { model.com_name.as_str() };
         let header = format!(
-            "{} {} {}:{}-{}({})",
-            model.model_id, model.gene_id,
+            "{} {}  {} {}:{}-{}({})",
+            model.model_id, model.gene_id, com_name,
             model.contig,
             model.cds_exons.iter().map(|&(s, _, _)| s).min().unwrap_or(0),
             model.cds_exons.iter().map(|&(_, e, _)| e).max().unwrap_or(0),
@@ -107,7 +116,17 @@ pub fn extract_sequences(
         );
 
         let final_seq = match seq_type {
-            SeqType::Prot => translate(seq.as_bytes(), stop_codons),
+            SeqType::Prot => {
+                // 5'-partial models start mid-codon: trim the first CDS exon's
+                // GFF3 phase (bases to drop to reach the first complete codon)
+                // before translating. The CDS/cDNA outputs keep the full
+                // sequence. The transcription-first exon is the lowest genomic
+                // start on '+' and the highest on '-'.
+                let phase = transcription_first_phase(model) as usize;
+                let bytes = seq.as_bytes();
+                let start = phase.min(bytes.len());
+                translate(&bytes[start..], stop_codons)
+            }
             _ => seq,
         };
 
@@ -137,6 +156,17 @@ fn build_cds_sequence(model: &GeneModel, genome_seq: &str, strand: char, _stop_c
     }
 
     Ok(cds)
+}
+
+/// GFF3 phase of the transcription-first CDS exon (lowest genomic start on
+/// '+', highest on '-'); used to trim a partial leading codon before protein
+/// translation.
+fn transcription_first_phase(model: &GeneModel) -> u8 {
+    if model.strand == '-' {
+        model.cds_exons.iter().max_by_key(|&&(s, _, _)| s).map(|&(_, _, p)| p).unwrap_or(0)
+    } else {
+        model.cds_exons.iter().min_by_key(|&&(s, _, _)| s).map(|&(_, _, p)| p).unwrap_or(0)
+    }
 }
 
 fn model_span(model: &GeneModel) -> (u32, u32) {

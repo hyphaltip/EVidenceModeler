@@ -5,3 +5,4 @@ pub mod partition;
 pub mod recombine;
 pub mod gff3_convert;
 pub mod translate;
+pub mod pipeline;

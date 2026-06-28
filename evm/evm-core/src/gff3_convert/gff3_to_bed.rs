@@ -1,82 +1,115 @@
 //! Convert GFF3 gene models to BED format.
 //!
-//! Replaces gene_gff3_to_bed.pl.
+//! Faithful port of `gene_gff3_to_bed.pl` + `Gene_obj::to_BED_format`. The
+//! driver pipes the output through `sort -k1,1 -k2,2g -k3,3g`, which this
+//! function reproduces before returning.
 
 use std::collections::HashMap;
 use anyhow::Result;
 use crate::io::gff3::read_gff3_file;
 
-/// Convert a GFF3 file containing gene models to BED format.
-///
-/// Each gene is represented as a single BED12 line.
+struct Model {
+    gene_id: String,           // TU_feat_name (mRNA Parent)
+    model_id: String,          // Model_feat_name (mRNA ID)
+    com_name: String,          // un-escaped Name
+    contig: String,
+    strand: char,
+    exons: Vec<(u32, u32)>,    // exon features (block coords)
+    cds: Vec<(u32, u32)>,      // CDS features (thick/coding span)
+}
+
+/// Convert a GFF3 file containing gene models to BED12, matching
+/// `Gene_obj::to_BED_format` and the driver's coordinate sort.
 pub fn gff3_to_bed(gff3_path: &str) -> Result<Vec<String>> {
     let records = read_gff3_file(gff3_path)?;
 
-    // Collect per-gene info
-    let mut gene_records: HashMap<String, Vec<(u32, u32, char, String)>> = HashMap::new();
-    let mut gene_contigs: HashMap<String, String> = HashMap::new();
-    let mut gene_strands: HashMap<String, char> = HashMap::new();
+    let mut models: HashMap<String, Model> = HashMap::new();
 
     for rec in &records {
-        if rec.feature == "gene" {
-            let id = rec.attr("ID").unwrap_or("").to_string();
-            gene_contigs.insert(id.clone(), rec.seqid.clone());
-            gene_strands.insert(id, rec.strand);
-        }
-        if rec.feature == "CDS" {
-            let parent = rec.attr("Parent").unwrap_or("").to_string();
-            gene_records.entry(parent.clone()).or_default().push((
-                rec.start, rec.end, rec.strand, rec.seqid.clone()
-            ));
+        match rec.feature.as_str() {
+            "mRNA" => {
+                let id = rec.attr("ID").unwrap_or("").to_string();
+                let gene_id = rec.attr("Parent").unwrap_or("").to_string();
+                let com_name = super::uri_unescape(rec.attr("Name").unwrap_or(""));
+                let m = models.entry(id.clone()).or_insert_with(|| Model {
+                    gene_id: String::new(), model_id: id.clone(), com_name: String::new(),
+                    contig: rec.seqid.clone(), strand: rec.strand,
+                    exons: Vec::new(), cds: Vec::new(),
+                });
+                m.gene_id = gene_id;
+                m.com_name = com_name;
+                m.contig = rec.seqid.clone();
+                m.strand = rec.strand;
+            }
+            "exon" => {
+                let parent = rec.attr("Parent").unwrap_or("").to_string();
+                models.entry(parent).or_insert_with(|| Model {
+                    gene_id: String::new(), model_id: String::new(), com_name: String::new(),
+                    contig: rec.seqid.clone(), strand: rec.strand,
+                    exons: Vec::new(), cds: Vec::new(),
+                }).exons.push((rec.start, rec.end));
+            }
+            "CDS" => {
+                let parent = rec.attr("Parent").unwrap_or("").to_string();
+                models.entry(parent).or_insert_with(|| Model {
+                    gene_id: String::new(), model_id: String::new(), com_name: String::new(),
+                    contig: rec.seqid.clone(), strand: rec.strand,
+                    exons: Vec::new(), cds: Vec::new(),
+                }).cds.push((rec.start, rec.end));
+            }
+            _ => {}
         }
     }
 
     let mut bed_lines = Vec::new();
 
-    for (gene_id, exons) in &gene_records {
-        if exons.is_empty() { continue; }
-        let contig = &exons[0].3;
-        let strand = exons[0].2;
-        let chrom_start: u32 = exons.iter().map(|&(s, _, _, _)| s).min().unwrap_or(0) - 1; // BED is 0-based
-        let chrom_end: u32 = exons.iter().map(|&(_, e, _, _)| e).max().unwrap_or(0);
+    for model in models.values() {
+        if model.exons.is_empty() { continue; }
 
-        let mut sorted_exons: Vec<(u32, u32)> = exons.iter()
-            .map(|&(s, e, _, _)| (s - 1, e)) // 0-based
-            .collect();
-        sorted_exons.sort();
-        sorted_exons.dedup();
+        // Exons sorted ascending (Perl sorts by end5; for non-overlapping exons
+        // this is ascending genomic order on both strands). Blocks are emitted
+        // in genomic-ascending order regardless of strand.
+        let mut exons = model.exons.clone();
+        exons.sort();
+        let gene_lend = exons[0].0;
+        let gene_rend = exons[exons.len() - 1].1;
 
-        let block_count = sorted_exons.len();
-        let block_sizes: Vec<String> = sorted_exons.iter()
-            .map(|&(s, e)| (e - s).to_string())
-            .collect();
-        let block_starts: Vec<String> = sorted_exons.iter()
-            .map(|&(s, _)| (s - chrom_start).to_string())
-            .collect();
+        let block_sizes: Vec<String> = exons.iter().map(|&(l, r)| (r - l + 1).to_string()).collect();
+        let block_starts: Vec<String> = exons.iter().map(|&(l, _)| (l - gene_lend).to_string()).collect();
+
+        // Coding (thick) span from CDS features; falls back to exon span.
+        let coding_lend = model.cds.iter().map(|&(l, _)| l).min().unwrap_or(gene_lend);
+        let coding_rend = model.cds.iter().map(|&(_, r)| r).max().unwrap_or(gene_rend);
+
+        // name = "ID=<model>;<gene>;<com_name>" with spaces → underscores.
+        let mut name = format!("ID={};{};{}", model.model_id, model.gene_id, model.com_name);
+        name = name.replace(' ', "_");
 
         bed_lines.push(format!(
-            "{}\t{}\t{}\t{}\t0\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-            contig,
-            chrom_start,
-            chrom_end,
-            gene_id,
-            strand,
-            chrom_start,
-            chrom_end,
-            "0,0,0",
-            block_count,
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            model.contig,
+            gene_lend - 1,
+            gene_rend,
+            name,
+            0,                 // score
+            model.strand,
+            coding_lend - 1,
+            coding_rend,
+            "0",               // itemRgb
+            exons.len(),
             block_sizes.join(","),
             block_starts.join(","),
         ));
     }
 
-    // Sort BED lines by chromosome then start position
+    // Reproduce the driver's `sort -k1,1 -k2,2g -k3,3g`: chrom lexical, then
+    // start (numeric), then end (numeric).
     bed_lines.sort_by(|a, b| {
-        let a_cols: Vec<&str> = a.splitn(3, '\t').collect();
-        let b_cols: Vec<&str> = b.splitn(3, '\t').collect();
-        a_cols[0].cmp(b_cols[0])
-            .then(a_cols[1].parse::<u32>().unwrap_or(0)
-                .cmp(&b_cols[1].parse::<u32>().unwrap_or(0)))
+        let a: Vec<&str> = a.splitn(4, '\t').collect();
+        let b: Vec<&str> = b.splitn(4, '\t').collect();
+        a[0].cmp(b[0])
+            .then(a[1].parse::<i64>().unwrap_or(0).cmp(&b[1].parse::<i64>().unwrap_or(0)))
+            .then(a[2].parse::<i64>().unwrap_or(0).cmp(&b[2].parse::<i64>().unwrap_or(0)))
     });
 
     Ok(bed_lines)
