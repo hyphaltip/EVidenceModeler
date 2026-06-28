@@ -9,6 +9,100 @@ original design sketch.
 
 ---
 
+## 00. SESSION HANDOFF (2026-06-27, latest) — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 22/22.**
+
+### Current parity on testing/Contig1 (single partition)
+Rust `evm.out` vs Perl golden (`testing/smalltest_perl.partitions/Contig1/evm.out`,
+also fixture `evm/tests/fixtures/Contig1.perl.evm.out`):
+- **170 lines == 170 lines.**
+- **11/11 gene spans, 79/79 exons** identical (coord+type+frame).
+- **All exon/intron rows + evidence SETS identical** (0 non-header diffs with
+  evidence-order normalization).
+- **All 208 exon base_scores byte-exact** vs Perl `exon_list.out`.
+- **ig_base byte-exact** vs Perl `intergenic.bps` (0/63304 positions differ).
+- Header `score(...)` exact; `raw_noncoding(...)` matches to <0.1 on all 11.
+- **ONLY remaining diff:** the filter `offset(...)` field is ~10–27 too low on
+  10/11 genes → `S-ratio` off by ~0.1–0.3, `noncoding_equivalent` off by ~the
+  same. Cosmetic; does NOT change gene selection. This is **task #16** and the
+  top next item. See "Offset residual" below.
+
+### What was completed THIS session (commits, newest first)
+- `e5cade3` intergenic grouping by **full attribute column** (Perl
+  `get_gene_predictions` groups CDS by `$x[8]`, not Parent; glimmerHMM/fgenesh
+  CDS with a `;5_prime_partial=true` suffix split into 2 genes → intron scored
+  as intergenic). Fixed ig_base tail (was 150 positions off at 62677–63076).
+- `38e9792` **Phase B2 output format** — faithful `EVM_prediction::toString`
+  (`!!` line, `# EVM prediction: …` header, sorted interleaved exon/INTRON rows).
+- `563f115` **decrement_coding_using_protein_alignment_introns** (Perl 4206) +
+  fixed `parse_evidence_chains` gap-building to sort per-link coords (median gap).
+- `ed52b06`/`3a2bcd0` **convert_5prime_partials** (the "842" fix).
+
+### KEY FINDING: Perl evm.out is NON-DETERMINISTIC
+Re-running `evidence_modeler.pl` produces DIFFERENT within-row evidence ordering
+each run (Perl hash randomization) — header NUMBERS are stable, only evidence
+ORDER changes. So **literal byte-for-byte parity with Perl is impossible.** Rust
+now **sorts evidence tokens canonically** (in `consensus.rs::format_prediction`)
+so its output is reproducible. The golden-comparison oracle must normalize
+evidence order on both sides (see the `norm()` awk one-liner used in this session).
+
+### Offset residual (task #16) — next diagnostic
+`filter.rs` `offset` = Σ over the prediction's own introns of
+`calc_intergenic_score(intron_span)` + Σ_i(`pred_intron_vec[i]` − `existing_per_base`).
+intergenic part is now exact; `existing_per_base` = sum of ab-initio weights for
+the intron (verified == Perl `get_predicted_intron_score_contribution/intron_len`).
+So the residual is in the `pred_intron_vec` (FORWARD/REVERSE_PRED_INTRON_VEC, built
+from `PREDICTED_INTRONS` = ab-initio introns only) summed over each intron span.
+**Next step:** dump Rust `all_fwd_intron_vec`/`all_rev_intron_vec` and compare to
+a Perl dump of `@FORWARD_PRED_INTRON_VEC`/`@REVERSE_PRED_INTRON_VEC` over a clean
+gene (e.g. gene7 30091-32906 '+', offset 26.72 vs 54.00, raw_noncoding matches).
+Perl does NOT dump the PRED vectors by default (only `introns_decomposed_to_vec.*`
+from INTRONS_TO_SCORE, which is ALL evidence — different). Add a temp Perl dump
+of the PRED vectors, or instrument both. Suspect: `predicted_introns` score
+accumulation span vs `intron_key_to_intron_span` normalization span (off-by-bases),
+or overlapping-intron contributions within a span.
+
+### HOW TO REPRODUCE / TEST (essential commands)
+Perl golden + debug dumps (run inside `testing/smalltest_perl.partitions/Contig1/`):
+```
+perl <repo>/EvmUtils/evidence_modeler.pl -G genome.fasta -g gene_predictions.gff3 \
+  -w <repo>/testing/weights.txt -e transcript_alignments.gff3 -p protein_alignments.gff3 \
+  --min_intron_length 20 --terminal_intergenic_re_search 10000 --exec_dir . --debug
+```
+Writes: `exon_list.out` (per-exon base_score), `intergenic.bps` (base intergenic),
+`final_path` (the chosen trellis path!), `coding_vector.{+,-}.dat`,
+`augment_intergenic_from_{start,stop}_peaks.dat`, `start_peaks`/`stop_peaks`.
+Rust single-partition (note clap uses `--min-intron-length`, hyphens):
+```
+<repo>/evm/target/debug/evidence_modeler -G genome.fasta -g gene_predictions.gff3 \
+  -w <repo>/testing/weights.txt -e transcript_alignments.gff3 -p protein_alignments.gff3 \
+  --min-intron-length 20 --terminal-intergenic-re-search 10000 -o /tmp/rust.evm.out
+```
+Evidence-order-normalized diff (the real oracle, since Perl is non-deterministic):
+```
+norm() { awk -F'\t' '{ if ($NF ~ /^\{/) { n=split($NF,a,"},{"); for(i=1;i<=n;i++)gsub(/^\{|\}$/,"",a[i]); asort(a); s=""; for(i=1;i<=n;i++)s=s"{"a[i]"}"(i<n?",":""); $NF=s } print }' OFS='\t' "$1"; }
+diff <(norm /tmp/rust.evm.out) <(norm .../evm.out)   # only header offset lines should differ
+```
+
+### AFTER offset (task #16): remaining Phase B + Phase C
+- Add a golden integration test (`evm/tests/golden.rs`) using the normalized
+  comparison. Decide tolerance for the offset field (or fix it first).
+- Phase B4: verify `--forwardStrandOnly`/`--reverseStrandOnly` + alt stop codons.
+- Phase C (next big milestone): `evm-cli` orchestrator end-to-end — partition
+  parity, recombine parity, GFF3/pep/cds/bed conversion. NOTE the evm-cli
+  `main.rs run_evm_on_partition` DUPLICATES the evm-utils shim merge logic — keep
+  both in sync (the consensus/format fixes live in shared `evm-core` so they're
+  already shared; only the merge/CLI wiring is duplicated).
+- Need NEW fixtures for: multi-contig/multi-partition (recombine DP), a gene
+  Perl actually ELIMINATES (filter), alternate genetic code.
+
+### Debug instrumentation note
+All temporary dumps (EVM_DUMP_EXONS / EVM_DUMP_FILTER / EVM_DUMP_IGBASE) have been
+REMOVED from the committed tree. Re-add as needed for task #16.
+
+---
+
 ## 0. Progress log
 
 - **2026-06-27 — Phase A complete.** Repo hygiene done (`.gitignore` added,
@@ -99,10 +193,11 @@ original design sketch.
 
 ## 0a. Live parity status (testing/Contig1)
 
-**ALL 11 Perl genes match exactly — 11/11 gene spans + 79/79 exons identical
-(coord + type) (commit ed52b06).** Low-support filter ported faithfully and
-verified against the golden header values: `raw_noncoding` matches ~exactly
-(e.g. 3619.01 vs 3619.02; 6165.00, 4113.00 exact), S-ratios within ~0.5%.
+**SUPERSEDED by §00 handoff — see top of file for current state.** Summary:
+170/170 lines; 11/11 spans; 79/79 exons; all base_scores + ig_base byte-exact;
+output format ported; evidence sets identical (Perl evidence ORDER is
+non-deterministic, Rust sorts canonically). Only the filter `offset` header field
+remains slightly low (task #16). Earlier notes retained below for history.
 
 **842 SOLVED — it was a missing post-trellis step, NOT a base-score tie-break.**
 The earlier diagnosis below was wrong. Perl's `--debug` `final_path` dump proves
