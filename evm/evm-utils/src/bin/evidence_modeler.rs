@@ -47,19 +47,19 @@ struct Cli {
     min_intron_length: u32,
 
     /// Forward strand only
-    #[arg(long, name = "forwardStrandOnly")]
+    #[arg(long = "forwardStrandOnly")]
     forward_strand_only: bool,
 
     /// Reverse strand only
-    #[arg(long, name = "reverseStrandOnly")]
+    #[arg(long = "reverseStrandOnly")]
     reverse_strand_only: bool,
 
     /// Report eliminated models
-    #[arg(long, name = "report_ELM")]
+    #[arg(long = "report_ELM")]
     report_elm: bool,
 
     /// Intergenic score adjustment factor
-    #[arg(long, name = "INTERGENIC_SCORE_ADJUST_FACTOR", default_value_t = 1.0)]
+    #[arg(long = "INTERGENIC_SCORE_ADJUST_FACTOR", default_value_t = 1.0)]
     intergenic_adjust: f64,
 
     /// Minimum intergenic size for terminal region re-search
