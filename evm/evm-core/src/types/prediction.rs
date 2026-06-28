@@ -11,7 +11,10 @@ pub enum PredMode {
 
 impl PredMode {
     pub fn as_str(&self) -> &'static str {
-        match self { PredMode::Standard => "STANDARD", PredMode::Intron => "INTRON" }
+        match self {
+            PredMode::Standard => "STANDARD",
+            PredMode::Intron => "INTRON",
+        }
     }
 }
 
@@ -67,10 +70,16 @@ impl EvmPrediction {
     /// exons and the intron score map — mirrors the Perl `EVM_prediction::_init`
     /// (prediction_score = Σ exon coding scores + Σ intron scores; introns keyed
     /// by donor/acceptor-adjusted coordinates).
-    pub fn finalize(&mut self, exons: &[Exon], introns_to_score: &std::collections::HashMap<String, f64>) {
+    pub fn finalize(
+        &mut self,
+        exons: &[Exon],
+        introns_to_score: &std::collections::HashMap<String, f64>,
+    ) {
         // Perl sorts the prediction's exons by end5 ascending.
         self.exon_indices.sort_by_key(|&i| exons[i].end5);
-        if self.exon_indices.is_empty() { return; }
+        if self.exon_indices.is_empty() {
+            return;
+        }
 
         self.orient = exons[self.exon_indices[0]].orientation.as_char();
 
@@ -120,8 +129,12 @@ fn span_of_indices(indices: &[usize], exons: &[Exon]) -> (u32, u32) {
     let mut rend = 0u32;
     for &idx in indices {
         let (el, er) = exons[idx].coords_sorted();
-        if el < lend { lend = el; }
-        if er > rend { rend = er; }
+        if el < lend {
+            lend = el;
+        }
+        if er > rend {
+            rend = er;
+        }
     }
     (lend, rend)
 }

@@ -8,7 +8,10 @@ use clap::Parser;
 use evm_core::partition::partition::{run_partition, InputFile};
 
 #[derive(Parser, Debug)]
-#[command(name = "partition_evm_inputs", about = "Partition EVM inputs for parallel execution")]
+#[command(
+    name = "partition_evm_inputs",
+    about = "Partition EVM inputs for parallel execution"
+)]
 struct Cli {
     /// Output directory for partitions
     #[arg(long)]
@@ -52,7 +55,10 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     let genome_basename = std::path::Path::new(&cli.genome)
-        .file_name().and_then(|n| n.to_str()).unwrap_or("genome.fasta").to_string();
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("genome.fasta")
+        .to_string();
 
     let mut input_files: Vec<InputFile> = Vec::new();
     if let Some(p) = &cli.gene_predictions {
@@ -68,7 +74,8 @@ fn main() -> Result<()> {
         input_files.push(InputFile::new("repeats", p));
     }
 
-    let listing_path = cli.partition_listing
+    let listing_path = cli
+        .partition_listing
         .unwrap_or_else(|| format!("{}.listing", cli.partition_dir));
 
     run_partition(

@@ -1,18 +1,23 @@
 //! Coordinates the per-strand evidence loading pipeline.
 
-use std::collections::HashMap;
-use anyhow::Result;
-use crate::types::genome::{GenomeSequence, MaskVec};
-use crate::types::exon::Exon;
-use crate::types::evidence::EvWeightMap;
-use crate::algo::splice_sites::populate_genome_features;
-use crate::algo::coding_scores::{new_coding_scores, CodingScores};
-use crate::algo::introns::{IntronScoreMap, IntronEvidenceMap, PredictedIntronMap, populate_intron_vectors, IntronVec};
-use crate::algo::load_predictions::load_prediction_data;
-use crate::algo::load_evidence::{parse_evidence_chains, instantiate_evidence_based_exons, decrement_coding_using_protein_alignment_introns};
-use crate::algo::peaks::analyze_peaks;
 use crate::algo::coding_scores::score_exons;
+use crate::algo::coding_scores::{new_coding_scores, CodingScores};
+use crate::algo::introns::{
+    populate_intron_vectors, IntronEvidenceMap, IntronScoreMap, IntronVec, PredictedIntronMap,
+};
+use crate::algo::load_evidence::{
+    decrement_coding_using_protein_alignment_introns, instantiate_evidence_based_exons,
+    parse_evidence_chains,
+};
+use crate::algo::load_predictions::load_prediction_data;
+use crate::algo::peaks::analyze_peaks;
+use crate::algo::splice_sites::populate_genome_features;
 use crate::io::gff3::Gff3Record;
+use crate::types::evidence::EvWeightMap;
+use crate::types::exon::Exon;
+use crate::types::genome::{GenomeSequence, MaskVec};
+use anyhow::Result;
+use std::collections::HashMap;
 
 /// State accumulated across one strand's processing pass.
 pub struct StrandState {
@@ -69,10 +74,7 @@ pub struct ProcessConfig<'a> {
 /// Run the complete per-strand feature-processing pipeline.
 ///
 /// Returns a `StrandState` containing all exons, introns, and peaks for that strand.
-pub fn process_features(
-    genomic_strand: char,
-    cfg: &ProcessConfig,
-) -> Result<StrandState> {
+pub fn process_features(genomic_strand: char, cfg: &ProcessConfig) -> Result<StrandState> {
     let seq_len = cfg.genome_seq.len();
     let seq = cfg.genome_seq.as_bytes();
 
@@ -158,8 +160,18 @@ pub fn process_features(
     }
 
     // Analyse gene boundary peaks
-    let start_peaks_raw = analyze_peaks(&state.begins, seq_len, cfg.chain_termini_window, cfg.sum_genepred_weights);
-    let end_peaks_raw   = analyze_peaks(&state.ends, seq_len, cfg.chain_termini_window, cfg.sum_genepred_weights);
+    let start_peaks_raw = analyze_peaks(
+        &state.begins,
+        seq_len,
+        cfg.chain_termini_window,
+        cfg.sum_genepred_weights,
+    );
+    let end_peaks_raw = analyze_peaks(
+        &state.ends,
+        seq_len,
+        cfg.chain_termini_window,
+        cfg.sum_genepred_weights,
+    );
 
     // Transpose peaks back to forward-strand coordinates if processing reverse
     for (pos, score) in &start_peaks_raw {
@@ -180,13 +192,18 @@ pub fn process_features(
     }
 
     // Score exons
-    let ev_weight_fn = |ev_type: &str| -> Option<f64> {
-        cfg.ev_weights.get(ev_type).map(|e| e.weight)
-    };
+    let ev_weight_fn =
+        |ev_type: &str| -> Option<f64> { cfg.ev_weights.get(ev_type).map(|e| e.weight) };
     let ev_class_fn = |ev_type: &str| -> Option<crate::types::evidence::EvClass> {
         cfg.ev_weights.get(ev_type).map(|e| e.ev_class.clone())
     };
-    score_exons(&mut state.exons, &state.coding_scores, cfg.mask, &ev_weight_fn, &ev_class_fn);
+    score_exons(
+        &mut state.exons,
+        &state.coding_scores,
+        cfg.mask,
+        &ev_weight_fn,
+        &ev_class_fn,
+    );
 
     // Build intron vectors
     let (fwd, rev) = populate_intron_vectors(&state.predicted_introns, cfg.mask, seq_len);

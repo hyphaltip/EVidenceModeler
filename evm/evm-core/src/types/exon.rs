@@ -32,7 +32,10 @@ pub enum Orientation {
 
 impl Orientation {
     pub fn as_char(&self) -> char {
-        match self { Orientation::Fwd => '+', Orientation::Rev => '-' }
+        match self {
+            Orientation::Fwd => '+',
+            Orientation::Rev => '-',
+        }
     }
 }
 
@@ -52,8 +55,12 @@ pub fn end_frame(start_frame: ExonPhase, exon_len: u32) -> ExonPhase {
 /// GFF3 phase conversion: (gff_phase_digit, strand_char) → ExonPhase [1..=6].
 pub fn gff_phase_to_exon_phase(gff_phase: u8, orient: char) -> ExonPhase {
     match (gff_phase, orient) {
-        (0, '+') => 1, (1, '+') => 2, (2, '+') => 3,
-        (0, '-') => 4, (1, '-') => 5, (2, '-') => 6,
+        (0, '+') => 1,
+        (1, '+') => 2,
+        (2, '+') => 3,
+        (0, '-') => 4,
+        (1, '-') => 5,
+        (2, '-') => 6,
         _ => 1,
     }
 }
@@ -141,9 +148,9 @@ impl Exon {
 /// Acceptable exon linkage table: (typeA_orient, typeB_orient) → phased?.
 /// This mirrors the `@acceptableExonLinkages` table from the Perl.
 pub fn build_acceptable_linkages() -> (
-    std::collections::HashSet<(String, String)>,   // all linkages
-    std::collections::HashSet<(String, String)>,   // phased linkages
-    std::collections::HashSet<(String, String)>,   // intergenic linkages
+    std::collections::HashSet<(String, String)>, // all linkages
+    std::collections::HashSet<(String, String)>, // phased linkages
+    std::collections::HashSet<(String, String)>, // intergenic linkages
     std::collections::HashSet<(ExonPhase, ExonPhase)>, // frame-frame pairs
 ) {
     use std::collections::HashSet;
@@ -188,14 +195,22 @@ pub fn build_acceptable_linkages() -> (
     }
 
     let intergenic_raw: &[(&str, &str)] = &[
-        ("terminal+", "initial+"), ("terminal+", "single+"),
-        ("single+", "single+"),   ("single+", "initial+"),
-        ("initial-", "terminal-"), ("single-", "terminal-"),
-        ("single-", "single-"),   ("initial-", "single-"),
-        ("single+", "single-"),   ("single+", "terminal-"),
-        ("terminal+", "terminal-"), ("terminal+", "single-"),
-        ("single-", "single+"),   ("single-", "initial+"),
-        ("initial-", "initial+"), ("initial-", "single+"),
+        ("terminal+", "initial+"),
+        ("terminal+", "single+"),
+        ("single+", "single+"),
+        ("single+", "initial+"),
+        ("initial-", "terminal-"),
+        ("single-", "terminal-"),
+        ("single-", "single-"),
+        ("initial-", "single-"),
+        ("single+", "single-"),
+        ("single+", "terminal-"),
+        ("terminal+", "terminal-"),
+        ("terminal+", "single-"),
+        ("single-", "single+"),
+        ("single-", "initial+"),
+        ("initial-", "initial+"),
+        ("initial-", "single+"),
     ];
     let mut intergenic: HashSet<(String, String)> = HashSet::new();
     for (a, b) in intergenic_raw {
@@ -204,9 +219,16 @@ pub fn build_acceptable_linkages() -> (
 
     // Frame-frame compatibility pairs
     let frame_pairs: HashSet<(ExonPhase, ExonPhase)> = [
-        (1u8, 2u8), (2, 3), (3, 1), // fwd
-        (4, 5), (5, 6), (6, 4),     // rev
-    ].iter().cloned().collect();
+        (1u8, 2u8),
+        (2, 3),
+        (3, 1), // fwd
+        (4, 5),
+        (5, 6),
+        (6, 4), // rev
+    ]
+    .iter()
+    .cloned()
+    .collect();
 
     (all, phased, intergenic, frame_pairs)
 }

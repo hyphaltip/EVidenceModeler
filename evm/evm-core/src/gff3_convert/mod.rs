@@ -1,6 +1,6 @@
 pub mod evm_to_gff3;
-pub mod gff3_to_proteins;
 pub mod gff3_to_bed;
+pub mod gff3_to_proteins;
 
 /// Decode percent-encoded octets in a GFF3 attribute value (e.g. `%20` → space),
 /// matching the URI un-escaping that Perl `GFF3_utils::index_GFF3_gene_objs`

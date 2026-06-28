@@ -6,50 +6,90 @@ use std::collections::HashMap;
 fn build_standard_table() -> HashMap<[u8; 3], char> {
     let raw: &[(&str, char)] = &[
         // Phe
-        ("TTT", 'F'), ("TTC", 'F'),
+        ("TTT", 'F'),
+        ("TTC", 'F'),
         // Leu
-        ("TTA", 'L'), ("TTG", 'L'),
-        ("CTT", 'L'), ("CTC", 'L'), ("CTA", 'L'), ("CTG", 'L'),
+        ("TTA", 'L'),
+        ("TTG", 'L'),
+        ("CTT", 'L'),
+        ("CTC", 'L'),
+        ("CTA", 'L'),
+        ("CTG", 'L'),
         // Ile
-        ("ATT", 'I'), ("ATC", 'I'), ("ATA", 'I'),
+        ("ATT", 'I'),
+        ("ATC", 'I'),
+        ("ATA", 'I'),
         // Met
         ("ATG", 'M'),
         // Val
-        ("GTT", 'V'), ("GTC", 'V'), ("GTA", 'V'), ("GTG", 'V'),
+        ("GTT", 'V'),
+        ("GTC", 'V'),
+        ("GTA", 'V'),
+        ("GTG", 'V'),
         // Ser
-        ("TCT", 'S'), ("TCC", 'S'), ("TCA", 'S'), ("TCG", 'S'),
-        ("AGT", 'S'), ("AGC", 'S'),
+        ("TCT", 'S'),
+        ("TCC", 'S'),
+        ("TCA", 'S'),
+        ("TCG", 'S'),
+        ("AGT", 'S'),
+        ("AGC", 'S'),
         // Pro
-        ("CCT", 'P'), ("CCC", 'P'), ("CCA", 'P'), ("CCG", 'P'),
+        ("CCT", 'P'),
+        ("CCC", 'P'),
+        ("CCA", 'P'),
+        ("CCG", 'P'),
         // Thr
-        ("ACT", 'T'), ("ACC", 'T'), ("ACA", 'T'), ("ACG", 'T'),
+        ("ACT", 'T'),
+        ("ACC", 'T'),
+        ("ACA", 'T'),
+        ("ACG", 'T'),
         // Ala
-        ("GCT", 'A'), ("GCC", 'A'), ("GCA", 'A'), ("GCG", 'A'),
+        ("GCT", 'A'),
+        ("GCC", 'A'),
+        ("GCA", 'A'),
+        ("GCG", 'A'),
         // Tyr
-        ("TAT", 'Y'), ("TAC", 'Y'),
+        ("TAT", 'Y'),
+        ("TAC", 'Y'),
         // Stop
-        ("TAA", '*'), ("TAG", '*'), ("TGA", '*'),
+        ("TAA", '*'),
+        ("TAG", '*'),
+        ("TGA", '*'),
         // His
-        ("CAT", 'H'), ("CAC", 'H'),
+        ("CAT", 'H'),
+        ("CAC", 'H'),
         // Gln
-        ("CAA", 'Q'), ("CAG", 'Q'),
+        ("CAA", 'Q'),
+        ("CAG", 'Q'),
         // Asn
-        ("AAT", 'N'), ("AAC", 'N'),
+        ("AAT", 'N'),
+        ("AAC", 'N'),
         // Lys
-        ("AAA", 'K'), ("AAG", 'K'),
+        ("AAA", 'K'),
+        ("AAG", 'K'),
         // Asp
-        ("GAT", 'D'), ("GAC", 'D'),
+        ("GAT", 'D'),
+        ("GAC", 'D'),
         // Glu
-        ("GAA", 'E'), ("GAG", 'E'),
+        ("GAA", 'E'),
+        ("GAG", 'E'),
         // Cys
-        ("TGT", 'C'), ("TGC", 'C'),
+        ("TGT", 'C'),
+        ("TGC", 'C'),
         // Trp
         ("TGG", 'W'),
         // Arg
-        ("CGT", 'R'), ("CGC", 'R'), ("CGA", 'R'), ("CGG", 'R'),
-        ("AGA", 'R'), ("AGG", 'R'),
+        ("CGT", 'R'),
+        ("CGC", 'R'),
+        ("CGA", 'R'),
+        ("CGG", 'R'),
+        ("AGA", 'R'),
+        ("AGG", 'R'),
         // Gly
-        ("GGT", 'G'), ("GGC", 'G'), ("GGA", 'G'), ("GGG", 'G'),
+        ("GGT", 'G'),
+        ("GGC", 'G'),
+        ("GGA", 'G'),
+        ("GGG", 'G'),
     ];
 
     let mut map = HashMap::new();
@@ -72,7 +112,9 @@ pub fn translate(cds: &[u8], stop_codons: &[[u8; 3]]) -> String {
     let custom_stops = !stop_codons.is_empty();
 
     for chunk in cds.chunks(3) {
-        if chunk.len() < 3 { break; }
+        if chunk.len() < 3 {
+            break;
+        }
         let codon = [
             chunk[0].to_ascii_uppercase(),
             chunk[1].to_ascii_uppercase(),
@@ -132,7 +174,7 @@ mod tests {
         let stops = vec![*b"TGA"];
         let prot = translate(cds, &stops);
         assert_eq!(prot, "MXP"); // ATG=M, TAA=X (reassigned stop), CCC=P
-        // TGA still stops translation
+                                 // TGA still stops translation
         let cds2 = b"ATGTGA";
         let prot2 = translate(cds2, &stops);
         assert_eq!(prot2, "M*");

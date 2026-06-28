@@ -1,8 +1,8 @@
-pub mod types;
-pub mod io;
 pub mod algo;
-pub mod partition;
-pub mod recombine;
 pub mod gff3_convert;
-pub mod translate;
+pub mod io;
+pub mod partition;
 pub mod pipeline;
+pub mod recombine;
+pub mod translate;
+pub mod types;

@@ -1,13 +1,13 @@
 //! Load protein/transcript alignment evidence and create evidence-based exons.
 
-use std::collections::HashMap;
-use crate::types::exon::{Exon, ExonType, Orientation, end_frame};
-use crate::types::evidence::{EvWeightMap, EvidenceChain, EvClass};
-use crate::types::genome::{FeatureVec, MaskVec, FEAT_DONOR, FEAT_ACCEPTOR};
-use crate::algo::introns::{add_introns, IntronScoreMap, IntronEvidenceMap, PredictedIntronMap};
-use crate::algo::coding_scores::{CodingScores, add_match_coverage};
+use crate::algo::coding_scores::{add_match_coverage, CodingScores};
+use crate::algo::introns::{add_introns, IntronEvidenceMap, IntronScoreMap, PredictedIntronMap};
 use crate::algo::phases::determine_good_phases;
 use crate::io::gff3::Gff3Record;
+use crate::types::evidence::{EvClass, EvWeightMap, EvidenceChain};
+use crate::types::exon::{end_frame, Exon, ExonType, Orientation};
+use crate::types::genome::{FeatureVec, MaskVec, FEAT_ACCEPTOR, FEAT_DONOR};
+use std::collections::HashMap;
 
 /// Parse evidence chains from a GFF3 file containing protein or transcript alignments.
 pub fn parse_evidence_chains(
@@ -29,7 +29,9 @@ pub fn parse_evidence_chains(
         let orient = rec.strand;
 
         // Filter by strand
-        if genomic_strand != '?' && orient != genomic_strand { continue; }
+        if genomic_strand != '?' && orient != genomic_strand {
+            continue;
+        }
 
         let lend = rec.start.min(rec.end);
         let rend = rec.start.max(rec.end);
@@ -37,15 +39,24 @@ pub fn parse_evidence_chains(
         // Parse chain ID and parent
         let chain_id = rec.attr("ID").unwrap_or("").to_string();
         let parent_id = rec.attr("Parent").unwrap_or("").to_string();
-        let target = rec.attr("Target")
+        let target = rec
+            .attr("Target")
             .or_else(|| rec.attr("Query"))
             .map(|s| s.to_string());
 
         let is_child = !parent_id.is_empty();
-        let key_chain_id = if is_child { parent_id.clone() } else { chain_id.clone() };
+        let key_chain_id = if is_child {
+            parent_id.clone()
+        } else {
+            chain_id.clone()
+        };
         let key = format!("ev_type:{}/ID={}", ev_type, key_chain_id);
 
-        let (mut end5, mut end3) = if orient == '+' { (lend, rend) } else { (rend, lend) };
+        let (mut end5, mut end3) = if orient == '+' {
+            (lend, rend)
+        } else {
+            (rend, lend)
+        };
 
         if genomic_strand == '-' {
             // Transpose coordinates to forward-strand reference
@@ -55,27 +66,25 @@ pub fn parse_evidence_chains(
 
         let applied_orient = if genomic_strand == '-' { '+' } else { orient };
 
-        let chain = acc_to_chain.entry(key.clone()).or_insert_with(|| EvidenceChain {
-            accession: key.clone(),
-            target: None,
-            ev_type: ev_type.clone(),
-            ev_class: ev_class.clone(),
-            lend: u32::MAX,
-            rend: 0,
-            links: Vec::new(),
-            gaps: Vec::new(),
-            applied_orient,
-        });
+        let chain = acc_to_chain
+            .entry(key.clone())
+            .or_insert_with(|| EvidenceChain {
+                accession: key.clone(),
+                target: None,
+                ev_type: ev_type.clone(),
+                ev_class: ev_class.clone(),
+                lend: u32::MAX,
+                rend: 0,
+                links: Vec::new(),
+                gaps: Vec::new(),
+                applied_orient,
+            });
 
         if let Some(t) = target {
             chain.target = Some(t);
         }
 
-        if is_child {
-            chain.links.push((end5, end3));
-        } else {
-            chain.links.push((end5, end3));
-        }
+        chain.links.push((end5, end3));
     }
 
     // Finalise each chain
@@ -113,12 +122,14 @@ const MIN_ALIGNMENT_GAP_SIZE_INFER_INTRON: u32 = 30;
 /// Median of a slice of gap lengths (Perl `median`: mean of the two central
 /// values for an even count, the central value for an odd count; 0 if empty).
 fn median(nums: &[u32]) -> f64 {
-    if nums.is_empty() { return 0.0; }
+    if nums.is_empty() {
+        return 0.0;
+    }
     let mut v: Vec<u32> = nums.to_vec();
     v.sort_unstable();
     let n = v.len();
     let mid = n / 2;
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         (v[mid - 1] as f64 + v[mid] as f64) / 2.0
     } else {
         v[mid] as f64
@@ -157,7 +168,10 @@ pub fn decrement_coding_using_protein_alignment_introns(
     // Apply decrements using strand-specific chains.
     let chains = parse_evidence_chains(genomic_strand, records, ev_weights, genomic_seq_len);
     for chain in &chains {
-        let weight = ev_weights.get(&chain.ev_type).map(|e| e.weight).unwrap_or(0.0);
+        let weight = ev_weights
+            .get(&chain.ev_type)
+            .map(|e| e.weight)
+            .unwrap_or(0.0);
         for &(end5, end3) in &chain.gaps {
             let gap_length = end3.abs_diff(end5) + 1;
             if (gap_length as f64) <= max_gap_length {
@@ -168,6 +182,8 @@ pub fn decrement_coding_using_protein_alignment_introns(
 }
 
 /// Instantiate evidence-based exons from the parsed chains.
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::ptr_arg)]
 pub fn instantiate_evidence_based_exons(
     chains: &[EvidenceChain],
     begins: &mut Vec<f64>,
@@ -187,7 +203,10 @@ pub fn instantiate_evidence_based_exons(
     genomic_seq_len: usize,
 ) {
     for chain in chains {
-        let weight = ev_weights.get(&chain.ev_type).map(|e| e.weight).unwrap_or(1.0);
+        let weight = ev_weights
+            .get(&chain.ev_type)
+            .map(|e| e.weight)
+            .unwrap_or(1.0);
         let accession = if let Some(t) = &chain.target {
             format!("{}/Target={}", chain.accession, t)
         } else {
@@ -196,8 +215,12 @@ pub fn instantiate_evidence_based_exons(
 
         // PROTEIN chains increment begin/end peaks
         if chain.ev_class == EvClass::Protein {
-            if (chain.lend as usize) < begins.len() { begins[chain.lend as usize] += weight; }
-            if (chain.rend as usize) < ends.len() { ends[chain.rend as usize] += weight; }
+            if (chain.lend as usize) < begins.len() {
+                begins[chain.lend as usize] += weight;
+            }
+            if (chain.rend as usize) < ends.len() {
+                ends[chain.rend as usize] += weight;
+            }
         }
 
         let links = &chain.links;
@@ -206,10 +229,13 @@ pub fn instantiate_evidence_based_exons(
         for (link_idx, &(end5, end3)) in links.iter().enumerate() {
             // Internal alignment segments (not first/last) can contribute exons
             // if they have proper splice boundaries
-            let got_acceptor = genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR
-                && link_idx != 0 && link_idx != num_links - 1;
+            let got_acceptor = genome_features.get((end5 as usize).saturating_sub(2))
+                == FEAT_ACCEPTOR
+                && link_idx != 0
+                && link_idx != num_links - 1;
             let got_donor = genome_features.get((end3 + 1) as usize) == FEAT_DONOR
-                && link_idx != 0 && link_idx != num_links - 1;
+                && link_idx != 0
+                && link_idx != num_links - 1;
 
             if got_donor && got_acceptor {
                 let good_phases = determine_good_phases(genome_features, end5, end3);
@@ -232,7 +258,14 @@ pub fn instantiate_evidence_based_exons(
 
                     // TRANSCRIPT internal exons with ORF also contribute to coding
                     if chain.ev_class == EvClass::Transcript {
-                        add_match_coverage(coding_scores, mask, end5, end3, weight, &chain.ev_class);
+                        add_match_coverage(
+                            coding_scores,
+                            mask,
+                            end5,
+                            end3,
+                            weight,
+                            &chain.ev_class,
+                        );
                     }
                 }
             }
@@ -245,9 +278,18 @@ pub fn instantiate_evidence_based_exons(
 
         // Add introns from chain
         add_introns(
-            &accession, links, genomic_strand, weight, &chain.ev_type, &chain.ev_class,
-            min_intron_length, genome_features, mask,
-            introns_to_score, introns_to_evidence, predicted_introns,
+            &accession,
+            links,
+            genomic_strand,
+            weight,
+            &chain.ev_type,
+            &chain.ev_class,
+            min_intron_length,
+            genome_features,
+            mask,
+            introns_to_score,
+            introns_to_evidence,
+            predicted_introns,
             genomic_seq_len,
         );
     }

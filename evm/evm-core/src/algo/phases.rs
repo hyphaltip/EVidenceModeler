@@ -1,7 +1,7 @@
 //! Phase / reading-frame utilities.
 
-use crate::types::genome::{FeatureVec, FEAT_STOP};
 use crate::types::exon::ExonPhase;
+use crate::types::genome::{FeatureVec, FEAT_STOP};
 
 /// Determine which reading phases (1, 2, 3) are valid for an exon spanning
 /// [end5, end3] by checking whether any in-frame stop codon would be created.
@@ -12,11 +12,7 @@ use crate::types::exon::ExonPhase;
 ///
 /// A stop codon at position i (1-based, pointing to the first nt of the stop)
 /// eliminates the phase for which position i is in-frame.
-pub fn determine_good_phases(
-    genome_features: &FeatureVec,
-    end5: u32,
-    end3: u32,
-) -> Vec<ExonPhase> {
+pub fn determine_good_phases(genome_features: &FeatureVec, end5: u32, end3: u32) -> Vec<ExonPhase> {
     let mut phase_ok = [true; 3]; // index 0 = phase1, 1 = phase2, 2 = phase3
 
     // Walk through potential stop-codon positions within [end5, end3-2]
@@ -40,15 +36,23 @@ pub fn determine_good_phases(
     }
 
     let mut good = Vec::new();
-    if phase_ok[0] { good.push(1u8); }
-    if phase_ok[1] { good.push(2u8); }
-    if phase_ok[2] { good.push(3u8); }
+    if phase_ok[0] {
+        good.push(1u8);
+    }
+    if phase_ok[1] {
+        good.push(2u8);
+    }
+    if phase_ok[2] {
+        good.push(3u8);
+    }
     good
 }
 
 /// Return true if the 3-byte slice represents a stop codon.
 pub fn is_stop_codon(triplet: &[u8], stop_codons: &[[u8; 3]]) -> bool {
-    if triplet.len() < 3 { return false; }
+    if triplet.len() < 3 {
+        return false;
+    }
     let t = [
         triplet[0].to_ascii_uppercase(),
         triplet[1].to_ascii_uppercase(),

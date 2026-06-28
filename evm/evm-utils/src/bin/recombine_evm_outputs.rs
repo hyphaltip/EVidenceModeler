@@ -9,7 +9,10 @@ use evm_core::io::partitions::read_partitions_file;
 use evm_core::recombine::recombine::recombine_outputs;
 
 #[derive(Parser, Debug)]
-#[command(name = "recombine_evm_outputs", about = "Recombine partial EVM outputs")]
+#[command(
+    name = "recombine_evm_outputs",
+    about = "Recombine partial EVM outputs"
+)]
 struct Cli {
     /// Partitions listing file
     #[arg(long)]

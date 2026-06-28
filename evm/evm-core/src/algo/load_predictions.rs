@@ -1,18 +1,19 @@
 //! Load gene prediction GFF3 data and create exon candidates.
 
-use std::collections::HashMap;
-use anyhow::Result;
-use crate::types::exon::{Exon, ExonType, Orientation, ExonPhase, end_frame};
-use crate::types::evidence::{EvWeightMap, EvClass};
-use crate::types::genome::{FeatureVec, MaskVec, FEAT_START, FEAT_STOP, FEAT_DONOR, FEAT_ACCEPTOR};
-use crate::algo::introns::{add_introns, IntronScoreMap, IntronEvidenceMap, PredictedIntronMap};
-use crate::algo::coding_scores::{CodingScores, add_match_coverage};
+use crate::algo::coding_scores::{add_match_coverage, CodingScores};
+use crate::algo::introns::{add_introns, IntronEvidenceMap, IntronScoreMap, PredictedIntronMap};
 use crate::algo::phases::determine_good_phases;
 use crate::io::gff3::Gff3Record;
+use crate::types::evidence::{EvClass, EvWeightMap};
+use crate::types::exon::{end_frame, Exon, ExonPhase, ExonType, Orientation};
+use crate::types::genome::{FeatureVec, MaskVec, FEAT_ACCEPTOR, FEAT_DONOR, FEAT_START, FEAT_STOP};
+use anyhow::Result;
+use std::collections::HashMap;
 
 /// Load CDS exon records from gene-prediction GFF3 and populate the exon pool.
 ///
 /// Returns the updated exon pool. Intron maps are updated in-place.
+#[allow(clippy::too_many_arguments)]
 pub fn load_prediction_data(
     genomic_strand: char,
     records: &[Gff3Record],
@@ -34,8 +35,12 @@ pub fn load_prediction_data(
     let mut model_to_entry: HashMap<String, (String, EvClass, f64)> = HashMap::new(); // model_id → (ev_type, class, weight)
 
     for rec in records {
-        if rec.feature != "CDS" { continue; }
-        if rec.strand != genomic_strand { continue; }
+        if rec.feature != "CDS" {
+            continue;
+        }
+        if rec.strand != genomic_strand {
+            continue;
+        }
 
         let ev_type = &rec.source;
         let entry = match ev_weights.get(ev_type) {
@@ -51,11 +56,16 @@ pub fn load_prediction_data(
             continue;
         }
 
-        let parent = rec.raw_attributes.split("Parent=").nth(1)
-            .and_then(|s| s.split(|c| c == ';' || c == ' ').next())
+        let parent = rec
+            .raw_attributes
+            .split("Parent=")
+            .nth(1)
+            .and_then(|s| s.split([';', ' ']).next())
             .unwrap_or("")
             .to_string();
-        if parent.is_empty() { continue; }
+        if parent.is_empty() {
+            continue;
+        }
 
         let model_id = format!("{}_{}", ev_type, parent);
 
@@ -74,10 +84,13 @@ pub fn load_prediction_data(
             (end5.min(end3), end5.max(end3))
         };
 
-        model_to_coords.entry(model_id.clone()).or_default().push((fwd_end5, fwd_end3));
-        model_to_entry.entry(model_id).or_insert_with(|| {
-            (ev_type.clone(), entry.ev_class.clone(), entry.weight)
-        });
+        model_to_coords
+            .entry(model_id.clone())
+            .or_default()
+            .push((fwd_end5, fwd_end3));
+        model_to_entry
+            .entry(model_id)
+            .or_insert_with(|| (ev_type.clone(), entry.ev_class.clone(), entry.weight));
     }
 
     // Process each model
@@ -99,9 +112,21 @@ pub fn load_prediction_data(
                 && (end3 - end5 + 1) >= 3
             {
                 add_or_update_exon(
-                    &model_id, end5, end3, ExonType::Single, 1, &ev_type, &ev_class, weight,
-                    genome_seq, genome_features, mask, coding_scores,
-                    exons, exons_via_coords, genomic_seq_len,
+                    &model_id,
+                    end5,
+                    end3,
+                    ExonType::Single,
+                    1,
+                    &ev_type,
+                    &ev_class,
+                    weight,
+                    genome_seq,
+                    genome_features,
+                    mask,
+                    coding_scores,
+                    exons,
+                    exons_via_coords,
+                    genomic_seq_len,
                 );
             }
         } else {
@@ -115,10 +140,11 @@ pub fn load_prediction_data(
                 let start_frame = (cds_len % 3 + 1) as ExonPhase;
                 cds_len += exon_len;
 
-                let has_start    = genome_features.get(end5 as usize) == FEAT_START;
-                let has_stop     = genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP;
-                let has_acceptor = genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR;
-                let has_donor    = genome_features.get((end3 + 1) as usize) == FEAT_DONOR;
+                let has_start = genome_features.get(end5 as usize) == FEAT_START;
+                let has_stop = genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP;
+                let has_acceptor =
+                    genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR;
+                let has_donor = genome_features.get((end3 + 1) as usize) == FEAT_DONOR;
 
                 let exon_type = if i == 0 && has_start && has_donor && exon_len >= 3 {
                     Some(ExonType::Initial)
@@ -132,32 +158,68 @@ pub fn load_prediction_data(
 
                 match exon_type {
                     Some(t) => classified.push((end5, end3, t, start_frame)),
-                    None => { valid = false; break; }
+                    None => {
+                        valid = false;
+                        break;
+                    }
                 }
             }
 
             if valid {
                 for (end5, end3, exon_type, start_frame) in &classified {
                     add_or_update_exon(
-                        &model_id, *end5, *end3, *exon_type, *start_frame, &ev_type, &ev_class, weight,
-                        genome_seq, genome_features, mask, coding_scores,
-                        exons, exons_via_coords, genomic_seq_len,
+                        &model_id,
+                        *end5,
+                        *end3,
+                        *exon_type,
+                        *start_frame,
+                        &ev_type,
+                        &ev_class,
+                        weight,
+                        genome_seq,
+                        genome_features,
+                        mask,
+                        coding_scores,
+                        exons,
+                        exons_via_coords,
+                        genomic_seq_len,
                     );
                 }
                 add_introns(
-                    &model_id, &coordsets, genomic_strand, weight,
-                    &ev_type, &ev_class, min_intron_length,
-                    genome_features, mask,
-                    introns_to_score, introns_to_evidence, predicted_introns,
+                    &model_id,
+                    &coordsets,
+                    genomic_strand,
+                    weight,
+                    &ev_type,
+                    &ev_class,
+                    min_intron_length,
+                    genome_features,
+                    mask,
+                    introns_to_score,
+                    introns_to_evidence,
+                    predicted_introns,
                     genomic_seq_len,
                 );
             } else {
                 // Try to recover partials
                 recover_partial_prediction(
-                    &model_id, &coordsets, genomic_strand, weight, &ev_type, &ev_class,
-                    genome_seq, genome_features, mask, coding_scores,
-                    introns_to_score, introns_to_evidence, predicted_introns,
-                    exons, exons_via_coords, min_intron_length, genomic_seq_len,
+                    &model_id,
+                    &coordsets,
+                    genomic_strand,
+                    weight,
+                    &ev_type,
+                    &ev_class,
+                    genome_seq,
+                    genome_features,
+                    mask,
+                    coding_scores,
+                    introns_to_score,
+                    introns_to_evidence,
+                    predicted_introns,
+                    exons,
+                    exons_via_coords,
+                    min_intron_length,
+                    genomic_seq_len,
                 );
             }
         }
@@ -191,7 +253,13 @@ fn add_or_update_exon(
     };
     let good_phases = determine_good_phases(genome_features, end5, check_end3);
     if !good_phases.contains(&start_frame) {
-        log::warn!("add_exon: {} {}-{} invalid phase {}", accession, end5, end3, start_frame);
+        log::warn!(
+            "add_exon: {} {}-{} invalid phase {}",
+            accession,
+            end5,
+            end3,
+            start_frame
+        );
         return;
     }
 
@@ -206,13 +274,17 @@ fn add_or_update_exon(
         exon.exon_type = exon_type;
         exon.start_frame = start_frame;
         exon.end_frame = ef;
-        exon.orientation = if end5 <= end3 { Orientation::Fwd } else { Orientation::Rev };
+        exon.orientation = if end5 <= end3 {
+            Orientation::Fwd
+        } else {
+            Orientation::Rev
+        };
         // Store 2-char boundary sequences for stop-codon junction check
         if end5 >= 2 && (end5 - 2) as usize + 2 <= genome_seq.len() {
             let lb = &genome_seq[(end5 - 2) as usize..(end5) as usize];
             exon.left_seq_boundary = [lb[0], lb[1]];
         }
-        if end3 as usize + 1 <= genome_seq.len() {
+        if (end3 as usize) < genome_seq.len() {
             let rb = &genome_seq[(end3 - 1) as usize..(end3 + 1) as usize];
             exon.right_seq_boundary = [rb[0], if rb.len() > 1 { rb[1] } else { 0 }];
         }
@@ -244,32 +316,94 @@ fn recover_partial_prediction(
 ) {
     for &(end5, end3) in coordsets {
         let exon_len = end3 - end5 + 1;
-        let has_start    = genome_features.get(end5 as usize) == FEAT_START;
-        let has_stop     = genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP;
+        let has_start = genome_features.get(end5 as usize) == FEAT_START;
+        let has_stop = genome_features.get((end3 as usize).saturating_sub(2)) == FEAT_STOP;
         let has_acceptor = genome_features.get((end5 as usize).saturating_sub(2)) == FEAT_ACCEPTOR;
-        let has_donor    = genome_features.get((end3 + 1) as usize) == FEAT_DONOR;
+        let has_donor = genome_features.get((end3 + 1) as usize) == FEAT_DONOR;
 
         if has_start && has_donor && exon_len >= 3 {
-            add_or_update_exon(model_id, end5, end3, ExonType::Initial, 1, ev_type, ev_class, weight,
-                genome_seq, genome_features, mask, coding_scores, exons, exons_via_coords, genomic_seq_len);
+            add_or_update_exon(
+                model_id,
+                end5,
+                end3,
+                ExonType::Initial,
+                1,
+                ev_type,
+                ev_class,
+                weight,
+                genome_seq,
+                genome_features,
+                mask,
+                coding_scores,
+                exons,
+                exons_via_coords,
+                genomic_seq_len,
+            );
         }
         if has_acceptor && has_stop && exon_len >= 3 {
             let num_prev = exon_len % 3;
-            let phase: ExonPhase = match num_prev { 0 => 1, 1 => 3, 2 => 2, _ => 1 };
-            add_or_update_exon(model_id, end5, end3, ExonType::Terminal, phase, ev_type, ev_class, weight,
-                genome_seq, genome_features, mask, coding_scores, exons, exons_via_coords, genomic_seq_len);
+            let phase: ExonPhase = match num_prev {
+                0 => 1,
+                1 => 3,
+                2 => 2,
+                _ => 1,
+            };
+            add_or_update_exon(
+                model_id,
+                end5,
+                end3,
+                ExonType::Terminal,
+                phase,
+                ev_type,
+                ev_class,
+                weight,
+                genome_seq,
+                genome_features,
+                mask,
+                coding_scores,
+                exons,
+                exons_via_coords,
+                genomic_seq_len,
+            );
         }
         // Candidate internal exons (Perl try_recover_partial_prediction line 1076):
         // acceptor at end5-2 and donor at end3+1. Internal exons are added for
         // every valid reading phase (the Perl add_exon validates phase).
         if has_acceptor && has_donor {
             for phase in determine_good_phases(genome_features, end5, end3) {
-                add_or_update_exon(model_id, end5, end3, ExonType::Internal, phase, ev_type, ev_class, weight,
-                    genome_seq, genome_features, mask, coding_scores, exons, exons_via_coords, genomic_seq_len);
+                add_or_update_exon(
+                    model_id,
+                    end5,
+                    end3,
+                    ExonType::Internal,
+                    phase,
+                    ev_type,
+                    ev_class,
+                    weight,
+                    genome_seq,
+                    genome_features,
+                    mask,
+                    coding_scores,
+                    exons,
+                    exons_via_coords,
+                    genomic_seq_len,
+                );
             }
         }
     }
-    add_introns(model_id, coordsets, genomic_strand, weight, ev_type, ev_class,
-        min_intron_length, genome_features, mask,
-        introns_to_score, introns_to_evidence, predicted_introns, genomic_seq_len);
+    add_introns(
+        model_id,
+        coordsets,
+        genomic_strand,
+        weight,
+        ev_type,
+        ev_class,
+        min_intron_length,
+        genome_features,
+        mask,
+        introns_to_score,
+        introns_to_evidence,
+        predicted_introns,
+        genomic_seq_len,
+    );
 }

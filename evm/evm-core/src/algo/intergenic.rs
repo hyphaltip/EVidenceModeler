@@ -1,10 +1,10 @@
 //! Intergenic region scoring.
 
-use std::collections::HashMap;
-use crate::types::genome::MaskVec;
+use crate::io::gff3::Gff3Record;
 use crate::types::evidence::EvWeightMap;
 use crate::types::exon::{Exon, ExonType};
-use crate::io::gff3::Gff3Record;
+use crate::types::genome::MaskVec;
+use std::collections::HashMap;
 
 pub type IntergenicScores = Vec<f64>;
 
@@ -34,12 +34,16 @@ pub fn populate_intergenic_scores(
     let mut per_type: HashMap<String, HashMap<String, (u32, u32)>> = HashMap::new();
 
     for rec in gene_pred_records {
-        if rec.feature != "CDS" { continue; }
+        if rec.feature != "CDS" {
+            continue;
+        }
         let entry = match ev_weights.get(&rec.source) {
             Some(e) => e,
             None => continue,
         };
-        if !entry.ev_class.is_abinitio() { continue; }
+        if !entry.ev_class.is_abinitio() {
+            continue;
+        }
 
         // Perl get_gene_predictions groups CDS by the FULL attribute column
         // ($x[8]), not by Parent. This matters when otherwise-identical CDS of
@@ -47,7 +51,9 @@ pub fn populate_intergenic_scores(
         // Perl then treats them as separate "genes", creating an intergenic gap
         // in the intron between them. Group by the raw attribute string to match.
         let group_key = rec.raw_attributes.clone();
-        if group_key.is_empty() { continue; }
+        if group_key.is_empty() {
+            continue;
+        }
 
         let lend = rec.start.min(rec.end);
         let rend = rec.start.max(rec.end);
@@ -69,9 +75,11 @@ pub fn populate_intergenic_scores(
         for w in spans.windows(2) {
             let lend_intergenic = w[0].1;
             let rend_intergenic = w[1].0;
-            if lend_intergenic > rend_intergenic { continue; }
+            if lend_intergenic > rend_intergenic {
+                continue;
+            }
             let mut j = lend_intergenic + 1;
-            while j + 1 <= rend_intergenic {
+            while j < rend_intergenic {
                 if !mask.get(j as usize) {
                     ig[j as usize] += weight;
                 }
@@ -85,7 +93,9 @@ pub fn populate_intergenic_scores(
 
 /// Compute the sum of intergenic scores over [lend, rend] (inclusive, 1-based).
 pub fn calc_intergenic_score(scores: &IntergenicScores, lend: u32, rend: u32) -> f64 {
-    if lend > rend { return 0.0; }
+    if lend > rend {
+        return 0.0;
+    }
     let mut s = 0.0;
     let max = (scores.len() - 1) as u32;
     let l = lend.max(1);
@@ -104,6 +114,7 @@ pub fn calc_intergenic_score(scores: &IntergenicScores, lend: u32, rend: u32) ->
 /// **set** every non-masked intergenic position in that flanking span to
 /// `sum_genepred_weights`. Exons are processed in end5-ascending order (the Perl
 /// wrapper sorts `@EXONS` before augmenting).
+#[allow(clippy::too_many_arguments)]
 pub fn augment_intergenic_from_start_stop_peaks(
     ig: &mut IntergenicScores,
     start_peaks: &[(u32, f64, char)],
@@ -119,7 +130,9 @@ pub fn augment_intergenic_from_start_stop_peaks(
     sorted.sort_by_key(|e| e.end5);
 
     let set_range = |ig: &mut [f64], lo: u32, hi: u32| {
-        if lo > hi { return; }
+        if lo > hi {
+            return;
+        }
         for i in lo..=hi {
             let iu = i as usize;
             if iu < ig.len() && !mask.get(iu) {
@@ -132,15 +145,24 @@ pub fn augment_intergenic_from_start_stop_peaks(
     for &(pos, _score, strand) in start_peaks {
         if strand == '+' {
             // closest initial|single + exon within range
-            let closest = match find_closest_exon(&sorted, &[ExonType::Initial, ExonType::Single], '+', pos, start_stop_range) {
-                Some(e) => e, None => continue,
+            let closest = match find_closest_exon(
+                &sorted,
+                &[ExonType::Initial, ExonType::Single],
+                '+',
+                pos,
+                start_stop_range,
+            ) {
+                Some(e) => e,
+                None => continue,
             };
             let position = closest.coords_sorted().0; // lend (5' of initial+)
-            // walk right→left: nearest exon with rend < position that ends a gene
+                                                      // walk right→left: nearest exon with rend < position that ends a gene
             let mut exon_rend = 1u32;
             for &e in sorted.iter().rev() {
                 let (_, e_rend) = e.coords_sorted();
-                if e_rend >= position { continue; }
+                if e_rend >= position {
+                    continue;
+                }
                 let o = e.orientation.as_char();
                 if (o == '+' && is_terminal_or_single(e)) || (o == '-' && is_initial_or_single(e)) {
                     exon_rend = e.coords_sorted().1;
@@ -149,14 +171,23 @@ pub fn augment_intergenic_from_start_stop_peaks(
             }
             set_range(ig, exon_rend, position);
         } else {
-            let closest = match find_closest_exon(&sorted, &[ExonType::Initial, ExonType::Single], '-', pos, start_stop_range) {
-                Some(e) => e, None => continue,
+            let closest = match find_closest_exon(
+                &sorted,
+                &[ExonType::Initial, ExonType::Single],
+                '-',
+                pos,
+                start_stop_range,
+            ) {
+                Some(e) => e,
+                None => continue,
             };
             let position = closest.coords_sorted().1; // rend (5' of initial-)
             let mut exon_lend = seq_len;
             for &e in sorted.iter() {
                 let (e_lend, _) = e.coords_sorted();
-                if e_lend <= position { continue; }
+                if e_lend <= position {
+                    continue;
+                }
                 let o = e.orientation.as_char();
                 if (o == '+' && is_initial_or_single(e)) || (o == '-' && is_terminal_or_single(e)) {
                     exon_lend = e.coords_sorted().0;
@@ -170,14 +201,23 @@ pub fn augment_intergenic_from_start_stop_peaks(
     // ── STOP peaks ─────────────────────────────────────────────────────────
     for &(pos, _score, strand) in end_peaks {
         if strand == '+' {
-            let closest = match find_closest_exon(&sorted, &[ExonType::Terminal, ExonType::Single], '+', pos, start_stop_range) {
-                Some(e) => e, None => continue,
+            let closest = match find_closest_exon(
+                &sorted,
+                &[ExonType::Terminal, ExonType::Single],
+                '+',
+                pos,
+                start_stop_range,
+            ) {
+                Some(e) => e,
+                None => continue,
             };
             let position = closest.coords_sorted().1; // rend (3' of terminal+)
             let mut exon_lend = seq_len;
             for &e in sorted.iter() {
                 let (e_lend, _) = e.coords_sorted();
-                if e_lend <= position { continue; }
+                if e_lend <= position {
+                    continue;
+                }
                 let o = e.orientation.as_char();
                 if (o == '+' && is_initial_or_single(e)) || (o == '-' && is_terminal_or_single(e)) {
                     exon_lend = e.coords_sorted().0;
@@ -186,14 +226,23 @@ pub fn augment_intergenic_from_start_stop_peaks(
             }
             set_range(ig, position, exon_lend);
         } else {
-            let closest = match find_closest_exon(&sorted, &[ExonType::Terminal, ExonType::Single], '-', pos, start_stop_range) {
-                Some(e) => e, None => continue,
+            let closest = match find_closest_exon(
+                &sorted,
+                &[ExonType::Terminal, ExonType::Single],
+                '-',
+                pos,
+                start_stop_range,
+            ) {
+                Some(e) => e,
+                None => continue,
             };
             let position = closest.coords_sorted().0; // lend (3' of terminal-)
             let mut exon_rend = 1u32;
             for &e in sorted.iter().rev() {
                 let (_, e_rend) = e.coords_sorted();
-                if e_rend >= position { continue; }
+                if e_rend >= position {
+                    continue;
+                }
                 let o = e.orientation.as_char();
                 if (o == '+' && is_terminal_or_single(e)) || (o == '-' && is_initial_or_single(e)) {
                     exon_rend = e.coords_sorted().1;
@@ -225,15 +274,24 @@ fn find_closest_exon<'a>(
     let mut closest: Option<&Exon> = None;
     let mut closest_dist: Option<u32> = None;
     for &e in exons {
-        if !types.contains(&e.exon_type) { continue; }
-        if e.orientation.as_char() != strand { continue; }
+        if !types.contains(&e.exon_type) {
+            continue;
+        }
+        if e.orientation.as_char() != strand {
+            continue;
+        }
         let d5 = e.end5.abs_diff(position);
         let d3 = e.end3.abs_diff(position);
         let delta = d5.min(d3);
-        if delta > range { continue; }
+        if delta > range {
+            continue;
+        }
         match closest_dist {
             Some(cd) if cd <= delta => {}
-            _ => { closest_dist = Some(delta); closest = Some(e); }
+            _ => {
+                closest_dist = Some(delta);
+                closest = Some(e);
+            }
         }
     }
     closest

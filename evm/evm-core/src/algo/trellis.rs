@@ -1,11 +1,11 @@
 //! Dynamic-programming trellis: finding the highest-scoring path through exons.
 
-use std::collections::HashSet;
-use crate::types::exon::{Exon, ExonType, ExonPhase};
-use crate::types::prediction::EvmPrediction;
+use crate::algo::intergenic::{calc_intergenic_score, IntergenicScores};
 use crate::algo::introns::IntronScoreMap;
-use crate::algo::intergenic::{IntergenicScores, calc_intergenic_score};
 use crate::algo::phases::is_stop_codon;
+use crate::types::exon::{Exon, ExonPhase, ExonType};
+use crate::types::prediction::EvmPrediction;
+use std::collections::HashSet;
 
 /// Result of compatibility check between two exons.
 pub enum CompatResult {
@@ -19,6 +19,7 @@ pub enum CompatResult {
 /// in the trellis, and compute the join score.
 ///
 /// Returns `Compatible(score)` on success, `Incompatible` otherwise.
+#[allow(clippy::too_many_arguments)]
 pub fn are_compatible_exons(
     exon_a: &Exon,
     exon_b: &Exon,
@@ -62,14 +63,20 @@ pub fn are_compatible_exons(
         };
 
         // Check frame compatibility
-        let (before, after) = if key_a.ends_with('-') { (exon_b, exon_a) } else { (exon_a, exon_b) };
+        let (before, after) = if key_a.ends_with('-') {
+            (exon_b, exon_a)
+        } else {
+            (exon_a, exon_b)
+        };
         if !frame_pairs.contains(&(before.end_frame, after.start_frame)) {
             return CompatResult::Incompatible;
         }
 
         // Check no stop codon created across the junction
         let end_frame = before.end_frame % 3;
-        let seq_junction: Vec<u8> = before.right_seq_boundary.iter()
+        let seq_junction: Vec<u8> = before
+            .right_seq_boundary
+            .iter()
             .chain(after.left_seq_boundary.iter())
             .copied()
             .collect();
@@ -131,6 +138,7 @@ pub fn score_boundary_condition(
 ///
 /// Exons must be sorted by end5 ascending before calling this function.
 /// Returns the index of the highest-scoring exon (or None if empty).
+#[allow(clippy::too_many_arguments)]
 pub fn build_trellis(
     exons: &mut Vec<Exon>,
     range_lend: u32,
@@ -144,7 +152,9 @@ pub fn build_trellis(
     stop_codons: &[[u8; 3]],
     max_prev_exons_compare: usize,
 ) -> Option<usize> {
-    if exons.is_empty() { return None; }
+    if exons.is_empty() {
+        return None;
+    }
 
     // Sort real exons by 5' end (Perl re-sorts inside build_trellis).
     exons.sort_by_key(|e| e.end5);
@@ -184,9 +194,7 @@ pub fn build_trellis(
 
         let mut j = (i - 1) as isize;
 
-        while j >= 0
-            && (compare_count < max_prev_exons_compare || !found_compatible)
-        {
+        while j >= 0 && (compare_count < max_prev_exons_compare || !found_compatible) {
             let ji = j as usize;
             compare_count += 1;
             j -= 1;
@@ -263,7 +271,8 @@ pub fn traverse_path(exons: &[Exon], top_idx: usize) -> Vec<EvmPrediction> {
         }
         current.push(idx);
         // Terminate prediction at terminal+ or single, or initial- (reverse strand terminal)
-        if type_orient == "terminal+" || type_orient.contains("single") || type_orient == "initial-" {
+        if type_orient == "terminal+" || type_orient.contains("single") || type_orient == "initial-"
+        {
             let pred = EvmPrediction::new(current.clone(), exons);
             predictions.push(pred);
             current.clear();

@@ -1,16 +1,16 @@
 //! Recursive consensus gene prediction — trellis + recursion on tail/intergenic regions.
 
-use std::collections::HashSet;
-use anyhow::Result;
-use crate::types::exon::{Exon, ExonPhase, ExonType};
-use crate::types::prediction::{EvmPrediction, PredMode};
-use crate::algo::trellis::{build_trellis, traverse_path};
-use crate::algo::filter::filter_predictions_low_support;
-use crate::algo::introns::{IntronScoreMap, IntronEvidenceMap, IntronVec};
-use crate::algo::intergenic::{IntergenicScores, get_intergenic_regions};
 use crate::algo::coding_scores::CodingScores;
+use crate::algo::filter::filter_predictions_low_support;
+use crate::algo::intergenic::{get_intergenic_regions, IntergenicScores};
+use crate::algo::introns::{IntronEvidenceMap, IntronScoreMap, IntronVec};
+use crate::algo::trellis::{build_trellis, traverse_path};
 use crate::types::evidence::EvWeightMap;
+use crate::types::exon::{Exon, ExonPhase, ExonType};
 use crate::types::genome::MaskVec;
+use crate::types::prediction::{EvmPrediction, PredMode};
+use anyhow::Result;
+use std::collections::HashSet;
 
 /// Parameters controlling the recursive search.
 pub struct ConsensusParams<'a> {
@@ -82,7 +82,8 @@ pub fn generate_consensus_gene_predictions(
     }
 
     // Build a local copy of exons for the trellis (subset in range)
-    let mut local_exons: Vec<Exon> = exon_indices_in_range.iter()
+    let mut local_exons: Vec<Exon> = exon_indices_in_range
+        .iter()
         .map(|&i| params.exons[i].clone())
         .collect();
     local_exons.sort_by_key(|e| e.end5);
@@ -103,7 +104,10 @@ pub fn generate_consensus_gene_predictions(
 
     let top_idx = match top_idx {
         Some(i) => i,
-        None => { *recursion_count -= 1; return Ok(()); }
+        None => {
+            *recursion_count -= 1;
+            return Ok(());
+        }
     };
 
     let mut predictions = traverse_path(&local_exons, top_idx);
@@ -140,9 +144,8 @@ pub fn generate_consensus_gene_predictions(
         params.introns_to_score,
     );
 
-    let preds_remain: Vec<&EvmPrediction> = predictions.iter()
-        .filter(|p| !p.is_eliminated)
-        .collect();
+    let preds_remain: Vec<&EvmPrediction> =
+        predictions.iter().filter(|p| !p.is_eliminated).collect();
 
     if preds_remain.is_empty() && !params.report_elm {
         *recursion_count -= 1;
@@ -151,11 +154,23 @@ pub fn generate_consensus_gene_predictions(
 
     // Determine span of predictions
     let (pred_span_lend, pred_span_rend) = if !preds_remain.is_empty() {
-        let l = preds_remain.iter().map(|p| p.lend).min().unwrap_or(range_lend);
-        let r = preds_remain.iter().map(|p| p.rend).max().unwrap_or(range_rend);
+        let l = preds_remain
+            .iter()
+            .map(|p| p.lend)
+            .min()
+            .unwrap_or(range_lend);
+        let r = preds_remain
+            .iter()
+            .map(|p| p.rend)
+            .max()
+            .unwrap_or(range_rend);
         (l, r)
     } else {
-        predictions.iter().fold((range_rend, range_lend), |(l, r), p| (l.min(p.lend), r.max(p.rend)))
+        predictions
+            .iter()
+            .fold((range_rend, range_lend), |(l, r), p| {
+                (l.min(p.lend), r.max(p.rend))
+            })
     };
 
     // Emit predictions: one "!!" range line for the call, then each prediction's
@@ -165,8 +180,15 @@ pub fn generate_consensus_gene_predictions(
         pred_span_lend, pred_span_rend, *recursion_count
     ));
     for pred in &predictions {
-        if pred.is_eliminated && !params.report_elm { continue; }
-        let text = format_prediction(pred, &local_exons, params.introns_to_evidence, mode.as_str());
+        if pred.is_eliminated && !params.report_elm {
+            continue;
+        }
+        let text = format_prediction(
+            pred,
+            &local_exons,
+            params.introns_to_evidence,
+            mode.as_str(),
+        );
         output.push(text);
         output.push("\n".to_string());
     }
@@ -176,19 +198,30 @@ pub fn generate_consensus_gene_predictions(
         let left_len = pred_span_lend.saturating_sub(range_lend);
         if left_len >= params.min_intergenic_size_on_re_search {
             generate_consensus_gene_predictions(
-                range_lend, pred_span_lend - 1, mode.clone(), params, recursion_count, output,
+                range_lend,
+                pred_span_lend - 1,
+                mode.clone(),
+                params,
+                recursion_count,
+                output,
             )?;
         }
         let right_len = range_rend.saturating_sub(pred_span_rend);
         if right_len >= params.min_intergenic_size_on_re_search {
             generate_consensus_gene_predictions(
-                pred_span_rend + 1, range_rend, mode.clone(), params, recursion_count, output,
+                pred_span_rend + 1,
+                range_rend,
+                mode.clone(),
+                params,
+                recursion_count,
+                output,
             )?;
         }
 
         // Recursion: intergenic regions between predictions
         if params.min_gene_length_size_on_re_search > 0 {
-            let spans: Vec<(u32, u32)> = predictions.iter()
+            let spans: Vec<(u32, u32)> = predictions
+                .iter()
                 .filter(|p| !p.is_eliminated)
                 .map(|p| (p.lend, p.rend))
                 .collect();
@@ -196,7 +229,12 @@ pub fn generate_consensus_gene_predictions(
                 let ig_len = ig_r.saturating_sub(ig_l) + 1;
                 if ig_len >= params.min_gene_length_size_on_re_search {
                     generate_consensus_gene_predictions(
-                        ig_l, ig_r, mode.clone(), params, recursion_count, output,
+                        ig_l,
+                        ig_r,
+                        mode.clone(),
+                        params,
+                        recursion_count,
+                        output,
                     )?;
                 }
             }
@@ -210,9 +248,10 @@ pub fn generate_consensus_gene_predictions(
 /// A prediction is 5'-partial if none of its exons is an initial or single exon
 /// (Perl `EVM_prediction::is_5prime_partial`).
 fn is_5prime_partial(pred: &EvmPrediction, exons: &[Exon]) -> bool {
-    !pred.exon_indices.iter().any(|&i| {
-        matches!(exons[i].exon_type, ExonType::Initial | ExonType::Single)
-    })
+    !pred
+        .exon_indices
+        .iter()
+        .any(|&i| matches!(exons[i].exon_type, ExonType::Initial | ExonType::Single))
 }
 
 /// Faithful port of Perl `convert_5prime_partials_to_complete_genes_where_possible`.
@@ -229,19 +268,29 @@ fn convert_5prime_partials_to_complete_genes(
     introns_to_score: &IntronScoreMap,
 ) {
     for pred in predictions.iter_mut() {
-        if !is_5prime_partial(pred, local_exons) { continue; }
+        if !is_5prime_partial(pred, local_exons) {
+            continue;
+        }
         // Only multi-exon genes (Perl skips single-exon).
-        if pred.exon_indices.len() < 2 { continue; }
+        if pred.exon_indices.len() < 2 {
+            continue;
+        }
 
         let orient = pred.orient;
         // exon_indices are sorted by end5 ascending (finalize). The gene-start
         // exon is the first for '+' and the last for '-' (Perl reverses for '-').
-        let gene_start_pos = if orient == '-' { pred.exon_indices.len() - 1 } else { 0 };
+        let gene_start_pos = if orient == '-' {
+            pred.exon_indices.len() - 1
+        } else {
+            0
+        };
         let gs_idx = pred.exon_indices[gene_start_pos];
         let gs = &local_exons[gs_idx];
 
         // Perl only converts when the gene-start exon is internal.
-        if gs.exon_type != ExonType::Internal { continue; }
+        if gs.exon_type != ExonType::Internal {
+            continue;
+        }
 
         let (gs_l, gs_r) = gs.coords_sorted();
         let gs_end3 = gs.end3;
@@ -252,11 +301,21 @@ fn convert_5prime_partials_to_complete_genes(
         let mut best: Option<&Exon> = None;
         for e in search_pool {
             let (el, er) = e.coords_sorted();
-            if !(el < gs_r && er > gs_l) { continue; }
-            if e.exon_type != ExonType::Initial { continue; }
-            if e.orientation.as_char() != orient { continue; }
-            if e.end3 != gs_end3 { continue; }
-            if e.end_frame != gs_end_frame { continue; }
+            if !(el < gs_r && er > gs_l) {
+                continue;
+            }
+            if e.exon_type != ExonType::Initial {
+                continue;
+            }
+            if e.orientation.as_char() != orient {
+                continue;
+            }
+            if e.end3 != gs_end3 {
+                continue;
+            }
+            if e.end_frame != gs_end_frame {
+                continue;
+            }
             match best {
                 Some(b) if b.base_score >= e.base_score => {}
                 _ => best = Some(e),
@@ -289,8 +348,15 @@ fn format_prediction(
     let mut s = format!(
         "# EVM prediction: Mode:{} S-ratio: {:.2} {}-{} orient({}) score({:.2}) \
 noncoding_equivalent({:.2}) raw_noncoding({:.2}) offset({:.2}) ",
-        mode, pred.score_ratio, pred.lend, pred.rend, orient,
-        pred.total_score, pred.noncoding_equivalent, pred.raw_noncoding, pred.offset_noncoding,
+        mode,
+        pred.score_ratio,
+        pred.lend,
+        pred.rend,
+        orient,
+        pred.total_score,
+        pred.noncoding_equivalent,
+        pred.raw_noncoding,
+        pred.offset_noncoding,
     );
     if pred.is_eliminated {
         s.push_str(" *** ELIMINATED *** ");
@@ -299,7 +365,10 @@ noncoding_equivalent({:.2}) raw_noncoding({:.2}) offset({:.2}) ",
 
     // Build the interleaved, coordinate-sorted component list (Perl orders by
     // the first stored coordinate of each exon/intron).
-    enum Comp<'a> { Exon(&'a Exon), Intron(u32, u32, String) }
+    enum Comp<'a> {
+        Exon(&'a Exon),
+        Intron(u32, u32, String),
+    }
     let mut components: Vec<(u32, Comp)> = Vec::new();
 
     for &(intron_lend, intron_rend) in &pred.intron_coords {
@@ -319,7 +388,10 @@ noncoding_equivalent({:.2}) raw_noncoding({:.2}) offset({:.2}) ",
         let ev = introns_to_evidence.get(&key).cloned().unwrap_or_default();
         // Perl emits evidence in hash-iteration order, which is non-deterministic
         // across runs; sort canonically so Rust output is reproducible.
-        let mut toks: Vec<String> = ev.iter().map(|(acc, et)| format!("{{{};{}}}", acc, et)).collect();
+        let mut toks: Vec<String> = ev
+            .iter()
+            .map(|(acc, et)| format!("{{{};{}}}", acc, et))
+            .collect();
         toks.sort();
         let ev_str = toks.join(",");
         components.push((intron_end5, Comp::Intron(intron_end5, intron_end3, ev_str)));
@@ -337,12 +409,19 @@ noncoding_equivalent({:.2}) raw_noncoding({:.2}) offset({:.2}) ",
             Comp::Exon(exon) => {
                 let mut row = format!(
                     "{}\t{}\t{}{}\t{}\t{}\t",
-                    exon.end5, exon.end3, exon.exon_type.as_str(), exon.orientation.as_char(),
-                    exon.start_frame, exon.end_frame,
+                    exon.end5,
+                    exon.end3,
+                    exon.exon_type.as_str(),
+                    exon.orientation.as_char(),
+                    exon.start_frame,
+                    exon.end_frame,
                 );
                 // Sort evidence canonically (see intron note above).
-                let mut toks: Vec<String> = exon.evidence.iter()
-                    .map(|(acc, et)| format!("{{{};{}}}", acc, et)).collect();
+                let mut toks: Vec<String> = exon
+                    .evidence
+                    .iter()
+                    .map(|(acc, et)| format!("{{{};{}}}", acc, et))
+                    .collect();
                 toks.sort();
                 row.push_str(&toks.join(","));
                 s.push_str(&row);

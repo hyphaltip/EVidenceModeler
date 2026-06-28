@@ -64,30 +64,43 @@ impl GenomeSequence {
 
 /// Reverse-complement a byte slice of DNA.
 pub fn reverse_complement_bytes(s: &[u8]) -> Vec<u8> {
-    s.iter()
-        .rev()
-        .map(|&b| complement_base(b))
-        .collect()
+    s.iter().rev().map(|&b| complement_base(b)).collect()
 }
 
 fn complement_base(b: u8) -> u8 {
     match b {
-        b'A' => b'T', b'a' => b't',
-        b'T' => b'A', b't' => b'a',
-        b'G' => b'C', b'g' => b'c',
-        b'C' => b'G', b'c' => b'g',
-        b'R' => b'Y', b'r' => b'y',
-        b'Y' => b'R', b'y' => b'r',
-        b'M' => b'K', b'm' => b'k',
-        b'K' => b'M', b'k' => b'm',
-        b'S' => b'S', b's' => b's',
-        b'W' => b'W', b'w' => b'w',
-        b'H' => b'D', b'h' => b'd',
-        b'D' => b'H', b'd' => b'h',
-        b'B' => b'V', b'b' => b'v',
-        b'V' => b'B', b'v' => b'b',
-        b'N' => b'N', b'n' => b'n',
-        b'X' => b'X', b'x' => b'x',
+        b'A' => b'T',
+        b'a' => b't',
+        b'T' => b'A',
+        b't' => b'a',
+        b'G' => b'C',
+        b'g' => b'c',
+        b'C' => b'G',
+        b'c' => b'g',
+        b'R' => b'Y',
+        b'r' => b'y',
+        b'Y' => b'R',
+        b'y' => b'r',
+        b'M' => b'K',
+        b'm' => b'k',
+        b'K' => b'M',
+        b'k' => b'm',
+        b'S' => b'S',
+        b's' => b's',
+        b'W' => b'W',
+        b'w' => b'w',
+        b'H' => b'D',
+        b'h' => b'd',
+        b'D' => b'H',
+        b'd' => b'h',
+        b'B' => b'V',
+        b'b' => b'v',
+        b'V' => b'B',
+        b'v' => b'b',
+        b'N' => b'N',
+        b'n' => b'n',
+        b'X' => b'X',
+        b'x' => b'x',
         other => other,
     }
 }

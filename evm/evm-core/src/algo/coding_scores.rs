@@ -1,8 +1,8 @@
 //! Per-base coding score accumulation.
 
-use crate::types::genome::MaskVec;
 use crate::types::evidence::EvClass;
 use crate::types::exon::Exon;
+use crate::types::genome::MaskVec;
 
 /// Coding score vector: one f64 per genome position (1-indexed, index 0 unused).
 pub type CodingScores = Vec<f64>;
@@ -45,6 +45,7 @@ pub fn add_match_coverage(
 
 /// Assign base_score to each exon by summing the coding scores over its span
 /// plus evidence-specific contributions for TRANSCRIPT and OTHER_PREDICTION exons.
+#[allow(clippy::ptr_arg)]
 pub fn score_exons(
     exons: &mut Vec<Exon>,
     coding_scores: &CodingScores,
@@ -59,13 +60,15 @@ pub fn score_exons(
         // Sum coding vector contributions (PROTEIN + ABINITIO already in vector)
         for i in end5..=end3 {
             let v = coding_scores[i as usize];
-            if v > 0.0 { coding_score += v; }
+            if v > 0.0 {
+                coding_score += v;
+            }
         }
 
         // Add exon-specific contributions for TRANSCRIPT and OTHER_PREDICTION
         for (accession, ev_type) in &exon.evidence {
             let cls = ev_class_fn(ev_type);
-            let matches_class = cls.as_ref().map_or(false, |c| {
+            let matches_class = cls.as_ref().is_some_and(|c| {
                 matches!(c, EvClass::Transcript | EvClass::OtherPrediction)
             });
             if matches_class {

@@ -5,8 +5,8 @@
 //!
 //! If the third field is 'N' there is no fourth field (sequence not further partitioned).
 
-use std::io::{BufRead, Write};
 use anyhow::Result;
+use std::io::{BufRead, Write};
 
 #[derive(Debug, Clone)]
 pub struct PartitionEntry {
@@ -29,9 +29,13 @@ pub fn parse_partitions<R: BufRead>(reader: R) -> Result<Vec<PartitionEntry>> {
     for line in reader.lines() {
         let line = line?;
         let line = line.trim();
-        if line.is_empty() { continue; }
+        if line.is_empty() {
+            continue;
+        }
         let parts: Vec<&str> = line.split('\t').collect();
-        if parts.len() < 3 { continue; }
+        if parts.len() < 3 {
+            continue;
+        }
         let is_partitioned = parts[2] == "Y";
         let partition_dir = if is_partitioned && parts.len() >= 4 {
             Some(parts[3].to_string())

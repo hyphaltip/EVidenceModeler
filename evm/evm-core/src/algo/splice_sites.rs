@@ -1,7 +1,7 @@
 //! Splice-site and codon position scanning.
 
-use memchr::memmem;
 use crate::types::genome::{FeatureVec, FEAT_ACCEPTOR, FEAT_DONOR, FEAT_START, FEAT_STOP};
+use memchr::memmem;
 
 /// Find all 0-based start positions of `pattern` in `seq`.
 pub fn find_all_positions(seq: &[u8], pattern: &[u8]) -> Vec<usize> {
@@ -68,7 +68,11 @@ pub fn parse_stop_codons(arg: &str) -> anyhow::Result<Vec<[u8; 3]>> {
             anyhow::bail!("Stop codon must be 3 nucleotides: {}", s);
         }
         let bytes = s.as_bytes();
-        out.push([bytes[0].to_ascii_uppercase(), bytes[1].to_ascii_uppercase(), bytes[2].to_ascii_uppercase()]);
+        out.push([
+            bytes[0].to_ascii_uppercase(),
+            bytes[1].to_ascii_uppercase(),
+            bytes[2].to_ascii_uppercase(),
+        ]);
     }
     Ok(out)
 }
@@ -76,7 +80,7 @@ pub fn parse_stop_codons(arg: &str) -> anyhow::Result<Vec<[u8; 3]>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::genome::{FEAT_START, FEAT_DONOR, FEAT_ACCEPTOR, FEAT_STOP};
+    use crate::types::genome::{FEAT_ACCEPTOR, FEAT_DONOR, FEAT_START, FEAT_STOP};
 
     #[test]
     fn find_positions() {

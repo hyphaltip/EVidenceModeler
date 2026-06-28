@@ -4,10 +4,10 @@
 //! actual algorithm lives in `evm_core::pipeline::run_single_partition`, shared
 //! with the `EVidenceModeler` orchestrator.
 
-use std::fs;
-use std::io::Write;
 use anyhow::Result;
 use clap::Parser;
+use std::fs;
+use std::io::Write;
 
 use evm_core::pipeline::{run_single_partition, SinglePartitionParams};
 
@@ -97,10 +97,14 @@ fn main() -> Result<()> {
     match &cli.output {
         Some(path) => {
             let mut f = fs::File::create(path)?;
-            for block in &output { write!(f, "{}", block)?; }
+            for block in &output {
+                write!(f, "{}", block)?;
+            }
         }
         None => {
-            for block in &output { print!("{}", block); }
+            for block in &output {
+                print!("{}", block);
+            }
         }
     }
 

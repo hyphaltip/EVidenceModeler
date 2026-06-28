@@ -20,7 +20,9 @@ use evm_core::gff3_convert::gff3_to_bed::gff3_to_bed;
 use evm_core::gff3_convert::gff3_to_proteins::{extract_sequences, SeqType};
 
 fn fixture(name: &str) -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../tests/fixtures").join(name)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../tests/fixtures")
+        .join(name)
 }
 
 fn tmp(name: &str) -> PathBuf {
@@ -34,13 +36,17 @@ fn parse_fasta(text: &str) -> BTreeMap<String, String> {
     let mut seq = String::new();
     for line in text.lines() {
         if let Some(h) = line.strip_prefix('>') {
-            if !header.is_empty() { map.insert(header.clone(), std::mem::take(&mut seq)); }
+            if !header.is_empty() {
+                map.insert(header.clone(), std::mem::take(&mut seq));
+            }
             header = h.to_string();
         } else {
             seq.push_str(line);
         }
     }
-    if !header.is_empty() { map.insert(header, seq); }
+    if !header.is_empty() {
+        map.insert(header, seq);
+    }
     map
 }
 
@@ -51,7 +57,8 @@ fn evm_out_to_gff3_matches_perl() {
         fixture("Contig1.perl.evm.out").to_str().unwrap(),
         "Contig1",
         out.to_str().unwrap(),
-    ).unwrap();
+    )
+    .unwrap();
     let got = fs::read_to_string(&out).unwrap();
     let want = fs::read_to_string(fixture("Contig1.perl.EVM.gff3")).unwrap();
     assert_eq!(got, want, "GFF3 output differs from Perl golden");
@@ -66,7 +73,8 @@ fn gff3_to_bed_matches_perl() {
         fixture("Contig1.perl.evm.out").to_str().unwrap(),
         "Contig1",
         gff3.to_str().unwrap(),
-    ).unwrap();
+    )
+    .unwrap();
 
     let lines = gff3_to_bed(gff3.to_str().unwrap()).unwrap();
     let got = format!("{}\n", lines.join("\n"));
@@ -81,7 +89,8 @@ fn check_sequences(seq_type: SeqType, fixture_name: &str) {
         fixture("Contig1.perl.evm.out").to_str().unwrap(),
         "Contig1",
         gff3.to_str().unwrap(),
-    ).unwrap();
+    )
+    .unwrap();
 
     let stops: Vec<[u8; 3]> = vec![*b"TAA", *b"TGA", *b"TAG"];
     let recs = extract_sequences(
@@ -89,13 +98,20 @@ fn check_sequences(seq_type: SeqType, fixture_name: &str) {
         fixture("Contig1.genome.fasta").to_str().unwrap(),
         &seq_type,
         &stops,
-    ).unwrap();
+    )
+    .unwrap();
 
     let mut got: BTreeMap<String, String> = BTreeMap::new();
-    for (hdr, seq) in recs { got.insert(hdr, seq); }
+    for (hdr, seq) in recs {
+        got.insert(hdr, seq);
+    }
 
     let want = parse_fasta(&fs::read_to_string(fixture(fixture_name)).unwrap());
-    assert_eq!(got, want, "{} records differ from Perl golden", fixture_name);
+    assert_eq!(
+        got, want,
+        "{} records differ from Perl golden",
+        fixture_name
+    );
     let _ = fs::remove_file(&gff3);
 }
 
@@ -124,12 +140,14 @@ fn multicontig_gff3_ordering_matches_perl() {
         fixture("Contig1.perl.evm.out").to_str().unwrap(),
         "Contig1",
         gff3_c1.to_str().unwrap(),
-    ).unwrap();
+    )
+    .unwrap();
     evm_output_to_gff3(
         fixture("Contig1.perl.evm.out").to_str().unwrap(),
         "Contig2",
         gff3_c2.to_str().unwrap(),
-    ).unwrap();
+    )
+    .unwrap();
 
     // Concatenate in listing order (Contig1 then Contig2), mirroring the
     // orchestrator's concatenate_gff3_outputs and Perl's find order.

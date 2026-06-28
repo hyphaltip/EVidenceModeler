@@ -2,17 +2,23 @@
 //!
 //! Replaces gff3_file_to_proteins.pl + Gene_obj.pm + Nuc_translator.pm.
 
-use std::collections::HashMap;
-use anyhow::Result;
 use crate::io::fasta::read_fasta_hash;
 use crate::io::gff3::read_gff3_file;
 use crate::translate::codon_table::translate;
 use crate::types::genome::reverse_complement_bytes;
+use anyhow::Result;
+use std::collections::HashMap;
 
 /// Sequence output type.
-pub enum SeqType { Prot, Cds, Cdna, Gene }
+pub enum SeqType {
+    Prot,
+    Cds,
+    Cdna,
+    Gene,
+}
 
 impl SeqType {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<SeqType> {
         match s {
             "prot" => Some(SeqType::Prot),
@@ -53,14 +59,17 @@ pub fn extract_sequences(
                 let model_id = rec.attr("ID").unwrap_or("").to_string();
                 let gene_id = rec.attr("Parent").unwrap_or("").to_string();
                 let com_name = super::uri_unescape(rec.attr("Name").unwrap_or(""));
-                models.insert(model_id.clone(), GeneModel {
-                    gene_id: gene_id.clone(),
-                    model_id: model_id.clone(),
-                    com_name,
-                    contig: rec.seqid.clone(),
-                    strand: rec.strand,
-                    cds_exons: Vec::new(),
-                });
+                models.insert(
+                    model_id.clone(),
+                    GeneModel {
+                        gene_id: gene_id.clone(),
+                        model_id: model_id.clone(),
+                        com_name,
+                        contig: rec.seqid.clone(),
+                        strand: rec.strand,
+                        cds_exons: Vec::new(),
+                    },
+                );
                 gene_to_models.entry(gene_id).or_default().push(model_id);
             }
             "CDS" => {
@@ -105,13 +114,29 @@ pub fn extract_sequences(
         // with an empty $locus_string (no pub_locus), which leaves a double
         // space between $gene_id and $com_name. Perl blanks com_name when it
         // equals the model id.
-        let com_name = if model.com_name == model.model_id { "" } else { model.com_name.as_str() };
+        let com_name = if model.com_name == model.model_id {
+            ""
+        } else {
+            model.com_name.as_str()
+        };
         let header = format!(
             "{} {}  {} {}:{}-{}({})",
-            model.model_id, model.gene_id, com_name,
+            model.model_id,
+            model.gene_id,
+            com_name,
             model.contig,
-            model.cds_exons.iter().map(|&(s, _, _)| s).min().unwrap_or(0),
-            model.cds_exons.iter().map(|&(_, e, _)| e).max().unwrap_or(0),
+            model
+                .cds_exons
+                .iter()
+                .map(|&(s, _, _)| s)
+                .min()
+                .unwrap_or(0),
+            model
+                .cds_exons
+                .iter()
+                .map(|&(_, e, _)| e)
+                .max()
+                .unwrap_or(0),
             model.strand,
         );
 
@@ -136,7 +161,12 @@ pub fn extract_sequences(
     Ok(results)
 }
 
-fn build_cds_sequence(model: &GeneModel, genome_seq: &str, strand: char, _stop_codons: &[[u8; 3]]) -> Result<String> {
+fn build_cds_sequence(
+    model: &GeneModel,
+    genome_seq: &str,
+    strand: char,
+    _stop_codons: &[[u8; 3]],
+) -> Result<String> {
     let mut exons = model.cds_exons.clone();
     // Sort by genomic position
     exons.sort_by_key(|&(s, _, _)| s);
@@ -163,14 +193,34 @@ fn build_cds_sequence(model: &GeneModel, genome_seq: &str, strand: char, _stop_c
 /// translation.
 fn transcription_first_phase(model: &GeneModel) -> u8 {
     if model.strand == '-' {
-        model.cds_exons.iter().max_by_key(|&&(s, _, _)| s).map(|&(_, _, p)| p).unwrap_or(0)
+        model
+            .cds_exons
+            .iter()
+            .max_by_key(|&&(s, _, _)| s)
+            .map(|&(_, _, p)| p)
+            .unwrap_or(0)
     } else {
-        model.cds_exons.iter().min_by_key(|&&(s, _, _)| s).map(|&(_, _, p)| p).unwrap_or(0)
+        model
+            .cds_exons
+            .iter()
+            .min_by_key(|&&(s, _, _)| s)
+            .map(|&(_, _, p)| p)
+            .unwrap_or(0)
     }
 }
 
 fn model_span(model: &GeneModel) -> (u32, u32) {
-    let lend = model.cds_exons.iter().map(|&(s, _, _)| s).min().unwrap_or(0);
-    let rend = model.cds_exons.iter().map(|&(_, e, _)| e).max().unwrap_or(0);
+    let lend = model
+        .cds_exons
+        .iter()
+        .map(|&(s, _, _)| s)
+        .min()
+        .unwrap_or(0);
+    let rend = model
+        .cds_exons
+        .iter()
+        .map(|&(_, e, _)| e)
+        .max()
+        .unwrap_or(0);
     (lend, rend)
 }

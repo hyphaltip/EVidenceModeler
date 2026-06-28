@@ -5,19 +5,21 @@
 //! the intergenic vectors are built, and the trellis/consensus is invoked — so
 //! the two binaries can never drift apart (a risk flagged while building Phase C).
 
-use std::collections::HashMap;
 use anyhow::Result;
+use std::collections::HashMap;
 
+use crate::algo::consensus::{generate_consensus_gene_predictions, ConsensusParams};
+use crate::algo::intergenic::{
+    augment_intergenic_from_start_stop_peaks, populate_intergenic_scores,
+};
+use crate::algo::process::{process_features, ProcessConfig};
+use crate::algo::splice_sites::parse_stop_codons;
 use crate::io::fasta::read_fasta_file;
 use crate::io::gff3::read_gff3_file;
 use crate::io::weights::read_weights_file;
-use crate::types::genome::{GenomeSequence, MaskVec};
 use crate::types::exon::{build_acceptable_linkages, Exon, Orientation};
+use crate::types::genome::{GenomeSequence, MaskVec};
 use crate::types::prediction::PredMode;
-use crate::algo::splice_sites::parse_stop_codons;
-use crate::algo::intergenic::{populate_intergenic_scores, augment_intergenic_from_start_stop_peaks};
-use crate::algo::process::{process_features, ProcessConfig};
-use crate::algo::consensus::{generate_consensus_gene_predictions, ConsensusParams};
 
 /// Tunables for one single-partition EVM run.
 pub struct SinglePartitionParams {
@@ -49,7 +51,12 @@ impl Default for SinglePartitionParams {
 /// Map a forward reading frame (1,2,3) to its reverse equivalent (4,5,6) when
 /// transposing reverse-strand exons back to forward coordinates.
 fn fwd_frame_to_rev(frame: crate::types::exon::ExonPhase) -> crate::types::exon::ExonPhase {
-    match frame { 1 => 4, 2 => 5, 3 => 6, other => other }
+    match frame {
+        1 => 4,
+        2 => 5,
+        3 => 6,
+        other => other,
+    }
 }
 
 /// Run EVM on a single partition's input files and return the `evm.out` text
@@ -78,7 +85,8 @@ pub fn run_single_partition(
 
     let mask = MaskVec::new(seq_len);
 
-    let sum_pred_weights: f64 = ev_weights.values()
+    let sum_pred_weights: f64 = ev_weights
+        .values()
         .filter(|e| e.ev_class.is_prediction())
         .map(|e| e.weight)
         .sum();
@@ -98,10 +106,15 @@ pub fn run_single_partition(
 
     let fwd_state = if !params.reverse_only {
         Some(process_features('+', &cfg)?)
-    } else { None };
+    } else {
+        None
+    };
 
     let rev_genome = genome_seq.to_reverse_complement();
-    let rev_cfg = ProcessConfig { genome_seq: &rev_genome, ..cfg };
+    let rev_cfg = ProcessConfig {
+        genome_seq: &rev_genome,
+        ..cfg
+    };
     let rev_state = if !params.forward_only {
         let mut s = process_features('-', &rev_cfg)?;
         // transpose_exons_back_to_forward_strand: revcomp coords, remap reading
@@ -116,7 +129,9 @@ pub fn run_single_partition(
             exon.orientation = Orientation::Rev;
         }
         Some(s)
-    } else { None };
+    } else {
+        None
+    };
 
     // Merge forward + (transposed) reverse states.
     let mut all_exons: Vec<Exon> = Vec::new();
@@ -131,23 +146,51 @@ pub fn run_single_partition(
 
     for state in [fwd_state, rev_state].into_iter().flatten() {
         all_exons.extend(state.exons);
-        for (k, v) in state.introns_to_score { *all_introns_to_score.entry(k).or_insert(0.0) += v; }
-        for (k, v) in state.introns_to_evidence { all_introns_to_evidence.entry(k).or_default().extend(v); }
-        for (k, v) in state.predicted_introns { *all_predicted_introns.entry(k).or_insert(0.0) += v; }
-        for (i, &v) in state.coding_scores.iter().enumerate() { all_coding_scores[i] += v; }
+        for (k, v) in state.introns_to_score {
+            *all_introns_to_score.entry(k).or_insert(0.0) += v;
+        }
+        for (k, v) in state.introns_to_evidence {
+            all_introns_to_evidence.entry(k).or_default().extend(v);
+        }
+        for (k, v) in state.predicted_introns {
+            *all_predicted_introns.entry(k).or_insert(0.0) += v;
+        }
+        for (i, &v) in state.coding_scores.iter().enumerate() {
+            all_coding_scores[i] += v;
+        }
         all_start_peaks.extend(state.start_peaks);
         all_end_peaks.extend(state.end_peaks);
-        for (i, &v) in state.fwd_intron_vec.iter().enumerate() { if i < all_fwd_intron_vec.len() { all_fwd_intron_vec[i] += v; } }
-        for (i, &v) in state.rev_intron_vec.iter().enumerate() { if i < all_rev_intron_vec.len() { all_rev_intron_vec[i] += v; } }
+        for (i, &v) in state.fwd_intron_vec.iter().enumerate() {
+            if i < all_fwd_intron_vec.len() {
+                all_fwd_intron_vec[i] += v;
+            }
+        }
+        for (i, &v) in state.rev_intron_vec.iter().enumerate() {
+            if i < all_rev_intron_vec.len() {
+                all_rev_intron_vec[i] += v;
+            }
+        }
     }
 
     // Base intergenic (for the low-support filter) + a start/stop-peak-augmented
     // copy (for the trellis).
-    let ig_base = populate_intergenic_scores(seq_len, &gene_pred_records, &ev_weights, &mask, params.intergenic_adjust);
+    let ig_base = populate_intergenic_scores(
+        seq_len,
+        &gene_pred_records,
+        &ev_weights,
+        &mask,
+        params.intergenic_adjust,
+    );
     let mut ig_scores = ig_base.clone();
     augment_intergenic_from_start_stop_peaks(
-        &mut ig_scores, &all_start_peaks, &all_end_peaks, &all_exons, &mask,
-        seq_len as u32, sum_pred_weights, 500,
+        &mut ig_scores,
+        &all_start_peaks,
+        &all_end_peaks,
+        &all_exons,
+        &mask,
+        seq_len as u32,
+        sum_pred_weights,
+        500,
     );
 
     let (acceptable, phased, intergenic_conns, frame_pairs) = build_acceptable_linkages();
@@ -179,8 +222,12 @@ pub fn run_single_partition(
     };
 
     generate_consensus_gene_predictions(
-        1, seq_len as u32, PredMode::Standard,
-        &mut consensus_params, &mut recursion_count, &mut output,
+        1,
+        seq_len as u32,
+        PredMode::Standard,
+        &mut consensus_params,
+        &mut recursion_count,
+        &mut output,
     )?;
 
     Ok(output)

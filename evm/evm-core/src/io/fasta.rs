@@ -1,7 +1,7 @@
 //! Streaming FASTA reader.
 
-use std::io::{self, BufRead};
 use anyhow::Result;
+use std::io::{self, BufRead};
 
 /// A single FASTA record.
 #[derive(Debug, Clone)]
@@ -38,12 +38,17 @@ impl<R: BufRead> FastaReader<R> {
         loop {
             line.clear();
             let n = reader.read_line(&mut line)?;
-            if n == 0 { return Ok(FastaReader { reader, next_header: None }); }
-            let trimmed = line.trim_end();
-            if trimmed.starts_with('>') {
+            if n == 0 {
                 return Ok(FastaReader {
                     reader,
-                    next_header: Some(trimmed[1..].to_string()),
+                    next_header: None,
+                });
+            }
+            let trimmed = line.trim_end();
+            if let Some(stripped) = trimmed.strip_prefix('>') {
+                return Ok(FastaReader {
+                    reader,
+                    next_header: Some(stripped.to_string()),
                 });
             }
         }
@@ -59,6 +64,7 @@ impl<R: BufRead> FastaReader<R> {
         Ok(out)
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Result<Option<FastaRecord>> {
         let header = match self.next_header.take() {
             Some(h) => h,
@@ -70,16 +76,25 @@ impl<R: BufRead> FastaReader<R> {
         loop {
             line.clear();
             let n = self.reader.read_line(&mut line)?;
-            if n == 0 { break; }
+            if n == 0 {
+                break;
+            }
             let trimmed = line.trim_end();
-            if trimmed.starts_with('>') {
-                self.next_header = Some(trimmed[1..].to_string());
+            if let Some(stripped) = trimmed.strip_prefix('>') {
+                self.next_header = Some(stripped.to_string());
                 break;
             }
             seq.push_str(trimmed.trim());
         }
-        let sequence: String = seq.bytes().map(|b| b.to_ascii_uppercase() as char).collect();
-        Ok(Some(FastaRecord { header, accession, sequence }))
+        let sequence: String = seq
+            .bytes()
+            .map(|b| b.to_ascii_uppercase() as char)
+            .collect();
+        Ok(Some(FastaRecord {
+            header,
+            accession,
+            sequence,
+        }))
     }
 }
 

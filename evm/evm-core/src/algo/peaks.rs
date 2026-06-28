@@ -11,7 +11,7 @@
 /// - Matches Perl exactly, including that the final in-progress window is NOT
 ///   emitted after the loop ends.
 pub fn analyze_peaks(
-    vector: &[f64],     // 1-indexed; index 0 is unused
+    vector: &[f64], // 1-indexed; index 0 is unused
     seq_len: usize,
     window_size: usize,
     threshold: f64,

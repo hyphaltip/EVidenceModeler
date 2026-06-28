@@ -86,7 +86,12 @@ mod tests {
 
     #[test]
     fn ev_class_round_trip() {
-        for s in &["PROTEIN", "TRANSCRIPT", "ABINITIO_PREDICTION", "OTHER_PREDICTION"] {
+        for s in &[
+            "PROTEIN",
+            "TRANSCRIPT",
+            "ABINITIO_PREDICTION",
+            "OTHER_PREDICTION",
+        ] {
             let cls = EvClass::from_str(s).unwrap();
             assert_eq!(cls.as_str(), *s);
         }

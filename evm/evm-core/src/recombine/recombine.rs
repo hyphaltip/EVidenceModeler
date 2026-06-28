@@ -2,12 +2,12 @@
 //!
 //! Mirrors the Perl `recombine_EVM_partial_outputs.pl` script.
 
+use crate::io::partitions::PartitionEntry;
+use crate::types::prediction::{PartitionPred, PredClass};
+use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, Write};
-use anyhow::{Context, Result};
-use crate::io::partitions::PartitionEntry;
-use crate::types::prediction::{PartitionPred, PredClass};
 
 /// Parse an EVM output file from a single partition, offsetting coordinates
 /// by `partition_lend - 1` to map them back to the full-contig space.
@@ -30,7 +30,9 @@ pub fn parse_and_add_predictions(
     let mut preds: Vec<PartitionPred> = Vec::new();
 
     let process = |text: &str, offset: u32, out: &mut Vec<PartitionPred>| {
-        if text.is_empty() { return; }
+        if text.is_empty() {
+            return;
+        }
         if let Some(pred) = process_prediction_text(text, offset) {
             out.push(pred);
         }
@@ -38,8 +40,12 @@ pub fn parse_and_add_predictions(
 
     for line in reader.lines() {
         let line = line?;
-        if line.starts_with("!!") { continue; }
-        if line.starts_with('#') && !line.contains("EVM") { continue; }
+        if line.starts_with("!!") {
+            continue;
+        }
+        if line.starts_with('#') && !line.contains("EVM") {
+            continue;
+        }
 
         if line.starts_with(|c: char| c.is_ascii_digit() || c == '#') {
             current_text.push_str(&line);
@@ -71,7 +77,10 @@ fn process_prediction_text(text: &str, partition_lend: u32) -> Option<PartitionP
 
     // First line is the header. Offset the coordspan at positional index 6.
     let header_line = lines_iter.next()?;
-    let mut header_parts: Vec<String> = header_line.split_whitespace().map(|s| s.to_string()).collect();
+    let mut header_parts: Vec<String> = header_line
+        .split_whitespace()
+        .map(|s| s.to_string())
+        .collect();
     if header_parts.len() > 6 {
         if let Some((l, r)) = header_parts[6].split_once('-') {
             if let (Ok(l), Ok(r)) = (l.parse::<u32>(), r.parse::<u32>()) {
@@ -102,7 +111,9 @@ fn process_prediction_text(text: &str, partition_lend: u32) -> Option<PartitionP
         }
     }
 
-    if all_coords.is_empty() { return None; }
+    if all_coords.is_empty() {
+        return None;
+    }
 
     let gene_lend = *all_coords.iter().min()?;
     let gene_rend = *all_coords.iter().max()?;
@@ -151,7 +162,8 @@ pub fn join_intronic_preds(mut preds: Vec<PartitionPred>) -> Vec<PartitionPred> 
         }
     }
 
-    preds.into_iter()
+    preds
+        .into_iter()
         .zip(encaps)
         .filter_map(|(p, enc)| if enc { None } else { Some(p) })
         .collect()
@@ -160,7 +172,9 @@ pub fn join_intronic_preds(mut preds: Vec<PartitionPred>) -> Vec<PartitionPred> 
 /// Dynamic-programming combination of predictions from multiple overlapping partitions.
 /// Selects the maximal set of non-overlapping complete genes.
 pub fn combine_predictions(mut preds: Vec<PartitionPred>) -> Vec<PartitionPred> {
-    if preds.is_empty() { return preds; }
+    if preds.is_empty() {
+        return preds;
+    }
     preds.sort_by_key(|p| p.lend);
     let n = preds.len();
 
@@ -185,7 +199,8 @@ pub fn combine_predictions(mut preds: Vec<PartitionPred>) -> Vec<PartitionPred> 
     }
 
     // Find highest-scoring end
-    let best_end = preds.iter()
+    let best_end = preds
+        .iter()
         .enumerate()
         .max_by_key(|(_, p)| p.path_score)
         .map(|(i, _)| i);
@@ -201,10 +216,7 @@ pub fn combine_predictions(mut preds: Vec<PartitionPred>) -> Vec<PartitionPred> 
 }
 
 /// Run recombination for all contigs listed in `entries`.
-pub fn recombine_outputs(
-    entries: &[PartitionEntry],
-    output_file_name: &str,
-) -> Result<()> {
+pub fn recombine_outputs(entries: &[PartitionEntry], output_file_name: &str) -> Result<()> {
     // Group entries by base_dir
     let mut base_to_partitions: HashMap<String, Vec<(String, u32)>> = HashMap::new();
     for entry in entries {
@@ -234,18 +246,18 @@ pub fn recombine_outputs(
 
         let final_preds = combine_predictions(all_preds);
         let out_path = format!("{}/{}", base_dir, output_file_name);
-        let mut out = fs::File::create(&out_path)
-            .with_context(|| format!("Cannot create {}", out_path))?;
+        let mut out =
+            fs::File::create(&out_path).with_context(|| format!("Cannot create {}", out_path))?;
 
         log::debug!("Writing combined output to {}", out_path);
         // Perl prints "$pred_text\n" — pred.text already ends in '\n', so the
         // extra newline yields a blank line separating predictions (which
         // EVM_to_GFF3 relies on to delimit gene models).
         for pred in &final_preds {
-            write!(out, "{}\n", pred.text)?;
+            writeln!(out, "{}", pred.text)?;
             for nested in &pred.intronic_preds {
                 writeln!(out, "!! Intron-containing prediction")?;
-                write!(out, "{}\n", nested.text)?;
+                writeln!(out, "{}", nested.text)?;
             }
         }
     }
@@ -258,9 +270,17 @@ fn extract_partition_lend(pdir: &str) -> Option<u32> {
     // themselves contain '-' or '_').
     let name = std::path::Path::new(pdir).file_name()?.to_str()?;
     let (head, rend) = name.rsplit_once('-')?;
-    if rend.is_empty() || !rend.chars().all(|c| c.is_ascii_digit()) { return None; }
-    let lend: String = head.chars().rev().take_while(|c| c.is_ascii_digit()).collect();
-    if lend.is_empty() { return None; }
+    if rend.is_empty() || !rend.chars().all(|c| c.is_ascii_digit()) {
+        return None;
+    }
+    let lend: String = head
+        .chars()
+        .rev()
+        .take_while(|c| c.is_ascii_digit())
+        .collect();
+    if lend.is_empty() {
+        return None;
+    }
     lend.chars().rev().collect::<String>().parse().ok()
 }
 
@@ -271,10 +291,16 @@ mod tests {
     #[test]
     fn extract_partition_lend_matches_perl_regex() {
         // /(\d+)-(\d+)$/ → lend is the first capture
-        assert_eq!(extract_partition_lend("partitions/Contig1/Contig1_20001-50000"), Some(20001));
+        assert_eq!(
+            extract_partition_lend("partitions/Contig1/Contig1_20001-50000"),
+            Some(20001)
+        );
         assert_eq!(extract_partition_lend("Contig1_1-30000"), Some(1));
         // accession containing '-' / '_' must not confuse the extractor
-        assert_eq!(extract_partition_lend("a/scaf-2_b/scaf-2_b_40001-63304"), Some(40001));
+        assert_eq!(
+            extract_partition_lend("a/scaf-2_b/scaf-2_b_40001-63304"),
+            Some(40001)
+        );
     }
 
     #[test]

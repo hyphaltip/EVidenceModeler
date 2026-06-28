@@ -2,15 +2,18 @@
 //!
 //! Replaces EvmUtils/gff3_file_to_proteins.pl
 
-use std::fs;
-use std::io::Write;
 use anyhow::Result;
 use clap::Parser;
+use std::fs;
+use std::io::Write;
 
 use evm_core::gff3_convert::gff3_to_proteins::{extract_sequences, SeqType};
 
 #[derive(Parser, Debug)]
-#[command(name = "gff3_file_to_proteins", about = "Extract protein/CDS/cDNA from GFF3")]
+#[command(
+    name = "gff3_file_to_proteins",
+    about = "Extract protein/CDS/cDNA from GFF3"
+)]
 struct Cli {
     /// GFF3 file with gene models
     #[arg(long, short = 'g')]

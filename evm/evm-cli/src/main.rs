@@ -2,22 +2,22 @@
 //!
 //! Drop-in replacement for the `EVidenceModeler` Perl script.
 
-use std::fs;
-use std::io::Write;
-use std::path::Path;
 use anyhow::Result;
 use clap::Parser;
 use log::{info, warn};
 use rayon::prelude::*;
+use std::fs;
+use std::io::Write;
+use std::path::Path;
 
+use evm_core::gff3_convert::evm_to_gff3::convert_all_to_gff3;
+use evm_core::gff3_convert::gff3_to_bed::gff3_to_bed;
+use evm_core::gff3_convert::gff3_to_proteins::{extract_sequences, SeqType};
 use evm_core::io::partitions::read_partitions_file;
 use evm_core::io::weights::read_weights_file;
 use evm_core::partition::partition::{run_partition, InputFile};
-use evm_core::recombine::recombine::recombine_outputs;
-use evm_core::gff3_convert::evm_to_gff3::convert_all_to_gff3;
-use evm_core::gff3_convert::gff3_to_proteins::{extract_sequences, SeqType};
-use evm_core::gff3_convert::gff3_to_bed::gff3_to_bed;
 use evm_core::pipeline::{run_single_partition, SinglePartitionParams};
+use evm_core::recombine::recombine::recombine_outputs;
 
 const VERSION: &str = "EVidenceModeler-v2.1.0-rust";
 
@@ -168,7 +168,10 @@ fn main() -> Result<()> {
 
     let genome_path = &cli.genome;
     let genome_basename = Path::new(genome_path)
-        .file_name().and_then(|n| n.to_str()).unwrap_or("genome.fasta").to_string();
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("genome.fasta")
+        .to_string();
 
     let partition_dir = format!("{}.partitions", sample_id);
     let partition_listing = format!("{}.partitions.listing", sample_id);
@@ -177,9 +180,7 @@ fn main() -> Result<()> {
     let partition_ckpt = format!("{}/partition_inputs.ok", checkpts_dir);
     if !Path::new(&partition_ckpt).exists() {
         info!("Partitioning inputs...");
-        let mut input_files = vec![
-            InputFile::new("gene_predictions", &cli.gene_predictions),
-        ];
+        let mut input_files = vec![InputFile::new("gene_predictions", &cli.gene_predictions)];
         if let Some(p) = &cli.protein_alignments {
             input_files.push(InputFile::new("protein_alignments", p));
         }
@@ -191,8 +192,13 @@ fn main() -> Result<()> {
         }
 
         run_partition(
-            &partition_dir, genome_path, &input_files, &genome_basename,
-            segment_size, overlap_size, &partition_listing,
+            &partition_dir,
+            genome_path,
+            &input_files,
+            &genome_basename,
+            segment_size,
+            overlap_size,
+            &partition_listing,
         )?;
         fs::write(&partition_ckpt, "")?;
         info!("Partitioning complete.");
@@ -207,10 +213,12 @@ fn main() -> Result<()> {
     if !Path::new(&evm_ckpt).exists() {
         info!("Running EVM on {} partitions...", entries.len());
         let _weights = read_weights_file(&cli.weights)?;
-        let _stop_codons_parsed = evm_core::algo::splice_sites::parse_stop_codons(&cli.stop_codons)?;
+        let _stop_codons_parsed =
+            evm_core::algo::splice_sites::parse_stop_codons(&cli.stop_codons)?;
 
         // Build list of per-partition work items
-        let work_items: Vec<_> = entries.iter()
+        let work_items: Vec<_> = entries
+            .iter()
             .map(|e| {
                 let data_dir = if e.is_partitioned {
                     e.partition_dir.clone().unwrap_or(e.base_dir.clone())
@@ -221,18 +229,30 @@ fn main() -> Result<()> {
             })
             .collect();
 
-        let results: Vec<Result<()>> = work_items.par_iter().map(|(acc, data_dir)| {
-            run_evm_on_partition(
-                acc, data_dir, &genome_basename, &cli.gene_predictions,
-                cli.protein_alignments.as_deref(),
-                cli.transcript_alignments.as_deref(),
-                &cli.weights, &cli.stop_codons,
-                cli.min_intron_length, forward_only, reverse_only,
-                cli.report_elm, cli.search_long_introns,
-                cli.re_search_intergenic, cli.terminal_intergenic_re_search,
-                cli.intergenic_adjust, cli.trellis_search_limit.unwrap_or(500),
-            )
-        }).collect();
+        let results: Vec<Result<()>> = work_items
+            .par_iter()
+            .map(|(acc, data_dir)| {
+                run_evm_on_partition(
+                    acc,
+                    data_dir,
+                    &genome_basename,
+                    &cli.gene_predictions,
+                    cli.protein_alignments.as_deref(),
+                    cli.transcript_alignments.as_deref(),
+                    &cli.weights,
+                    &cli.stop_codons,
+                    cli.min_intron_length,
+                    forward_only,
+                    reverse_only,
+                    cli.report_elm,
+                    cli.search_long_introns,
+                    cli.re_search_intergenic,
+                    cli.terminal_intergenic_re_search,
+                    cli.intergenic_adjust,
+                    cli.trellis_search_limit.unwrap_or(500),
+                )
+            })
+            .collect();
 
         let mut had_error = false;
         for r in results {
@@ -355,12 +375,34 @@ fn run_evm_on_partition(
 
     // Resolve the per-partition copies of each input file.
     let genome_path = format!("{}/{}", data_dir, genome_basename);
-    let gene_pred_path = format!("{}/{}", data_dir,
-        Path::new(gene_pred_global).file_name().and_then(|n| n.to_str()).unwrap_or(""));
-    let protein_path = protein_global.map(|p| format!("{}/{}", data_dir,
-        Path::new(p).file_name().and_then(|n| n.to_str()).unwrap_or("")));
-    let transcript_path = transcript_global.map(|p| format!("{}/{}", data_dir,
-        Path::new(p).file_name().and_then(|n| n.to_str()).unwrap_or("")));
+    let gene_pred_path = format!(
+        "{}/{}",
+        data_dir,
+        Path::new(gene_pred_global)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+    );
+    let protein_path = protein_global.map(|p| {
+        format!(
+            "{}/{}",
+            data_dir,
+            Path::new(p)
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("")
+        )
+    });
+    let transcript_path = transcript_global.map(|p| {
+        format!(
+            "{}/{}",
+            data_dir,
+            Path::new(p)
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("")
+        )
+    });
 
     let params = SinglePartitionParams {
         stop_codons: stop_codons_str.to_string(),

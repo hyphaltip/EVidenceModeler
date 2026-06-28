@@ -1,8 +1,8 @@
 //! Intron scoring and intron-vector population.
 
-use std::collections::HashMap;
-use crate::types::genome::{FeatureVec, MaskVec, FEAT_DONOR, FEAT_ACCEPTOR};
 use crate::types::evidence::EvClass;
+use crate::types::genome::{FeatureVec, MaskVec, FEAT_ACCEPTOR, FEAT_DONOR};
+use std::collections::HashMap;
 
 /// Key for an intron: "end5_end3" stored in forward genomic coordinates.
 pub type IntronKey = String;
@@ -23,12 +23,13 @@ pub type IntronVec = Vec<f64>;
 ///
 /// `coords_list` should already be sorted ascending by end5.
 /// Intron coordinates are determined from consecutive exon boundaries.
+#[allow(clippy::too_many_arguments)]
 pub fn add_introns(
     accession: &str,
     coords_list: &[(u32, u32)], // (end5, end3) in forward-strand reference coords
     genomic_strand: char,
     weight: f64,
-    intron_type: &str,   // ev_type string
+    intron_type: &str, // ev_type string
     intron_ev_class: &EvClass,
     min_intron_length: u32,
     genome_features: &FeatureVec,
@@ -49,7 +50,9 @@ pub fn add_introns(
         if next_end5 < first_end3 {
             log::warn!(
                 "ERROR adding intron for {}: next_end5 {} < first_end3 {}",
-                accession, next_end5, first_end3
+                accession,
+                next_end5,
+                first_end3
             );
             continue;
         }
@@ -63,7 +66,11 @@ pub fn add_introns(
         }
         let intron_length = potential_acceptor - potential_donor + 1;
         if intron_length < min_intron_length {
-            log::warn!("Intron length ({}) < min ({})", intron_length, min_intron_length);
+            log::warn!(
+                "Intron length ({}) < min ({})",
+                intron_length,
+                min_intron_length
+            );
             continue;
         }
 
@@ -108,7 +115,9 @@ pub fn add_introns(
 /// Parse intron key back to (end5, end3) coordinates.
 pub fn intron_key_to_span(key: &str) -> Option<(u32, u32)> {
     let parts: Vec<&str> = key.split('_').collect();
-    if parts.len() != 2 { return None; }
+    if parts.len() != 2 {
+        return None;
+    }
     let end5: u32 = parts[0].parse().ok()?;
     let end3: u32 = parts[1].parse().ok()?;
     Some((end5, end3))
@@ -131,7 +140,11 @@ pub fn intron_key_to_intron_span(key: &str) -> Option<(u32, u32)> {
 /// Determine strand of an intron from its key (end5 < end3 → '+').
 pub fn intron_key_strand(key: &str) -> char {
     if let Some((e5, e3)) = intron_key_to_span(key) {
-        if e5 < e3 { '+' } else { '-' }
+        if e5 < e3 {
+            '+'
+        } else {
+            '-'
+        }
     } else {
         '+'
     }
@@ -155,16 +168,24 @@ pub fn populate_intron_vectors(
             None => continue,
         };
         let strand = if end5 < end3 { '+' } else { '-' };
-        let (lend, rend) = if end5 < end3 { (end5, end3) } else { (end3, end5) };
+        let (lend, rend) = if end5 < end3 {
+            (end5, end3)
+        } else {
+            (end3, end5)
+        };
 
         // Compute adjusted length excluding masked positions
-        let adj_len: f64 = (lend..=rend)
-            .filter(|&i| !mask.get(i as usize))
-            .count() as f64;
-        if adj_len <= 0.0 { continue; }
+        let adj_len: f64 = (lend..=rend).filter(|&i| !mask.get(i as usize)).count() as f64;
+        if adj_len <= 0.0 {
+            continue;
+        }
 
         let score_per_bp = score / adj_len;
-        let vec = if strand == '+' { &mut fwd_vec } else { &mut rev_vec };
+        let vec = if strand == '+' {
+            &mut fwd_vec
+        } else {
+            &mut rev_vec
+        };
         for i in lend..=rend {
             if !mask.get(i as usize) {
                 vec[i as usize] += score_per_bp;
@@ -200,14 +221,22 @@ mod tests {
         let mask = MaskVec::new(64);
         let (fwd, rev) = populate_intron_vectors(&predicted, &mask, 50);
 
+        #[allow(clippy::needless_range_loop)]
         for i in 10..=19 {
-            assert!((fwd[i] - 5.0).abs() < 1e-9, "base {i} expected 5.0, got {}", fwd[i]);
+            assert!(
+                (fwd[i] - 5.0).abs() < 1e-9,
+                "base {i} expected 5.0, got {}",
+                fwd[i]
+            );
         }
         assert_eq!(fwd[20], 0.0, "raw acceptor base 20 must stay zero");
         assert_eq!(fwd[9], 0.0);
         // Total conserved == the intron score.
         let total: f64 = fwd.iter().sum();
         assert!((total - 50.0).abs() < 1e-9, "total {total} != 50.0");
-        assert!(rev.iter().all(|&v| v == 0.0), "reverse vector must stay zero");
+        assert!(
+            rev.iter().all(|&v| v == 0.0),
+            "reverse vector must stay zero"
+        );
     }
 }

@@ -1,11 +1,11 @@
 //! Input partitioning — split genome + GFF3 files into per-contig and per-segment chunks.
 
+use crate::io::fasta::{read_fasta_file, FastaRecord};
+use crate::io::partitions::{write_partitions, PartitionEntry};
+use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, Write};
-use anyhow::{Context, Result};
-use crate::io::fasta::{FastaRecord, read_fasta_file};
-use crate::io::partitions::{PartitionEntry, write_partitions};
 
 /// Describe one input file to be partitioned.
 #[derive(Debug, Clone)]
@@ -22,7 +22,11 @@ impl InputFile {
             .and_then(|n| n.to_str())
             .unwrap_or(path)
             .to_string();
-        InputFile { file_type: file_type.to_string(), path: path.to_string(), basename }
+        InputFile {
+            file_type: file_type.to_string(),
+            path: path.to_string(),
+            basename,
+        }
     }
 }
 
@@ -35,9 +39,13 @@ pub fn get_range_list(seq_len: u32, segment_size: u32, overlap_size: u32) -> Vec
     let mut range_lend: u32 = 1;
 
     loop {
-        if range_lend >= seq_len.saturating_sub(overlap_size) + 1 { break; }
+        if range_lend > seq_len.saturating_sub(overlap_size) {
+            break;
+        }
         let mut range_rend = range_lend + segment_size - 1;
-        if range_rend > seq_len { range_rend = seq_len; }
+        if range_rend > seq_len {
+            range_rend = seq_len;
+        }
         ranges.push((range_lend, range_rend));
         range_lend += segment_size - overlap_size;
     }
@@ -51,27 +59,32 @@ pub fn get_range_list(seq_len: u32, segment_size: u32, overlap_size: u32) -> Vec
 }
 
 /// Partition all input GFF3 files by contig id, writing per-contig sub-files.
-pub fn partition_files_based_on_contig(
-    partition_dir: &str,
-    files: &[InputFile],
-) -> Result<()> {
+pub fn partition_files_based_on_contig(partition_dir: &str, files: &[InputFile]) -> Result<()> {
     for input in files {
         let mut contig_handles: HashMap<String, Box<dyn Write>> = HashMap::new();
-        let f = fs::File::open(&input.path)
-            .with_context(|| format!("Cannot open {}", input.path))?;
+        let f =
+            fs::File::open(&input.path).with_context(|| format!("Cannot open {}", input.path))?;
         let reader = std::io::BufReader::new(f);
 
         for line in reader.lines() {
             let line = line?;
-            if line.is_empty() || line.starts_with('#') { continue; }
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
             let contig_id = line.split('\t').next().unwrap_or("").to_string();
-            let contig_adj: String = contig_id.chars()
-                .map(|c| if c.is_alphanumeric() || c == '_' { c } else { '_' })
+            let contig_adj: String = contig_id
+                .chars()
+                .map(|c| {
+                    if c.is_alphanumeric() || c == '_' {
+                        c
+                    } else {
+                        '_'
+                    }
+                })
                 .collect();
             let dir = format!("{}/{}", partition_dir, contig_adj);
             if !std::path::Path::new(&dir).exists() {
-                fs::create_dir_all(&dir)
-                    .with_context(|| format!("Cannot create dir {}", dir))?;
+                fs::create_dir_all(&dir).with_context(|| format!("Cannot create dir {}", dir))?;
             }
             let fpath = format!("{}/{}", dir, input.basename);
             let handle = contig_handles.entry(contig_adj).or_insert_with(|| {
@@ -99,28 +112,39 @@ pub fn partition_gff3_range(
     adjust_to_one: bool,
     output_path: &str,
 ) -> Result<()> {
-    let f = fs::File::open(input_path)
-        .with_context(|| format!("Cannot open {}", input_path))?;
-    let mut out = fs::File::create(output_path)
-        .with_context(|| format!("Cannot create {}", output_path))?;
+    let f = fs::File::open(input_path).with_context(|| format!("Cannot open {}", input_path))?;
+    let mut out =
+        fs::File::create(output_path).with_context(|| format!("Cannot create {}", output_path))?;
 
     let reader = std::io::BufReader::new(f);
-    let offset: i64 = if adjust_to_one { -(range_lend as i64) + 1 } else { 0 };
+    let offset: i64 = if adjust_to_one {
+        -(range_lend as i64) + 1
+    } else {
+        0
+    };
 
     for line in reader.lines() {
         let line = line?;
-        if line.is_empty() || line.starts_with('#') { continue; }
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
         let cols: Vec<&str> = line.splitn(9, '\t').collect();
-        if cols.len() < 5 { continue; }
-        if cols[0] != accession { continue; }
+        if cols.len() < 5 {
+            continue;
+        }
+        if cols[0] != accession {
+            continue;
+        }
         let start: u32 = cols[3].parse().unwrap_or(0);
         let end: u32 = cols[4].parse().unwrap_or(0);
         // Keep only features within [range_lend, range_rend]
-        if start < range_lend || end > range_rend { continue; }
+        if start < range_lend || end > range_rend {
+            continue;
+        }
 
         if adjust_to_one {
             let new_start = (start as i64 + offset) as u32;
-            let new_end   = (end as i64 + offset) as u32;
+            let new_end = (end as i64 + offset) as u32;
             let mut new_cols: Vec<String> = cols.iter().map(|s| s.to_string()).collect();
             new_cols[3] = new_start.to_string();
             new_cols[4] = new_end.to_string();
@@ -142,10 +166,14 @@ pub fn write_genome_partition(
     let seq = &record.sequence;
     let start = (range_lend - 1) as usize;
     let end = range_rend as usize;
-    let subseq = if end <= seq.len() { &seq[start..end] } else { &seq[start..] };
+    let subseq = if end <= seq.len() {
+        &seq[start..end]
+    } else {
+        &seq[start..]
+    };
 
-    let mut out = fs::File::create(output_path)
-        .with_context(|| format!("Cannot create {}", output_path))?;
+    let mut out =
+        fs::File::create(output_path).with_context(|| format!("Cannot create {}", output_path))?;
     writeln!(out, ">{}", record.accession)?;
     for chunk in subseq.as_bytes().chunks(60) {
         writeln!(out, "{}", std::str::from_utf8(chunk).unwrap())?;
@@ -187,8 +215,16 @@ pub fn run_partition(
 
     for record in &fasta_records {
         let seq_len = record.sequence.len() as u32;
-        let acc_adj: String = record.accession.chars()
-            .map(|c| if c.is_alphanumeric() || c == '_' { c } else { '_' })
+        let acc_adj: String = record
+            .accession
+            .chars()
+            .map(|c| {
+                if c.is_alphanumeric() || c == '_' {
+                    c
+                } else {
+                    '_'
+                }
+            })
             .collect();
         let acc_dir = format!("{}/{}", partition_dir, acc_adj);
         if !std::path::Path::new(&acc_dir).exists() {
@@ -234,7 +270,9 @@ pub fn run_partition(
                 if !std::path::Path::new(&ckpt).exists() {
                     // Write genome partition
                     write_genome_partition(
-                        record, lend, rend,
+                        record,
+                        lend,
+                        rend,
                         &format!("{}/{}", part_dir, genome_basename),
                     )?;
                     // Partition each GFF3 input file

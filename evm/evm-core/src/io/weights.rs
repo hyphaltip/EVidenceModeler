@@ -5,9 +5,9 @@
 //!   ABINITIO_PREDICTION  genscan  5
 //!   # comment lines are ignored
 
-use std::io::BufRead;
-use anyhow::Result;
 use crate::types::evidence::{EvClass, EvEntry, EvWeightMap};
+use anyhow::Result;
+use std::io::BufRead;
 
 /// Parse a weights file from any `BufRead` and return an `EvWeightMap`.
 pub fn parse_weights<R: BufRead>(reader: R) -> Result<EvWeightMap> {
@@ -15,7 +15,9 @@ pub fn parse_weights<R: BufRead>(reader: R) -> Result<EvWeightMap> {
     for line in reader.lines() {
         let line = line?;
         let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') { continue; }
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
         let parts: Vec<&str> = trimmed.split_whitespace().collect();
         if parts.len() < 3 {
             anyhow::bail!("Weights line has fewer than 3 columns: {}", trimmed);
@@ -23,7 +25,8 @@ pub fn parse_weights<R: BufRead>(reader: R) -> Result<EvWeightMap> {
         let ev_class = EvClass::from_str(parts[0])
             .ok_or_else(|| anyhow::anyhow!("Unknown evidence class: {}", parts[0]))?;
         let ev_type = parts[1].to_string();
-        let weight: f64 = parts[2].parse()
+        let weight: f64 = parts[2]
+            .parse()
             .map_err(|_| anyhow::anyhow!("Non-numeric weight for {}: {}", ev_type, parts[2]))?;
         map.insert(ev_type, EvEntry { ev_class, weight });
     }
