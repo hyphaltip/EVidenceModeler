@@ -1,5 +1,8 @@
-test: 
+test:
 	./runMe.sh
+
+test_rust:
+	./runMe.rust.sh
 
 all: test test_docker test_singularity
 
