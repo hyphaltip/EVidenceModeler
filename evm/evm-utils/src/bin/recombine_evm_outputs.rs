@@ -15,7 +15,7 @@ use evm_core::recombine::recombine::recombine_outputs;
 )]
 struct Cli {
     /// Partitions listing file
-    #[arg(long)]
+    #[arg(long = "partitions")]
     partitions_list: String,
 
     /// EVM output filename within each partition dir (default: evm.out)

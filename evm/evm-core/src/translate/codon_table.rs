@@ -185,10 +185,11 @@ mod tests {
         // ATG GGC TTT TAA
         let cds = b"ATGGGCTTTAA";
         let prot = translate(cds, &[]);
-        // ATG=M, GGC=G, TTT=F, TAA=* (stop, not included)
-        // Actually "ATGGGCTTTAA" is 11 chars: ATG GGC TTT AA -> incomplete last codon
+        // ATG=M, GGC=G, TTT=F; 11 chars => last codon AA is incomplete -> ignored
+        assert_eq!(prot, "MGF");
         let cds2 = b"ATGGGCTTTTAA";
         let prot2 = translate(cds2, &[]);
+        // ATG=M, GGC=G, TTT=F, TAA=* (stop, not included when in stop_codons list)
         assert_eq!(prot2, "MGF*");
     }
 }

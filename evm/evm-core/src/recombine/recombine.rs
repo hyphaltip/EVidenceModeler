@@ -304,6 +304,58 @@ mod tests {
     }
 
     #[test]
+    fn join_intronic_preds_nests_encapsulated_predictions() {
+        // Outer gene spans 100-1000; inner gene sits at 400-500 fully inside.
+        let outer = PartitionPred {
+            lend: 100,
+            rend: 1000,
+            class: PredClass::Complete,
+            text: "# outer\n100\t200\tinitial+\t1\t1\t\n201\t300\tINTRON\t\t\t\n301\t1000\tterminal+\t1\t3\t\n".to_string(),
+            length: 901,
+            path_score: 901,
+            prev_link: None,
+            intronic_preds: Vec::new(),
+            encaps: false,
+        };
+        let inner = PartitionPred {
+            lend: 400,
+            rend: 500,
+            class: PredClass::Complete,
+            text: "# inner\n400\t500\tsingle+\t1\t3\t\n".to_string(),
+            length: 101,
+            path_score: 101,
+            prev_link: None,
+            intronic_preds: Vec::new(),
+            encaps: false,
+        };
+        let non_overlap = PartitionPred {
+            lend: 1100,
+            rend: 1200,
+            class: PredClass::Complete,
+            text: "# non-overlap\n1100\t1200\tsingle+\t1\t3\t\n".to_string(),
+            length: 101,
+            path_score: 101,
+            prev_link: None,
+            intronic_preds: Vec::new(),
+            encaps: false,
+        };
+
+        let joined = join_intronic_preds(vec![outer, inner, non_overlap]);
+        // Inner should be removed from top level and nested under outer.
+        assert_eq!(joined.len(), 2, "outer + non_overlap should remain at top level");
+        assert_eq!(joined[0].lend, 100);
+        assert_eq!(joined[0].rend, 1000);
+        assert_eq!(joined[0].intronic_preds.len(), 1, "inner should be nested in outer");
+        assert_eq!(joined[0].intronic_preds[0].lend, 400);
+        assert_eq!(joined[0].intronic_preds[0].rend, 500);
+        // Outer length/path_score should absorb inner's contribution.
+        assert_eq!(joined[0].length, 901 + 101);
+        assert_eq!(joined[0].path_score, 901 + 101);
+        assert_eq!(joined[1].lend, 1100);
+        assert_eq!(joined[1].rend, 1200);
+    }
+
+    #[test]
     fn process_prediction_offsets_coords_and_keeps_type_column() {
         // partition_lend = 20001 → offset 20000 added to header coordspan (token 6)
         // and to the first two tab columns of each data row. The exon-type column

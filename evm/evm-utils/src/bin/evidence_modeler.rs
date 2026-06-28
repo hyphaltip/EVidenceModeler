@@ -43,7 +43,7 @@ struct Cli {
     stop_codons: String,
 
     /// Minimum intron length (default: 20)
-    #[arg(long, default_value_t = 20)]
+    #[arg(long = "min_intron_length", default_value_t = 20)]
     min_intron_length: u32,
 
     /// Forward strand only
@@ -63,7 +63,7 @@ struct Cli {
     intergenic_adjust: f64,
 
     /// Minimum intergenic size for terminal region re-search
-    #[arg(long, default_value_t = 10000)]
+    #[arg(long = "terminal_intergenic_re_search", default_value_t = 10000)]
     terminal_intergenic_re_search: u32,
 
     #[arg(long, default_value_t = 500)]

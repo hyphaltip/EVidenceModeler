@@ -14,39 +14,43 @@ use evm_core::partition::partition::{run_partition, InputFile};
 )]
 struct Cli {
     /// Output directory for partitions
-    #[arg(long)]
+    #[arg(long = "partition_dir")]
     partition_dir: String,
 
     /// Genome FASTA
-    #[arg(long, short = 'g')]
+    #[arg(long = "genome", short = 'g')]
     genome: String,
 
     /// Gene predictions GFF3
-    #[arg(long, name = "gene_predictions")]
+    #[arg(long = "gene_predictions")]
     gene_predictions: Option<String>,
 
     /// Protein alignments GFF3
-    #[arg(long, name = "protein_alignments")]
+    #[arg(long = "protein_alignments")]
     protein_alignments: Option<String>,
 
     /// Transcript alignments GFF3
-    #[arg(long, name = "transcript_alignments")]
+    #[arg(long = "transcript_alignments")]
     transcript_alignments: Option<String>,
 
+    /// PASA terminal exons file (partitioned for downstream compatibility)
+    #[arg(long = "pasaTerminalExons")]
+    pasa_terminal_exons: Option<String>,
+
     /// Repeats GFF3
-    #[arg(long)]
+    #[arg(long = "repeats")]
     repeats: Option<String>,
 
     /// Segment size (nt)
-    #[arg(long, name = "segmentSize", default_value_t = 100000)]
+    #[arg(long = "segmentSize", default_value_t = 100000)]
     segment_size: u32,
 
     /// Overlap between segments (nt)
-    #[arg(long, name = "overlapSize", default_value_t = 10000)]
+    #[arg(long = "overlapSize", default_value_t = 10000)]
     overlap_size: u32,
 
     /// Output partitions listing file
-    #[arg(long, name = "partition_listing")]
+    #[arg(long = "partition_listing")]
     partition_listing: Option<String>,
 }
 
@@ -69,6 +73,9 @@ fn main() -> Result<()> {
     }
     if let Some(p) = &cli.transcript_alignments {
         input_files.push(InputFile::new("transcript_alignments", p));
+    }
+    if let Some(p) = &cli.pasa_terminal_exons {
+        input_files.push(InputFile::new("pasaTerminalExons", p));
     }
     if let Some(p) = &cli.repeats {
         input_files.push(InputFile::new("repeats", p));

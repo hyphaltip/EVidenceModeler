@@ -25,8 +25,12 @@ fn fixture(name: &str) -> PathBuf {
         .join(name)
 }
 
-fn tmp(name: &str) -> PathBuf {
-    std::env::temp_dir().join(format!("evm_golden_{}_{}", std::process::id(), name))
+fn tmp(prefix: &str) -> PathBuf {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+    let id = std::process::id();
+    let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+    std::env::temp_dir().join(format!("evm_golden_{}_{}_{}", id, n, prefix))
 }
 
 /// Parse a (possibly line-wrapped) FASTA into header → concatenated sequence.
@@ -118,6 +122,27 @@ fn check_sequences(seq_type: SeqType, fixture_name: &str) {
 #[test]
 fn gff3_to_proteins_matches_perl() {
     check_sequences(SeqType::Prot, "Contig1.perl.EVM.pep");
+}
+
+/// Verify that eliminated predictions are emitted with source `EVM_elm`.
+///
+/// The EVM output format marks eliminated models with
+/// ` *** ELIMINATED *** ` in the header; `EVM_to_GFF3.pl` sets the GFF3
+/// source column to `EVM_elm` for those models. This fixture exercises a
+/// file containing one regular and one eliminated prediction.
+#[test]
+fn evm_out_to_gff3_emits_eliminated_source() {
+    let out = tmp("evm.out.elm.gff3");
+    evm_output_to_gff3(
+        fixture("Contig1.with_elm.perl.evm.out").to_str().unwrap(),
+        "Contig1",
+        out.to_str().unwrap(),
+    )
+    .unwrap();
+    let got = fs::read_to_string(&out).unwrap();
+    let want = fs::read_to_string(fixture("Contig1.with_elm.perl.EVM.gff3")).unwrap();
+    assert_eq!(got, want, "GFF3 output differs for eliminated-model fixture");
+    let _ = fs::remove_file(&out);
 }
 
 #[test]

@@ -12,20 +12,22 @@ use evm_core::gff3_convert::gff3_to_proteins::{extract_sequences, SeqType};
 #[derive(Parser, Debug)]
 #[command(
     name = "gff3_file_to_proteins",
-    about = "Extract protein/CDS/cDNA from GFF3"
+    about = "Extract protein/CDS/cDNA from GFF3",
+    version
 )]
 struct Cli {
     /// GFF3 file with gene models
-    #[arg(long, short = 'g')]
     gff3: String,
 
     /// Genome FASTA
-    #[arg(long, short = 'f')]
     fasta: String,
 
-    /// Output type: prot, cds, or cdna
-    #[arg(long, short = 't', default_value = "prot")]
+    /// Output type: prot, cds, cdna, or gene (default: prot)
+    #[arg(default_value = "prot")]
     seqtype: String,
+
+    /// Upstream/downstream flank (accepted for Perl parity; currently ignored)
+    flank: Option<String>,
 
     /// Stop codon list (default: TAA,TGA,TAG)
     #[arg(long, default_value = "TAA,TGA,TAG")]
@@ -40,10 +42,14 @@ fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
     let cli = Cli::parse();
 
+    if cli.flank.is_some() {
+        log::warn!("flank argument is accepted for Perl parity but not yet implemented");
+    }
+
     let seq_type = match cli.seqtype.as_str() {
         "prot" | "protein" => SeqType::Prot,
         "cds" => SeqType::Cds,
-        "cdna" => SeqType::Cdna,
+        "cdna" | "gene" => SeqType::Cdna,
         other => anyhow::bail!("Unknown sequence type: {}. Use prot, cds, or cdna.", other),
     };
 
