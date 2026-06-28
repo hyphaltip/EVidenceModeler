@@ -11,18 +11,31 @@ original design sketch.
 
 ## 00b. SESSION HANDOFF (2026-06-28) — Phase C END-TO-END PARITY — START HERE
 
-**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 28/28
-(24 unit + 4 new golden integration).**
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 30/30
+(26 unit + 4 golden integration).**
 
-**Phase C is functionally DONE on the single-partition `testing/` dataset.** The
-full `EVidenceModeler` Rust orchestrator runs end-to-end and its outputs match the
-Perl golden:
+**Phase C is DONE on BOTH single-partition AND multi-partition `testing/Contig1`.**
+The full `EVidenceModeler` Rust orchestrator runs end-to-end and its outputs match
+the Perl golden in both modes:
 - `smalltest.EVM.gff3` — **byte-identical**.
 - `smalltest.EVM.bed` — **byte-identical**.
 - `smalltest.EVM.pep` / `.cds` — **identical per-record** (Perl emits FASTA records
   in hash order = non-deterministic; oracle sorts records by header. Headers AND
   sequences byte-exact).
 - `smalltest.partitions.listing` + all partitioned input files — byte-identical.
+
+**MULTI-PARTITION verified (commit 7125c88):** ran `--segmentSize 30000
+--overlapSize 10000` on Contig1 (63304 bp → 3 partitions: 1-30000, 20001-50000,
+40001-63304). Per-partition evm.out (83/92/65 lines) → recombined 169 lines / 11
+genes, identical to Perl golden; all four EVM outputs byte-identical (pep/cds modulo
+FASTA record order). Recombine/partition bugs fixed: (1) partition dir naming
+`_{lend}-{rend}` hyphen (Perl `${accession}_${lend}-${rend}`, recombine keys on
+`/(\d+)-(\d+)$/`); (2) `process_prediction_text` was DROPPING the exon-type column
+(`cols[2]`, e.g. `initial+`/`INTRON`) when rejoining rows → shifted every row left,
+emptied GFF3 — Perl overwrites only x[0]/x[1] and rejoins ALL columns; (3) header
+coordspan offset at whitespace token index 6 (was matching `S-ratio:`); (4) keep
+INTRON rows; (5) blank-line separator between preds; (6) `extract_partition_lend`
+mirrors `/(\d+)-(\d+)$/`. Added 2 recombine unit tests.
 
 ### What landed this session
 1. **CLI flag parity (C4):** `evm-cli` clap now uses Perl's exact long names
@@ -71,12 +84,15 @@ Rust end-to-end: `EVidenceModeler --sample_id smalltest --genome genome.fasta
 --weights ./weights.txt --gene_predictions … --segmentSize 100000 --overlapSize 10000`.
 
 ### What is NOT yet covered (next session)
-- **Multi-partition / multi-contig:** `testing/` is one contig, ONE partition (N).
-  Recombine DP (`recombine_EVM_partial_outputs.pl`: `join_intronic_preds` +
-  `combine_predictions`) and the partition-`lend` coordinate offset in
-  `EVM_to_GFF3.pl` (`+= partition_lend - 1`) are UNTESTED. Need a synthetic
-  genome > segmentSize with overlap, plus a contig that actually splits, to
-  exercise C1 windowing + C2 recombine. **Top next item.**
+- **Multi-partition: DONE** (commit 7125c88) for a single contig that splits into
+  3 partitions — recombine DP (`join_intronic_preds` + `combine_predictions`) and
+  the partition-`lend` offset are now exercised and byte-exact. STILL untested:
+  **multi-CONTIG** (>1 record in the genome FASTA — `concatenate_gff3_outputs`
+  ordering across contigs, and a case where `join_intronic_preds` actually nests
+  an intron-encapsulated pred — this dataset's combine path had no nesting). To
+  reproduce multi-partition golden: same stages as below but `--segmentSize 30000
+  --overlapSize 10000`; run `evidence_modeler.pl` in EACH `Contig1_*-*` partition
+  dir, then recombine + convert.
 - **Eliminated models** (`EVM_elm` source, `*** ELIMINATED ***`) and **5'/3'
   partial** GFF3 tags (`5_prime_partial=true`) — no fixture exercises them
   (this dataset has 0). The GFF3 converter does NOT yet emit the partial tags
