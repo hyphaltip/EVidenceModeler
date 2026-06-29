@@ -12,7 +12,7 @@ original design sketch.
 ## 00g. SESSION HANDOFF (2026-06-29, session 6) — START HERE
 
 **Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
-(27 unit + 8 golden integration). Committed as `f499461`.**
+(27 unit + 8 golden integration). Committed as `b0ff6c4`.**
 
 ### What landed this session
 1. **Critical fix: intergenic scoring includes ALL ab-initio predictors from
@@ -40,18 +40,28 @@ original design sketch.
    - 539 structural differences (mostly minor boundary/score diffs)
    - 38 Rust-only predictions, 37 Perl-only predictions
    - 9 partitions (6.5%) with zero differences
+6. **Root-caused remaining structural diffs.** Used `EVM_DUMP_DIR` to compare
+   intermediate vectors (`intergenic.bps`, `coding_vector`, `exon_list`,
+   `pred_fwd_intron_vec.dat`, `pred_rev_intron_vec.dat`). All 6 different-score
+   structural diffs were caused by `min_intron_length` mismatch: golden run used
+   `min_intron_length = 10`, but the comparison script used the Perl default of 20.
+   Short introns (length 10-19) were accepted by Perl golden but rejected by Rust.
+7. **Fixed `min_intron_length` in comparison script.** Changed from 20 to 10 to
+   match golden run parameters. This resolved all 6 different-score structural diffs
+   and improved exact match rate from 91.2% to 97.0%.
+   Results after fix:
+   - **97.0% exact matches** (6362/6561)
+   - 182 structural diffs (all same-score tie-breaking, expected)
+   - 0 different-score diffs (was 6 before fix)
+   - 38 perfect partitions (27.5%, was 9 before fix)
 
 ### What the next session must do
-1. **Investigate remaining 8.8% structural differences.** Most are minor
-   boundary or score differences in specific predictions. Use `EVM_DUMP_DIR` to
-   compare intermediate vectors (intergenic.bps, coding_vector, exon_list) and
-   identify the root cause.
-2. **Run full end-to-end `EVidenceModeler` orchestrator on real genome.** The
-   per-partition parity is 91.2%; the orchestrator's multi-contig path and
+1. **Run full end-to-end `EVidenceModeler` orchestrator on real genome.** The
+   per-partition parity is now 97.0%; the orchestrator's multi-contig path and
    recombine DP need to be exercised together on a real dataset.
-3. **funannotate EVM contract integration test.** Swap Rust `evidence_modeler`
+2. **funannotate EVM contract integration test.** Swap Rust `evidence_modeler`
    binary in for `evidence_modeler.pl` inside `funannotate-runEVM.py`.
-4. **CI / packaging (Phase F).** GitHub Actions: `cargo fmt --check`,
+3. **CI / packaging (Phase F).** GitHub Actions: `cargo fmt --check`,
    `cargo clippy -D warnings`, `cargo test`, golden integration tests.
 
 ---
