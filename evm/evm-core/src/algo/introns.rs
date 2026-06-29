@@ -2,19 +2,80 @@
 
 use crate::types::evidence::EvClass;
 use crate::types::genome::{FeatureVec, MaskVec, FEAT_ACCEPTOR, FEAT_DONOR};
-use std::collections::HashMap;
 
-/// Key for an intron: "end5_end3" stored in forward genomic coordinates.
-pub type IntronKey = String;
+/// Key for an intron: packed `(end5 << 32) | end3` in forward genomic coordinates.
+pub type IntronKey = u64;
 
-/// Score accumulated for each intron.
-pub type IntronScoreMap = HashMap<IntronKey, f64>;
+/// Pack two u32 coordinates into a single u64 key.
+#[inline]
+pub fn make_intron_key(end5: u32, end3: u32) -> IntronKey {
+    ((end5 as u64) << 32) | (end3 as u64)
+}
+
+/// Unpack an intron key back to (end5, end3).
+#[inline]
+pub fn unpack_intron_key(key: IntronKey) -> (u32, u32) {
+    ((key >> 32) as u32, key as u32)
+}
+
+/// Fast lookup table for intron scores, backed by a sorted array.
+///
+/// Typical intron score maps are small (~thousands of entries) and accessed
+/// millions of times during the trellis. A sorted `Vec` has better cache
+/// locality and avoids the hash/comparison overhead of a general-purpose map.
+#[derive(Clone, Debug)]
+pub struct IntronScoreMap {
+    pairs: Vec<(IntronKey, f64)>,
+}
+
+impl IntronScoreMap {
+    pub fn new() -> Self {
+        Self { pairs: Vec::new() }
+    }
+
+    pub fn with_capacity(cap: usize) -> Self {
+        Self {
+            pairs: Vec::with_capacity(cap),
+        }
+    }
+
+    pub fn from_hashmap(map: rustc_hash::FxHashMap<IntronKey, f64>) -> Self {
+        let mut pairs: Vec<(IntronKey, f64)> = map.into_iter().collect();
+        pairs.sort_unstable_by_key(|(k, _)| *k);
+        Self { pairs }
+    }
+
+    #[inline]
+    pub fn get(&self, key: &IntronKey) -> Option<&f64> {
+        match self.pairs.binary_search_by_key(key, |(k, _)| *k) {
+            Ok(idx) => Some(&self.pairs[idx].1),
+            Err(_) => None,
+        }
+    }
+
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.pairs.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.pairs.is_empty()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &(IntronKey, f64)> {
+        self.pairs.iter()
+    }
+}
 
 /// Evidence list for each intron: Vec<(accession, ev_type)>.
-pub type IntronEvidenceMap = HashMap<IntronKey, Vec<(String, String)>>;
+pub type IntronEvidenceMap = rustc_hash::FxHashMap<IntronKey, Vec<(String, String)>>;
 
 /// Introns contributed only by ab-initio predictors.
-pub type PredictedIntronMap = HashMap<IntronKey, f64>;
+pub type PredictedIntronMap = rustc_hash::FxHashMap<IntronKey, f64>;
+
+/// Mutable accumulator used while loading evidence; converted to `IntronScoreMap`
+/// (sorted array) before the trellis.
+pub type IntronScoreBuilder = rustc_hash::FxHashMap<IntronKey, f64>;
 
 /// Per-base intron score vectors.
 pub type IntronVec = Vec<f64>;
@@ -34,7 +95,7 @@ pub fn add_introns(
     min_intron_length: u32,
     genome_features: &FeatureVec,
     mask: &MaskVec,
-    introns_to_score: &mut IntronScoreMap,
+    introns_to_score: &mut IntronScoreBuilder,
     introns_to_evidence: &mut IntronEvidenceMap,
     predicted_introns: &mut PredictedIntronMap,
     genomic_seq_len: usize,
@@ -99,10 +160,10 @@ pub fn add_introns(
             (potential_donor, potential_acceptor)
         };
 
-        let key = format!("{}_{}", intron_end5, intron_end3);
-        *introns_to_score.entry(key.clone()).or_insert(0.0) += intron_score;
+        let key = make_intron_key(intron_end5, intron_end3);
+        *introns_to_score.entry(key).or_insert(0.0) += intron_score;
         introns_to_evidence
-            .entry(key.clone())
+            .entry(key)
             .or_default()
             .push((accession.to_string(), intron_type.to_string()));
 
@@ -113,14 +174,8 @@ pub fn add_introns(
 }
 
 /// Parse intron key back to (end5, end3) coordinates.
-pub fn intron_key_to_span(key: &str) -> Option<(u32, u32)> {
-    let parts: Vec<&str> = key.split('_').collect();
-    if parts.len() != 2 {
-        return None;
-    }
-    let end5: u32 = parts[0].parse().ok()?;
-    let end3: u32 = parts[1].parse().ok()?;
-    Some((end5, end3))
+pub fn intron_key_to_span(key: IntronKey) -> Option<(u32, u32)> {
+    Some(unpack_intron_key(key))
 }
 
 /// Perl `intron_key_to_intron_span`: parse the key and shift the acceptor base
@@ -128,8 +183,8 @@ pub fn intron_key_to_span(key: &str) -> Option<(u32, u32)> {
 /// for '-' returns (end5, end3+1). This is the span Perl uses both when
 /// populating the per-base predicted-intron vectors and in the filter offset
 /// loop, and differs from the raw key span by one base at the acceptor end.
-pub fn intron_key_to_intron_span(key: &str) -> Option<(u32, u32)> {
-    let (end5, end3) = intron_key_to_span(key)?;
+pub fn intron_key_to_intron_span(key: IntronKey) -> Option<(u32, u32)> {
+    let (end5, end3) = unpack_intron_key(key);
     if end5 < end3 {
         Some((end5, end3.saturating_sub(1))) // '+'
     } else {
@@ -138,15 +193,12 @@ pub fn intron_key_to_intron_span(key: &str) -> Option<(u32, u32)> {
 }
 
 /// Determine strand of an intron from its key (end5 < end3 → '+').
-pub fn intron_key_strand(key: &str) -> char {
-    if let Some((e5, e3)) = intron_key_to_span(key) {
-        if e5 < e3 {
-            '+'
-        } else {
-            '-'
-        }
-    } else {
+pub fn intron_key_strand(key: IntronKey) -> char {
+    let (e5, e3) = unpack_intron_key(key);
+    if e5 < e3 {
         '+'
+    } else {
+        '-'
     }
 }
 
@@ -163,7 +215,7 @@ pub fn populate_intron_vectors(
         // Perl distributes the score over the exon-adjacent intron span
         // (`intron_key_to_intron_span`), NOT the raw key span — this is one base
         // shorter at the acceptor end and is what the filter offset loop reads.
-        let (end5, end3) = match intron_key_to_intron_span(key) {
+        let (end5, end3) = match intron_key_to_intron_span(*key) {
             Some(v) => v,
             None => continue,
         };
@@ -204,8 +256,8 @@ mod tests {
     fn intron_key_to_intron_span_shifts_acceptor() {
         // Perl `intron_key_to_intron_span`: '+' (end5 < end3) drops one base at
         // the acceptor (end3-1); '-' (end5 > end3) adds one (end3+1).
-        assert_eq!(intron_key_to_intron_span("100_200"), Some((100, 199)));
-        assert_eq!(intron_key_to_intron_span("200_100"), Some((200, 101)));
+        assert_eq!(intron_key_to_intron_span(make_intron_key(100, 200)), Some((100, 199)));
+        assert_eq!(intron_key_to_intron_span(make_intron_key(200, 100)), Some((200, 101)));
     }
 
     #[test]
@@ -216,8 +268,8 @@ mod tests {
         // span (D..A). Build a single forward intron "10_20" with score 50.
         // The exon-adjacent span is 10..=19 (10 bases) → 5.0 per base, and base
         // 20 (the raw acceptor) must receive nothing.
-        let mut predicted: PredictedIntronMap = HashMap::new();
-        predicted.insert("10_20".to_string(), 50.0);
+        let mut predicted: PredictedIntronMap = PredictedIntronMap::default();
+        predicted.insert(make_intron_key(10, 20), 50.0);
         let mask = MaskVec::new(64);
         let (fwd, rev) = populate_intron_vectors(&predicted, &mask, 50);
 

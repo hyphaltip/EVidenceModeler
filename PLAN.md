@@ -9,6 +9,171 @@ original design sketch.
 
 ---
 
+## 00f. SESSION HANDOFF (2026-06-29, session 5) — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
+(27 unit + 8 golden integration).**
+
+### Current parity status
+- **Single-partition `evm.out`: DONE** — `testing/Contig1` byte-identical to Perl.
+- **Multi-partition recombine + convert: DONE** — `testing/Contig1` split into 3
+  partitions; `EVM.{gff3,bed,pep,cds}` match Perl.
+- **Multi-contig ordering: DONE** — synthetic 2-contig GFF3 ordering matches Perl.
+- **Strand flags: DONE** — `--forwardStrandOnly` / `--reverseStrandOnly` on Contig1.
+- **Eliminated models (`EVM_elm`): DONE** — dedicated fixture, byte-identical with
+  `--report_ELM`.
+- **Alternate stop codons: DONE** — dedicated `TGA`-only fixture.
+- **Utility flag parity: DONE** — `convert_EVM_outputs_to_GFF3`,
+  `recombine_evm_outputs`, `partition_evm_inputs`, `gff3_file_to_proteins`.
+- **Phase E optimization: DONE** — >10× wall-clock speedup on benchmark partition;
+  default release profile retained.
+
+### What the next session must do
+The remaining work is **validation at real-genome scale**, not algorithm porting:
+
+1. **Full end-to-end `EVidenceModeler` orchestrator on a real multi-contig,
+   multi-partition genome.**
+   - Target: `example/Rhodotorula_sphaerocarpa/EVM` (or the original genome/weights
+     inputs that produced it if they can be located).
+   - Run `EVidenceModeler` (Rust) with partitioning, then recombine + convert.
+   - Compare `*.EVM.{gff3,bed,pep,cds}`, `.partitions.listing`, and per-partition
+     `evm.out` files against Perl+ParaFly.
+   - This is the highest-priority gap: the orchestrator's multi-contig path and
+     the recombine DP have not been exercised together on a real dataset.
+
+2. **funannotate EVM contract integration test.**
+   - Swap the Rust `evidence_modeler` binary in for `evidence_modeler.pl` inside
+     `funannotate-runEVM.py` (set `EVM_HOME` to the Rust `evm-utils` binary dir).
+   - Run on a small funannotate test dataset and verify the wrapper produces
+     `evm.out.gff3` without argument errors.
+
+3. **Real intron-nesting end-to-end.**
+   - Find or construct a multi-partition dataset where one gene is fully enclosed
+     within another gene's intron, so `join_intronic_preds` nesting is exercised
+     end-to-end. The existing unit test covers the logic but not the combine path.
+
+4. **Ported-vs-retained utility inventory.**
+   - Audit `EvmUtils/misc/*.pl` and document which are ported, which can remain
+     Perl shims, and which are no longer needed.
+
+5. **CI / packaging (Phase F).**
+   - GitHub Actions: `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`,
+     and the golden integration tests.
+   - Update `testing/runMe*.sh` to use the Rust binaries; remove ParaFly submodule
+     once end-to-end parity is confirmed.
+   - Update `README.md` / `Changelog.txt` and version the binary.
+
+### Suggested first action next session
+Generate the **Perl+ParaFly golden for `Rhodotorula_sphaerocarpa`** (or the
+largest available real genome inputs). If the pre-partitioned `example/` tree is
+all that exists, reconstruct the original inputs or treat the partitioned dirs as
+the source of truth and compare Rust per-partition + recombine outputs to the
+existing `evm.out` files in each partition directory.
+
+---
+
+## 00e. SESSION HANDOFF (2026-06-29, session 4) — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
+(27 unit + 8 golden integration).**
+
+### What landed this session
+1. **Alternate stop-codons (`--stop_codons`) fixture and parity:** created the
+   `stopcodon` fixture (genome where TAA/TAG are not stops and TGA is the only
+   stop), generated Perl golden `Contig_stop.perl.{evm.out,EVM.gff3}`, and added
+   `golden_stopcodon.rs::alternate_stop_codon_tga_produces_gene`. Rust output is
+   byte-identical to Perl with `--stop_codons TGA`.
+2. **`evm-cli` orchestrator passes `--repeats` through to the partition driver:**
+   `SinglePartitionParams.repeats` is now wired from `cli.repeats` and the
+   per-partition input path is resolved relative to the partition data directory.
+3. **`evidence_modeler` shim funannotate contract compliance:**
+   - Accepts `--repeats|-r`, `--exec_dir`, `--stop_codons`, `--min_intron_length`,
+     `--terminal_intergenic_re_search`, `--forwardStrandOnly`, `--reverseStrandOnly`,
+     `--report_ELM`.
+   - Tolerates the two trailing positional args emitted by
+     `funannotate-runEVM.py` (`<evm.out> <evm.out.log>`) without requiring `-o`.
+4. **Completed the intron-key `String` → packed `u64` refactor** across
+   `introns.rs`, `prediction.rs`, `filter.rs`, `consensus.rs`, `trellis.rs`, and
+   `pipeline.rs`.
+5. **Phase E optimization — major breakthrough:**
+   - Added `evm/bench/bench_partition.py` (wall-clock + peak RSS on a selected
+     partition, fixed to use absolute paths).
+   - Replaced linkage `HashSet` lookups with fixed-size array tables
+     (`LinkageTables`) in `exon.rs`/`trellis.rs`.
+   - Cached sorted `lend`/`rend` coordinates on `Exon`.
+   - Switched the hot intron score map to a sorted-array wrapper
+     (`IntronScoreMap`) with binary-search `get`.
+   - **Key win:** changed `IntergenicScores` from a raw `Vec<f64>` to a struct
+     holding per-base scores plus a prefix-sum array, making
+     `calc_intergenic_score` O(1) instead of O(region length). This was the
+     dominant cost inside `are_compatible_exons` (the intergenic-connection
+     branch summed thousands of doubles per call).
+   - Benchmarks on `example/Rhodotorula_sphaerocarpa/EVM`:
+     - `scaffold_1_262149-1061113` (~799 kb): **~5.18 s → ~0.40 s mean**
+       (best ~0.23 s), RSS ~63 MB.
+     - `scaffold_6_1-1201726` (~1.2 Mb): **~0.76 s mean** (best ~0.36 s),
+       RSS ~95 MB.
+     - Wall-clock on the 799 kb partition improved **>10×** vs. the baseline.
+   - Tested `lto = "thin"` + `codegen-units = 1`: no consistent improvement and
+     much slower compile, so reverted to default release profile.
+
+### What remains
+- **Phase D (utility-script parity) — remaining standalone converters:**
+  `create_weights_file.pl`, `extract_complete_proteins.pl`, and the many
+  `EvmUtils/misc/*.pl` format adapters. Many `misc/` adapters can remain Perl
+  shims; document ported vs. retained.
+- **Real multi-contig dataset with intron-nesting:** `join_intronic_preds` logic
+  is unit-tested but not yet exercised by an end-to-end multi-partition dataset.
+- **Phase E (optimization) — essentially done for now:** `are_compatible_exons`
+  is no longer the bottleneck (after prefix sums it is ~16 % of cycles on the
+  profiled partition). The next biggest cost is `analyze_peaks` (~14 %), which
+  is already O(n); further wins are likely small. Remaining low-priority ideas:
+  profile-guided optimization only if needed, and `rayon` parallelism across
+  contigs/partitions in the orchestrator.
+
+---
+
+## 00d. SESSION HANDOFF (2026-06-28, session 3)
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 34/34
+(27 unit + 7 golden integration).**
+
+### What landed this session
+1. **Eliminated-model (`EVM_elm`) end-to-end parity:** created the `elm` fixture
+   (tiny genome with one strong gene and one short gene eliminated by the
+   coding-length filter), generated Perl golden `Contig_elm.perl.{evm.out,EVM.gff3}`,
+   and added `golden_elm.rs::single_partition_produces_eliminated_model`. Rust
+   `evm.out` and GFF3 are byte-identical to Perl when `--report_ELM` is enabled.
+2. **Fixed `--report_ELM` prediction-span parity:** the `!! Predictions spanning range`
+   line and tail-recursion boundaries now use the full prediction set (including
+   eliminated models), matching Perl `get_range_covered_by_predictions`.
+3. **`join_intronic_preds` nesting test:** added unit test verifying a gene fully
+   enclosed within another gene's intron is nested and absorbed into the outer
+   gene's length/path_score.
+4. **Phase D utility parity — main pipeline drivers:**
+   - Added `convert_EVM_outputs_to_GFF3` Rust binary (`evm-utils`) as a drop-in
+     for the Perl driver (accepts `--partitions`, `--output_file_name|-O`, `--genome`).
+   - `recombine_evm_outputs` now accepts Perl's `--output_file_name|-O` flag.
+   - `partition_evm_inputs` flag names fixed to match Perl (`partition_dir`,
+     `gene_predictions`, `segmentSize`, `overlapSize`, `partition_listing`, …) and
+     added accepted-for-parity `--pasaTerminalExons`.
+   - `gff3_file_to_proteins` now uses Perl-style positional args
+     `<gff3> <fasta> [seqtype] [flank]`.
+5. **Fixed remaining compiler warning** in `translate/codon_table.rs` and the
+   `golden_convert.rs` temp-file race.
+
+### What remains
+- **Phase D (utility-script parity) — remaining standalone converters:**
+  `create_weights_file.pl`, `extract_complete_proteins.pl`, and the many
+  `EvmUtils/misc/*.pl` format adapters. Many `misc/` adapters can remain Perl
+  shims; document ported vs. retained.
+- **Real multi-contig dataset with intron-nesting:** `join_intronic_preds` logic
+  is unit-tested but not yet exercised by an end-to-end multi-partition dataset.
+- **Alternate genetic code (`--stop_codons`) end-to-end:** no fixture yet.
+- **Phase E (optimization):** establish benchmark harness, profile, and optimize.
+
+---
+
 ## 00c. SESSION HANDOFF (2026-06-28, session 2) — START HERE
 
 **Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 31/31

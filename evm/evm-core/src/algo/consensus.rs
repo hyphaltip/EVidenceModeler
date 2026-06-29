@@ -3,14 +3,13 @@
 use crate::algo::coding_scores::CodingScores;
 use crate::algo::filter::filter_predictions_low_support;
 use crate::algo::intergenic::{get_intergenic_regions, IntergenicScores};
-use crate::algo::introns::{IntronEvidenceMap, IntronScoreMap, IntronVec};
+use crate::algo::introns::{make_intron_key, IntronEvidenceMap, IntronScoreMap, IntronVec};
 use crate::algo::trellis::{build_trellis, traverse_path};
 use crate::types::evidence::EvWeightMap;
-use crate::types::exon::{Exon, ExonPhase, ExonType};
+use crate::types::exon::{Exon, ExonType, LinkageTables};
 use crate::types::genome::MaskVec;
 use crate::types::prediction::{EvmPrediction, PredMode};
 use anyhow::Result;
-use std::collections::HashSet;
 
 /// Parameters controlling the recursive search.
 pub struct ConsensusParams<'a> {
@@ -24,10 +23,7 @@ pub struct ConsensusParams<'a> {
     pub intergenic_scores: &'a IntergenicScores,
     /// Base (non-augmented) intergenic scores — used by the low-support filter.
     pub base_intergenic_scores: &'a IntergenicScores,
-    pub acceptable_linkages: &'a HashSet<(String, String)>,
-    pub phased_connections: &'a HashSet<(String, String)>,
-    pub intergenic_connections: &'a HashSet<(String, String)>,
-    pub frame_pairs: &'a HashSet<(ExonPhase, ExonPhase)>,
+    pub linkages: &'a LinkageTables,
     pub stop_codons: &'a [[u8; 3]],
     pub coding_scores: &'a CodingScores,
     pub fwd_intron_vec: &'a IntronVec,
@@ -92,10 +88,7 @@ pub fn generate_consensus_gene_predictions(
         &mut local_exons,
         range_lend,
         range_rend,
-        params.acceptable_linkages,
-        params.phased_connections,
-        params.intergenic_connections,
-        params.frame_pairs,
+        params.linkages,
         params.introns_to_score,
         params.intergenic_scores,
         params.stop_codons,
@@ -152,26 +145,12 @@ pub fn generate_consensus_gene_predictions(
         return Ok(());
     }
 
-    // Determine span of predictions
-    let (pred_span_lend, pred_span_rend) = if !preds_remain.is_empty() {
-        let l = preds_remain
-            .iter()
-            .map(|p| p.lend)
-            .min()
-            .unwrap_or(range_lend);
-        let r = preds_remain
-            .iter()
-            .map(|p| p.rend)
-            .max()
-            .unwrap_or(range_rend);
-        (l, r)
-    } else {
-        predictions
-            .iter()
-            .fold((range_rend, range_lend), |(l, r), p| {
-                (l.min(p.lend), r.max(p.rend))
-            })
-    };
+    // Determine span of predictions. Perl uses the full set of predictions
+    // (including eliminated models when --report_ELM is on) for both the
+    // "!! Predictions spanning range" line and tail-recursion boundaries.
+    let (pred_span_lend, pred_span_rend) = predictions
+        .iter()
+        .fold((range_rend, range_lend), |(l, r), p| (l.min(p.lend), r.max(p.rend)));
 
     // Emit predictions: one "!!" range line for the call, then each prediction's
     // block followed by a blank line (Perl prints `toString() . "\n"`).
@@ -220,9 +199,10 @@ pub fn generate_consensus_gene_predictions(
 
         // Recursion: intergenic regions between predictions
         if params.min_gene_length_size_on_re_search > 0 {
+            // Perl get_intergenic_regions operates on all predictions, including
+            // eliminated models when --report_ELM is enabled.
             let spans: Vec<(u32, u32)> = predictions
                 .iter()
-                .filter(|p| !p.is_eliminated)
                 .map(|p| (p.lend, p.rend))
                 .collect();
             for (ig_l, ig_r) in get_intergenic_regions(&spans) {
@@ -384,7 +364,7 @@ noncoding_equivalent({:.2}) raw_noncoding({:.2}) offset({:.2}) ",
         } else {
             (intron_end5, intron_end3 + 1)
         };
-        let key = format!("{}_{}", key5, key3);
+        let key = make_intron_key(key5, key3);
         let ev = introns_to_evidence.get(&key).cloned().unwrap_or_default();
         // Perl emits evidence in hash-iteration order, which is non-deterministic
         // across runs; sort canonically so Rust output is reproducible.

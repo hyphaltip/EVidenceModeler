@@ -43,6 +43,48 @@ impl Orientation {
 /// Encodes reading frame continuity at exon boundaries.
 pub type ExonPhase = u8;
 
+/// Compact encoding of exon type + strand orientation used for linkage lookups.
+/// Values are chosen to fit in a u8 and are stable across the codebase.
+pub type TypeOrient = u8;
+
+pub const TYPE_ORIENT_INITIAL_FWD: TypeOrient = 0;
+pub const TYPE_ORIENT_INTERNAL_FWD: TypeOrient = 1;
+pub const TYPE_ORIENT_TERMINAL_FWD: TypeOrient = 2;
+pub const TYPE_ORIENT_SINGLE_FWD: TypeOrient = 3;
+pub const TYPE_ORIENT_INITIAL_REV: TypeOrient = 4;
+pub const TYPE_ORIENT_INTERNAL_REV: TypeOrient = 5;
+pub const TYPE_ORIENT_TERMINAL_REV: TypeOrient = 6;
+pub const TYPE_ORIENT_SINGLE_REV: TypeOrient = 7;
+pub const TYPE_ORIENT_BOUND: TypeOrient = 8;
+
+pub fn type_orient_from(exon_type: ExonType, orientation: Orientation) -> TypeOrient {
+    match (exon_type, orientation) {
+        (ExonType::Initial, Orientation::Fwd) => TYPE_ORIENT_INITIAL_FWD,
+        (ExonType::Internal, Orientation::Fwd) => TYPE_ORIENT_INTERNAL_FWD,
+        (ExonType::Terminal, Orientation::Fwd) => TYPE_ORIENT_TERMINAL_FWD,
+        (ExonType::Single, Orientation::Fwd) => TYPE_ORIENT_SINGLE_FWD,
+        (ExonType::Initial, Orientation::Rev) => TYPE_ORIENT_INITIAL_REV,
+        (ExonType::Internal, Orientation::Rev) => TYPE_ORIENT_INTERNAL_REV,
+        (ExonType::Terminal, Orientation::Rev) => TYPE_ORIENT_TERMINAL_REV,
+        (ExonType::Single, Orientation::Rev) => TYPE_ORIENT_SINGLE_REV,
+        (ExonType::Bound, _) => TYPE_ORIENT_BOUND,
+    }
+}
+
+pub fn type_orient_to_str(t: TypeOrient) -> &'static str {
+    match t {
+        TYPE_ORIENT_INITIAL_FWD => "initial+",
+        TYPE_ORIENT_INTERNAL_FWD => "internal+",
+        TYPE_ORIENT_TERMINAL_FWD => "terminal+",
+        TYPE_ORIENT_SINGLE_FWD => "single+",
+        TYPE_ORIENT_INITIAL_REV => "initial-",
+        TYPE_ORIENT_INTERNAL_REV => "internal-",
+        TYPE_ORIENT_TERMINAL_REV => "terminal-",
+        TYPE_ORIENT_SINGLE_REV => "single-",
+        _ => "bound",
+    }
+}
+
 /// Compute the end frame given a start frame and exon length.
 /// Phase cycles 1→2→3→1 (fwd) or 4→5→6→4 (rev).
 pub fn end_frame(start_frame: ExonPhase, exon_len: u32) -> ExonPhase {
@@ -88,6 +130,9 @@ pub struct Exon {
     pub orientation: Orientation,
     pub start_frame: ExonPhase,
     pub end_frame: ExonPhase,
+    /// Sorted genomic coordinates (lend <= rend), cached for fast overlap checks.
+    pub lend: u32,
+    pub rend: u32,
     /// Cumulative evidence-weighted score for the exon (set by `score_exons`).
     pub base_score: f64,
     /// Running best path score through this exon (set during trellis build).
@@ -102,10 +147,13 @@ pub struct Exon {
     /// Index into the exon pool of the best predecessor in the trellis.
     /// None = no predecessor / boundary.
     pub link: Option<usize>,
+    /// Compact (exon_type, orientation) code for fast linkage lookups.
+    pub type_orient: TypeOrient,
 }
 
 impl Exon {
     pub fn new(end5: u32, end3: u32) -> Self {
+        let (lend, rend) = if end5 <= end3 { (end5, end3) } else { (end3, end5) };
         Exon {
             end5,
             end3,
@@ -113,22 +161,37 @@ impl Exon {
             orientation: Orientation::Fwd,
             start_frame: 1,
             end_frame: 1,
+            lend,
+            rend,
             base_score: 0.0,
             sum_score: 0.0,
             left_seq_boundary: [0, 0],
             right_seq_boundary: [0, 0],
             evidence: Vec::new(),
             link: None,
+            type_orient: TYPE_ORIENT_SINGLE_FWD,
+        }
+    }
+
+    /// Recompute the compact type+orientation code from fields.
+    pub fn refresh_type_orient(&mut self) {
+        self.type_orient = type_orient_from(self.exon_type, self.orientation);
+    }
+
+    /// Recompute cached sorted coordinates after a coordinate transposition.
+    pub fn refresh_coords(&mut self) {
+        if self.end5 <= self.end3 {
+            self.lend = self.end5;
+            self.rend = self.end3;
+        } else {
+            self.lend = self.end3;
+            self.rend = self.end5;
         }
     }
 
     /// Sorted (lend, rend) regardless of strand orientation.
     pub fn coords_sorted(&self) -> (u32, u32) {
-        if self.end5 <= self.end3 {
-            (self.end5, self.end3)
-        } else {
-            (self.end3, self.end5)
-        }
+        (self.lend, self.rend)
     }
 
     pub fn length(&self) -> u32 {
@@ -137,7 +200,7 @@ impl Exon {
     }
 
     pub fn type_orient_key(&self) -> String {
-        format!("{}{}", self.exon_type.as_str(), self.orientation.as_char())
+        type_orient_to_str(self.type_orient).to_string()
     }
 
     pub fn append_evidence(&mut self, accession: impl Into<String>, ev_type: impl Into<String>) {
@@ -145,15 +208,52 @@ impl Exon {
     }
 }
 
+const NUM_TYPE_ORIENTS: usize = 9;
+const NUM_PHASES: usize = 7; // phases 1..6
+
+/// Fast O(1) linkage lookup tables indexed by compact type/orient or phase codes.
+pub struct LinkageTables {
+    pub acceptable: [[bool; NUM_TYPE_ORIENTS]; NUM_TYPE_ORIENTS],
+    pub phased: [[bool; NUM_TYPE_ORIENTS]; NUM_TYPE_ORIENTS],
+    pub intergenic: [[bool; NUM_TYPE_ORIENTS]; NUM_TYPE_ORIENTS],
+    pub frame_pairs: [[bool; NUM_PHASES]; NUM_PHASES],
+}
+
+impl LinkageTables {
+    pub fn contains_acceptable(&self, a: TypeOrient, b: TypeOrient) -> bool {
+        self.acceptable[a as usize][b as usize]
+    }
+    pub fn contains_phased(&self, a: TypeOrient, b: TypeOrient) -> bool {
+        self.phased[a as usize][b as usize]
+    }
+    pub fn contains_intergenic(&self, a: TypeOrient, b: TypeOrient) -> bool {
+        self.intergenic[a as usize][b as usize]
+    }
+    pub fn contains_frame_pair(&self, a: ExonPhase, b: ExonPhase) -> bool {
+        self.frame_pairs[a as usize][b as usize]
+    }
+}
+
 /// Acceptable exon linkage table: (typeA_orient, typeB_orient) → phased?.
 /// This mirrors the `@acceptableExonLinkages` table from the Perl.
-pub fn build_acceptable_linkages() -> (
-    std::collections::HashSet<(String, String)>, // all linkages
-    std::collections::HashSet<(String, String)>, // phased linkages
-    std::collections::HashSet<(String, String)>, // intergenic linkages
-    std::collections::HashSet<(ExonPhase, ExonPhase)>, // frame-frame pairs
-) {
-    use std::collections::HashSet;
+pub fn build_acceptable_linkages() -> LinkageTables {
+    fn tok(s: &str) -> TypeOrient {
+        match s {
+            "initial+" => TYPE_ORIENT_INITIAL_FWD,
+            "internal+" => TYPE_ORIENT_INTERNAL_FWD,
+            "terminal+" => TYPE_ORIENT_TERMINAL_FWD,
+            "single+" => TYPE_ORIENT_SINGLE_FWD,
+            "initial-" => TYPE_ORIENT_INITIAL_REV,
+            "internal-" => TYPE_ORIENT_INTERNAL_REV,
+            "terminal-" => TYPE_ORIENT_TERMINAL_REV,
+            "single-" => TYPE_ORIENT_SINGLE_REV,
+            _ => TYPE_ORIENT_BOUND,
+        }
+    }
+
+    let mut all = [[false; NUM_TYPE_ORIENTS]; NUM_TYPE_ORIENTS];
+    let mut phased = [[false; NUM_TYPE_ORIENTS]; NUM_TYPE_ORIENTS];
+
     let raw: &[(&str, &str, bool)] = &[
         // Forward strand
         ("initial+", "terminal+", true),
@@ -184,16 +284,16 @@ pub fn build_acceptable_linkages() -> (
         ("initial-", "initial+", false),
         ("initial-", "single+", false),
     ];
-
-    let mut all: HashSet<(String, String)> = HashSet::new();
-    let mut phased: HashSet<(String, String)> = HashSet::new();
     for (a, b, p) in raw {
-        all.insert((a.to_string(), b.to_string()));
+        let ai = tok(a) as usize;
+        let bi = tok(b) as usize;
+        all[ai][bi] = true;
         if *p {
-            phased.insert((a.to_string(), b.to_string()));
+            phased[ai][bi] = true;
         }
     }
 
+    let mut intergenic = [[false; NUM_TYPE_ORIENTS]; NUM_TYPE_ORIENTS];
     let intergenic_raw: &[(&str, &str)] = &[
         ("terminal+", "initial+"),
         ("terminal+", "single+"),
@@ -212,25 +312,28 @@ pub fn build_acceptable_linkages() -> (
         ("initial-", "initial+"),
         ("initial-", "single+"),
     ];
-    let mut intergenic: HashSet<(String, String)> = HashSet::new();
     for (a, b) in intergenic_raw {
-        intergenic.insert((a.to_string(), b.to_string()));
+        intergenic[tok(a) as usize][tok(b) as usize] = true;
     }
 
-    // Frame-frame compatibility pairs
-    let frame_pairs: HashSet<(ExonPhase, ExonPhase)> = [
+    let mut frame_pairs = [[false; NUM_PHASES]; NUM_PHASES];
+    for (a, b) in &[
         (1u8, 2u8),
         (2, 3),
         (3, 1), // fwd
         (4, 5),
         (5, 6),
         (6, 4), // rev
-    ]
-    .iter()
-    .cloned()
-    .collect();
+    ] {
+        frame_pairs[*a as usize][*b as usize] = true;
+    }
 
-    (all, phased, intergenic, frame_pairs)
+    LinkageTables {
+        acceptable: all,
+        phased,
+        intergenic,
+        frame_pairs,
+    }
 }
 
 #[cfg(test)]
@@ -257,6 +360,7 @@ mod tests {
         assert_eq!(r, 100);
         e.end5 = 50;
         e.end3 = 100;
+        e.refresh_coords();
         let (l, r) = e.coords_sorted();
         assert_eq!(l, 50);
         assert_eq!(r, 100);

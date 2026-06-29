@@ -250,6 +250,7 @@ fn main() -> Result<()> {
                     cli.terminal_intergenic_re_search,
                     cli.intergenic_adjust,
                     cli.trellis_search_limit.unwrap_or(500),
+                    cli.repeats.as_deref(),
                 )
             })
             .collect();
@@ -364,6 +365,7 @@ fn run_evm_on_partition(
     terminal_intergenic_re_search: u32,
     intergenic_adjust: f64,
     max_prev_exons_compare: usize,
+    repeats_global: Option<&str>,
 ) -> Result<()> {
     let output_path = format!("{}/evm.out", data_dir);
 
@@ -403,6 +405,16 @@ fn run_evm_on_partition(
                 .unwrap_or("")
         )
     });
+    let repeats_path = repeats_global.map(|p| {
+        format!(
+            "{}/{}",
+            data_dir,
+            Path::new(p)
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("")
+        )
+    });
 
     let params = SinglePartitionParams {
         stop_codons: stop_codons_str.to_string(),
@@ -413,6 +425,7 @@ fn run_evm_on_partition(
         terminal_intergenic_re_search,
         intergenic_adjust,
         max_prev_exons_compare,
+        repeats: repeats_path,
     };
 
     let output = run_single_partition(

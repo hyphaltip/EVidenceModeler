@@ -3,7 +3,7 @@
 use crate::algo::coding_scores::score_exons;
 use crate::algo::coding_scores::{new_coding_scores, CodingScores};
 use crate::algo::introns::{
-    populate_intron_vectors, IntronEvidenceMap, IntronScoreMap, IntronVec, PredictedIntronMap,
+    populate_intron_vectors, IntronEvidenceMap, IntronScoreBuilder, IntronVec, PredictedIntronMap,
 };
 use crate::algo::load_evidence::{
     decrement_coding_using_protein_alignment_introns, instantiate_evidence_based_exons,
@@ -24,7 +24,7 @@ pub struct StrandState {
     pub exons: Vec<Exon>,
     pub exons_via_coords: HashMap<String, usize>,
     pub coding_scores: CodingScores,
-    pub introns_to_score: IntronScoreMap,
+    pub introns_to_score: IntronScoreBuilder,
     pub introns_to_evidence: IntronEvidenceMap,
     pub predicted_introns: PredictedIntronMap,
     pub begins: Vec<f64>,
@@ -43,9 +43,9 @@ impl StrandState {
             exons: Vec::new(),
             exons_via_coords: HashMap::new(),
             coding_scores: new_coding_scores(seq_len),
-            introns_to_score: HashMap::new(),
-            introns_to_evidence: HashMap::new(),
-            predicted_introns: HashMap::new(),
+            introns_to_score: IntronScoreBuilder::default(),
+            introns_to_evidence: IntronEvidenceMap::default(),
+            predicted_introns: PredictedIntronMap::default(),
             begins: vec![0.0f64; seq_len + 2],
             ends: vec![0.0f64; seq_len + 2],
             start_peaks: Vec::new(),

@@ -1,7 +1,7 @@
 //! Prediction filtering — remove low-support and degenerate gene models.
 
 use crate::algo::intergenic::{calc_intergenic_score, IntergenicScores};
-use crate::algo::introns::{IntronEvidenceMap, IntronVec};
+use crate::algo::introns::{make_intron_key, unpack_intron_key, IntronEvidenceMap, IntronKey, IntronVec};
 use crate::types::evidence::EvWeightMap;
 use crate::types::exon::{Exon, ExonType};
 use crate::types::genome::MaskVec;
@@ -70,7 +70,7 @@ pub fn filter_predictions_low_support(
         let mut offset = 0.0;
         for &(simple_lend, simple_rend) in &pred.intron_coords {
             let key = get_intron_key(simple_lend, simple_rend, orient);
-            let (ilend, irend) = intron_key_to_span_sorted(&key);
+            let (ilend, irend) = intron_key_to_span_sorted(key);
             let intron_len = adjust_feature_length_for_mask(ilend, irend, mask);
             if intron_len == 0 {
                 continue;
@@ -130,7 +130,7 @@ fn round2(x: f64) -> f64 {
 
 /// Perl `get_intron_key`: from a simple intron span (lend, rend) and orient,
 /// produce the donor/acceptor-adjusted key matching `INTRONS_TO_SCORE`.
-fn get_intron_key(lend: u32, rend: u32, orient: char) -> String {
+fn get_intron_key(lend: u32, rend: u32, orient: char) -> IntronKey {
     let (l, r) = if lend <= rend {
         (lend, rend)
     } else {
@@ -141,14 +141,12 @@ fn get_intron_key(lend: u32, rend: u32, orient: char) -> String {
     } else {
         (r, l + 1)
     };
-    format!("{}_{}", end5, end3)
+    make_intron_key(end5, end3)
 }
 
 /// Perl `intron_key_to_intron_span`, returning a sorted (lend, rend).
-fn intron_key_to_span_sorted(key: &str) -> (u32, u32) {
-    let parts: Vec<&str> = key.split('_').collect();
-    let end5: u32 = parts.first().and_then(|s| s.parse().ok()).unwrap_or(0);
-    let end3: u32 = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
+fn intron_key_to_span_sorted(key: IntronKey) -> (u32, u32) {
+    let (end5, end3) = unpack_intron_key(key);
     let (a, b) = if end5 < end3 {
         (end5, end3.saturating_sub(1)) // '+' orient
     } else {

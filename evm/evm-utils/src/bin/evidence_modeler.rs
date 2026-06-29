@@ -34,12 +34,20 @@ struct Cli {
     #[arg(long, short = 'e')]
     transcript_alignments: Option<String>,
 
+    /// Repeats GFF3 (masked from genome)
+    #[arg(long = "repeats", short = 'r')]
+    repeats: Option<String>,
+
     /// Output file (default: stdout)
     #[arg(long, short = 'o')]
     output: Option<String>,
 
+    /// Execution directory (accepted for Perl/funannotate parity; ignored by Rust)
+    #[arg(long = "exec_dir")]
+    _exec_dir: Option<String>,
+
     /// Stop codons, comma-separated (default: TAA,TGA,TAG)
-    #[arg(long, default_value = "TAA,TGA,TAG")]
+    #[arg(long = "stop_codons", default_value = "TAA,TGA,TAG")]
     stop_codons: String,
 
     /// Minimum intron length (default: 20)
@@ -68,6 +76,12 @@ struct Cli {
 
     #[arg(long, default_value_t = 500)]
     max_prev_exons_compare: usize,
+
+    /// Trailing positional args emitted by funannotate (output file, log file).
+    /// Output is still written to stdout/stderr; these are accepted and ignored
+    /// for Perl command-line compatibility.
+    #[arg(trailing_var_arg = true)]
+    _positional: Vec<String>,
 }
 
 fn main() -> Result<()> {
@@ -83,6 +97,7 @@ fn main() -> Result<()> {
         terminal_intergenic_re_search: cli.terminal_intergenic_re_search,
         intergenic_adjust: cli.intergenic_adjust,
         max_prev_exons_compare: cli.max_prev_exons_compare,
+        repeats: cli.repeats,
     };
 
     let output = run_single_partition(

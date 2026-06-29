@@ -6,7 +6,65 @@ use crate::types::exon::{Exon, ExonType};
 use crate::types::genome::MaskVec;
 use std::collections::HashMap;
 
-pub type IntergenicScores = Vec<f64>;
+/// Intergenic per-base scores with a cached prefix-sum array for O(1) range
+/// queries. `calc_intergenic_score` is called millions of times during the
+/// trellis, so summing ranges in a loop became the dominant cost.
+#[derive(Clone, Debug)]
+pub struct IntergenicScores {
+    per_base: Vec<f64>,
+    prefix: Vec<f64>,
+}
+
+impl IntergenicScores {
+    fn from_per_base(per_base: Vec<f64>) -> Self {
+        let mut prefix = Vec::with_capacity(per_base.len() + 1);
+        prefix.push(0.0);
+        let mut sum = 0.0;
+        for &v in &per_base {
+            sum += v;
+            prefix.push(sum);
+        }
+        Self { per_base, prefix }
+    }
+
+    #[inline]
+    pub fn calc(&self, lend: u32, rend: u32) -> f64 {
+        if lend > rend {
+            return 0.0;
+        }
+        let max_1based = (self.per_base.len().saturating_sub(1)) as u32;
+        let l = lend.max(1) as usize;
+        let r = rend.min(max_1based) as usize;
+        // prefix[k] = sum of per_base[0..k]; sum over [l, r] = prefix[r+1] - prefix[l].
+        self.prefix[r + 1] - self.prefix[l]
+    }
+
+    pub fn per_base(&self) -> &[f64] {
+        &self.per_base
+    }
+
+    pub fn per_base_mut(&mut self) -> &mut [f64] {
+        &mut self.per_base
+    }
+
+    pub fn rebuild_prefix(&mut self) {
+        self.prefix.clear();
+        self.prefix.push(0.0);
+        let mut sum = 0.0;
+        for &v in &self.per_base {
+            sum += v;
+            self.prefix.push(sum);
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.per_base.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.per_base.is_empty()
+    }
+}
 
 /// Compute per-base intergenic scores from gene-prediction spans.
 ///
@@ -63,11 +121,23 @@ pub fn populate_intergenic_scores(
         span.1 = span.1.max(rend);
     }
 
-    for (ev_type, models) in &per_type {
-        let weight = ev_weights[ev_type].weight * adjust_factor;
+    // Iterate over ALL ab-initio types in the weights file, not just those
+    // with gene predictions in this partition. Perl's populate_intergenic_regions
+    // loops over %PREDICTION_PROGS_CONTRIBUTE_INTERGENIC (populated from the
+    // weights file), so a predictor with no predictions in the current partition
+    // still contributes its weight to every intergenic position.
+    for (ev_type, entry) in ev_weights {
+        if !entry.ev_class.is_abinitio() {
+            continue;
+        }
+        let weight = entry.weight * adjust_factor;
+        let models = per_type.get(ev_type);
 
         // Collect gene spans plus genome-boundary sentinels, sorted by lend.
-        let mut spans: Vec<(u32, u32)> = models.values().copied().collect();
+        let mut spans: Vec<(u32, u32)> = match models {
+            Some(m) => m.values().copied().collect(),
+            None => Vec::new(),
+        };
         spans.push((0, 0));
         spans.push((seq_len as u32, seq_len as u32));
         spans.sort_by_key(|&(l, _)| l);
@@ -88,22 +158,12 @@ pub fn populate_intergenic_scores(
         }
     }
 
-    ig
+    IntergenicScores::from_per_base(ig)
 }
 
 /// Compute the sum of intergenic scores over [lend, rend] (inclusive, 1-based).
 pub fn calc_intergenic_score(scores: &IntergenicScores, lend: u32, rend: u32) -> f64 {
-    if lend > rend {
-        return 0.0;
-    }
-    let mut s = 0.0;
-    let max = (scores.len() - 1) as u32;
-    let l = lend.max(1);
-    let r = rend.min(max);
-    for i in l..=r {
-        s += scores[i as usize];
-    }
-    s
+    scores.calc(lend, rend)
 }
 
 /// Faithful port of Perl `augment_intergenic_from_start/stop_peaks`.
@@ -129,14 +189,15 @@ pub fn augment_intergenic_from_start_stop_peaks(
     let mut sorted: Vec<&Exon> = exons.iter().collect();
     sorted.sort_by_key(|e| e.end5);
 
-    let set_range = |ig: &mut [f64], lo: u32, hi: u32| {
+    let set_range = |ig: &mut IntergenicScores, lo: u32, hi: u32| {
         if lo > hi {
             return;
         }
+        let base = ig.per_base_mut();
         for i in lo..=hi {
             let iu = i as usize;
-            if iu < ig.len() && !mask.get(iu) {
-                ig[iu] = sum_genepred_weights;
+            if iu < base.len() && !mask.get(iu) {
+                base[iu] = sum_genepred_weights;
             }
         }
     };
@@ -252,6 +313,8 @@ pub fn augment_intergenic_from_start_stop_peaks(
             set_range(ig, exon_rend, position);
         }
     }
+
+    ig.rebuild_prefix();
 }
 
 fn is_initial_or_single(e: &Exon) -> bool {

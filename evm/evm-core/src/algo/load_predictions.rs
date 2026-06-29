@@ -1,7 +1,9 @@
 //! Load gene prediction GFF3 data and create exon candidates.
 
 use crate::algo::coding_scores::{add_match_coverage, CodingScores};
-use crate::algo::introns::{add_introns, IntronEvidenceMap, IntronScoreMap, PredictedIntronMap};
+use crate::algo::introns::{
+    add_introns, IntronEvidenceMap, IntronScoreBuilder, PredictedIntronMap,
+};
 use crate::algo::phases::determine_good_phases;
 use crate::io::gff3::Gff3Record;
 use crate::types::evidence::{EvClass, EvWeightMap};
@@ -23,7 +25,7 @@ pub fn load_prediction_data(
     min_intron_length: u32,
     mask: &MaskVec,
     coding_scores: &mut CodingScores,
-    introns_to_score: &mut IntronScoreMap,
+    introns_to_score: &mut IntronScoreBuilder,
     introns_to_evidence: &mut IntronEvidenceMap,
     predicted_introns: &mut PredictedIntronMap,
     exons: &mut Vec<Exon>,
@@ -279,6 +281,7 @@ fn add_or_update_exon(
         } else {
             Orientation::Rev
         };
+        exon.refresh_type_orient();
         // Store 2-char boundary sequences for stop-codon junction check
         if end5 >= 2 && (end5 - 2) as usize + 2 <= genome_seq.len() {
             let lb = &genome_seq[(end5 - 2) as usize..(end5) as usize];
@@ -306,7 +309,7 @@ fn recover_partial_prediction(
     genome_features: &FeatureVec,
     mask: &MaskVec,
     coding_scores: &mut CodingScores,
-    introns_to_score: &mut IntronScoreMap,
+    introns_to_score: &mut IntronScoreBuilder,
     introns_to_evidence: &mut IntronEvidenceMap,
     predicted_introns: &mut PredictedIntronMap,
     exons: &mut Vec<Exon>,

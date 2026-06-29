@@ -1,0 +1,70 @@
+-successfully changed directories to /bigdata/stajichlab/shared/projects/Rhodotorula/Ref_genomes/annotation/Rhodotorula_sphaerocarpa_TFCN_83C-1/predict_misc/EVM/scaffold_1/scaffold_1_1317790-1348751
+
+-reading genomic sequence.
+
+** Processing features (+)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: +)
+-loading gene prediction evidence. (strand: +)Valid prediction for GeneMark_model.514_t
+Valid prediction for snap_scaffold_1-snap.538-T1
+Valid prediction for snap_scaffold_1-snap.539-T1
+Valid prediction for snap_scaffold_1-snap.535-T1
+Valid prediction for GlimmerHMM_glimmerT_471-T1
+Valid prediction for GeneMark_model.513_t
+Valid prediction for snap_scaffold_1-snap.537-T1
+Valid prediction for snap_scaffold_1-snap.541-T1
+Valid prediction for GlimmerHMM_glimmerT_476-T1
+Valid prediction for snap_scaffold_1-snap.542-T1
+Valid prediction for Augustus_model.g464.t1
+Valid prediction for Augustus_model.g468.t1
+Valid prediction for GlimmerHMM_glimmerT_472-T1
+Valid prediction for GeneMark_model.512_t
+Valid prediction for GeneMark_model.517_t
+Valid prediction for Augustus_model.g463.t1
+Valid prediction for Augustus_model.g465.t1
+Valid prediction for GlimmerHMM_glimmerT_473-T1
+
+-loading the search evidence (protein and EST search results, strand: +)
+-scoring exons (strand: +)
+
+** Processing features (-)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: -)
+-loading gene prediction evidence. (strand: -)Valid prediction for GeneMark_model.518_t
+Valid prediction for GlimmerHMM_glimmerT_477-T1
+Valid prediction for GlimmerHMM_glimmerT_475-T1
+Valid prediction for GeneMark_model.520_t
+Valid prediction for GlimmerHMM_glimmerT_474-T1
+Valid prediction for snap_scaffold_1-snap.544-T1
+Valid prediction for Augustus_model.g470.t1
+Valid prediction for Augustus_model.g467.t1
+Valid prediction for GeneMark_model.516_t
+Valid prediction for GlimmerHMM_glimmerT_478-T1
+Valid prediction for Augustus_model.g462.t1
+Valid prediction for Augustus_model.g469.t1
+Valid prediction for GeneMark_model.519_t
+Valid prediction for GeneMark_model.515_t
+Valid prediction for snap_scaffold_1-snap.540-T1
+Valid prediction for snap_scaffold_1-snap.536-T1
+Valid prediction for Augustus_model.g466.t1
+Valid prediction for GeneMark_model.511_t
+Valid prediction for GeneMark_model.509_t
+Valid prediction for GlimmerHMM_glimmerT_470-T1
+Valid prediction for snap_scaffold_1-snap.543-T1
+
+-loading the search evidence (protein and EST search results, strand: -)
+-scoring exons (strand: -)
+-building DP trellis
+
+-building trellis in range 1 - 30962
+-exon list size: 109
+
+
+building trellis
+0.9    1.8    2.7    3.6    4.5    5.4    6.3    7.2    8.1    9.0    9.9    10.8    11.7    12.6    13.5    14.4    15.3    16.2    17.1    18.0    18.9    19.8    20.7    21.6    22.5    23.4    24.3    25.2    26.1    27.0    27.9    28.8    29.7    30.6    31.5    32.4    33.3    34.2    35.1    36.0    36.9    37.8    38.7    39.6    40.5    41.4    42.3    43.2    44.1    45.0    45.9    46.8    47.7    48.6    49.5    50.5    51.4    52.3    53.2    54.1    55.0    55.9    56.8    57.7    58.6    59.5    60.4    61.3    62.2    63.1    64.0    64.9    65.8    66.7    67.6    68.5    69.4    70.3    71.2    72.1    73.0    73.9    74.8    75.7    76.6    77.5    78.4    79.3    80.2    81.1    82.0    82.9    83.8    84.7    85.6    86.5    87.4    88.3    89.2    90.1    91.0    91.9    92.8    93.7    94.6    95.5    96.4    97.3    98.2    99.1    
+-found 11 predictions from path traversal
+
+-reporting highest scoring path thru the trellis.
+-found 11 predictions persist after filtering for low support

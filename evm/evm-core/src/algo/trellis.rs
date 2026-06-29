@@ -1,11 +1,13 @@
 //! Dynamic-programming trellis: finding the highest-scoring path through exons.
 
 use crate::algo::intergenic::{calc_intergenic_score, IntergenicScores};
-use crate::algo::introns::IntronScoreMap;
+use crate::algo::introns::{make_intron_key, IntronScoreMap};
 use crate::algo::phases::is_stop_codon;
-use crate::types::exon::{Exon, ExonPhase, ExonType};
+use crate::types::exon::{
+    Exon, ExonType, LinkageTables, TYPE_ORIENT_BOUND, TYPE_ORIENT_INITIAL_REV,
+    TYPE_ORIENT_TERMINAL_REV,
+};
 use crate::types::prediction::EvmPrediction;
-use std::collections::HashSet;
 
 /// Result of compatibility check between two exons.
 pub enum CompatResult {
@@ -23,19 +25,16 @@ pub enum CompatResult {
 pub fn are_compatible_exons(
     exon_a: &Exon,
     exon_b: &Exon,
-    acceptable_linkages: &HashSet<(String, String)>,
-    phased_connections: &HashSet<(String, String)>,
-    intergenic_connections: &HashSet<(String, String)>,
-    frame_pairs: &HashSet<(ExonPhase, ExonPhase)>,
+    linkages: &LinkageTables,
     introns_to_score: &IntronScoreMap,
     intergenic_scores: &IntergenicScores,
     stop_codons: &[[u8; 3]],
 ) -> CompatResult {
-    let key_a = exon_a.type_orient_key();
-    let key_b = exon_b.type_orient_key();
+    let key_a = exon_a.type_orient;
+    let key_b = exon_b.type_orient;
 
     // Check linkage is allowed
-    if !acceptable_linkages.contains(&(key_a.clone(), key_b.clone())) {
+    if !linkages.contains_acceptable(key_a, key_b) {
         return CompatResult::Incompatible;
     }
 
@@ -47,42 +46,40 @@ pub fn are_compatible_exons(
         return CompatResult::Incompatible;
     }
 
-    if phased_connections.contains(&(key_a.clone(), key_b.clone())) {
+    let reverse_strand = key_a >= TYPE_ORIENT_INITIAL_REV && key_a <= TYPE_ORIENT_TERMINAL_REV;
+
+    if linkages.contains_phased(key_a, key_b) {
         // Check intron validity
-        let (intron_end5, intron_end3) = if key_a.ends_with('-') {
+        let (intron_end5, intron_end3) = if reverse_strand {
             // Reverse strand: intron is upstream of A in genomic terms
             (b_lend - 1, a_rend + 2)
         } else {
             (a_rend + 1, b_lend - 2)
         };
 
-        let intron_key = format!("{}_{}", intron_end5, intron_end3);
+        let intron_key = make_intron_key(intron_end5, intron_end3);
         let intron_score = match introns_to_score.get(&intron_key) {
             Some(&s) => s,
             None => return CompatResult::Incompatible,
         };
 
         // Check frame compatibility
-        let (before, after) = if key_a.ends_with('-') {
-            (exon_b, exon_a)
-        } else {
-            (exon_a, exon_b)
-        };
-        if !frame_pairs.contains(&(before.end_frame, after.start_frame)) {
+        let (before, after) = if reverse_strand { (exon_b, exon_a) } else { (exon_a, exon_b) };
+        if !linkages.contains_frame_pair(before.end_frame, after.start_frame) {
             return CompatResult::Incompatible;
         }
 
         // Check no stop codon created across the junction
         let end_frame = before.end_frame % 3;
-        let seq_junction: Vec<u8> = before
-            .right_seq_boundary
-            .iter()
-            .chain(after.left_seq_boundary.iter())
-            .copied()
-            .collect();
+        let seq_junction: [u8; 4] = [
+            before.right_seq_boundary[0],
+            before.right_seq_boundary[1],
+            after.left_seq_boundary[0],
+            after.left_seq_boundary[1],
+        ];
         let potential_stop = match end_frame {
-            1 => seq_junction.get(1..4),
-            2 => seq_junction.get(0..3),
+            1 => Some(&seq_junction[1..4]),
+            2 => Some(&seq_junction[0..3]),
             _ => None, // frame 0 / 3: no partial codon at junction
         };
         if let Some(codon) = potential_stop {
@@ -92,7 +89,7 @@ pub fn are_compatible_exons(
         }
 
         CompatResult::Compatible(intron_score)
-    } else if intergenic_connections.contains(&(key_a.clone(), key_b.clone())) {
+    } else if linkages.contains_intergenic(key_a, key_b) {
         let score = calc_intergenic_score(intergenic_scores, a_rend + 1, b_lend - 1);
         CompatResult::Compatible(score)
     } else {
@@ -143,10 +140,7 @@ pub fn build_trellis(
     exons: &mut Vec<Exon>,
     range_lend: u32,
     range_rend: u32,
-    acceptable_linkages: &HashSet<(String, String)>,
-    phased_connections: &HashSet<(String, String)>,
-    intergenic_connections: &HashSet<(String, String)>,
-    frame_pairs: &HashSet<(ExonPhase, ExonPhase)>,
+    linkages: &LinkageTables,
     introns_to_score: &IntronScoreMap,
     intergenic_scores: &IntergenicScores,
     stop_codons: &[[u8; 3]],
@@ -163,12 +157,14 @@ pub fn build_trellis(
     // right bound at the END. Layout: [left_bound, exons…, right_bound].
     let mut left_bound = Exon::new(range_lend, range_lend);
     left_bound.exon_type = ExonType::Bound;
+    left_bound.type_orient = TYPE_ORIENT_BOUND;
     left_bound.start_frame = 1;
     left_bound.end_frame = 1;
     exons.insert(0, left_bound);
 
     let mut right_bound = Exon::new(range_rend, range_rend);
     right_bound.exon_type = ExonType::Bound;
+    right_bound.type_orient = TYPE_ORIENT_BOUND;
     right_bound.start_frame = 1;
     right_bound.end_frame = 1;
     exons.push(right_bound);
@@ -210,10 +206,7 @@ pub fn build_trellis(
                 match are_compatible_exons(
                     &exons[ji],
                     &exons[i],
-                    acceptable_linkages,
-                    phased_connections,
-                    intergenic_connections,
-                    frame_pairs,
+                    linkages,
                     introns_to_score,
                     intergenic_scores,
                     stop_codons,

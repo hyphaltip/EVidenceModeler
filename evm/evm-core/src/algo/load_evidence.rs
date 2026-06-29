@@ -1,7 +1,9 @@
 //! Load protein/transcript alignment evidence and create evidence-based exons.
 
 use crate::algo::coding_scores::{add_match_coverage, CodingScores};
-use crate::algo::introns::{add_introns, IntronEvidenceMap, IntronScoreMap, PredictedIntronMap};
+use crate::algo::introns::{
+    add_introns, IntronEvidenceMap, IntronScoreBuilder, PredictedIntronMap,
+};
 use crate::algo::phases::determine_good_phases;
 use crate::io::gff3::Gff3Record;
 use crate::types::evidence::{EvClass, EvWeightMap, EvidenceChain};
@@ -194,7 +196,7 @@ pub fn instantiate_evidence_based_exons(
     ev_weights: &EvWeightMap,
     genomic_strand: char,
     coding_scores: &mut CodingScores,
-    introns_to_score: &mut IntronScoreMap,
+    introns_to_score: &mut IntronScoreBuilder,
     introns_to_evidence: &mut IntronEvidenceMap,
     predicted_introns: &mut PredictedIntronMap,
     exons: &mut Vec<Exon>,
@@ -248,6 +250,7 @@ pub fn instantiate_evidence_based_exons(
                         let mut exon = Exon::new(end5, end3);
                         exon.exon_type = ExonType::Internal;
                         exon.orientation = Orientation::Fwd;
+                        exon.refresh_type_orient();
                         exon.start_frame = *phase;
                         exon.end_frame = ef;
                         exon.append_evidence(&accession, &chain.ev_type);

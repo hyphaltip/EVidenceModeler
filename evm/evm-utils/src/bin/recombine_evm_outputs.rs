@@ -19,7 +19,7 @@ struct Cli {
     partitions_list: String,
 
     /// EVM output filename within each partition dir (default: evm.out)
-    #[arg(long, default_value = "evm.out")]
+    #[arg(long = "output_file_name", short = 'O', default_value = "evm.out")]
     evm_output_file: String,
 }
 

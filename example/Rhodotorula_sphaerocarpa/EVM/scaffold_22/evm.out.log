@@ -1,0 +1,54 @@
+-successfully changed directories to /bigdata/stajichlab/shared/projects/Rhodotorula/Ref_genomes/annotation/Rhodotorula_sphaerocarpa_TFCN_83C-1/predict_misc/EVM/scaffold_22
+
+-reading genomic sequence.
+
+** Processing features (+)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: +)
+-loading gene prediction evidence. (strand: +)
+-loading the search evidence (protein and EST search results, strand: +)
+-scoring exons (strand: +)
+
+** Processing features (-)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: -)
+-loading gene prediction evidence. (strand: -)Couldn't classify 21504, 21534
+Sorry, prediction GlimmerHMM_glimmerT_6003-T1 fails validation.
+(GCA)	 AG	21504-21534	GT	AGG
+(GTT)	 AG	21809-21850	AT	AAA
+-recovered GlimmerHMM_glimmerT_6003-T1, terminal, 21809, 21850
+-recovered GlimmerHMM_glimmerT_6003-T1, internal, 21504, 21534
+
+-loading the search evidence (protein and EST search results, strand: -)
+-scoring exons (strand: -)
+-building DP trellis
+
+-building trellis in range 1 - 33530
+-exon list size: 4
+
+
+building trellis
+16.7    33.3    50.0    66.7    83.3    
+-found 1 predictions from path traversal
+GOT 5prime partial gene.
+
+-reporting highest scoring path thru the trellis.
+-found 0 predictions persist after filtering for low support
+
+-building DP trellis
+
+-building trellis in range 1 - 11996
+-exon list size: 1
+
+
+building trellis
+33.3    66.7    
+-found 1 predictions from path traversal
+GOT 5prime partial gene.
+
+-reporting highest scoring path thru the trellis.
+-found 0 predictions persist after filtering for low support
+	-no exons in range 1 - 11680
+	-no exons in range 12028 - 33530

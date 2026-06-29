@@ -1,0 +1,55 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [ "master", "rust-rewrite-completion" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Build & test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry & build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            evm/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('evm/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Check formatting
+        working-directory: evm
+        run: cargo fmt --all --check
+
+      - name: Clippy (deny warnings)
+        working-directory: evm
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Build (debug)
+        working-directory: evm
+        run: cargo build --all
+
+      - name: Run unit & golden integration tests
+        working-directory: evm
+        run: cargo test --all
+
+      - name: End-to-end pipeline test
+        run: |
+          cd testing
+          bash runMe.rust.sh

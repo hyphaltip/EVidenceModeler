@@ -1,0 +1,136 @@
+-successfully changed directories to /bigdata/stajichlab/shared/projects/Rhodotorula/Ref_genomes/annotation/Rhodotorula_sphaerocarpa_TFCN_83C-1/predict_misc/EVM/scaffold_23
+
+-reading genomic sequence.
+
+** Processing features (+)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: +)
+-loading gene prediction evidence. (strand: +)Valid prediction for GlimmerHMM_glimmerT_6007-T1
+Valid prediction for GeneMark_model.6443_t
+Valid prediction for GlimmerHMM_glimmerT_6005-T1
+Valid prediction for GlimmerHMM_glimmerT_6010-T1
+Valid prediction for GeneMark_model.6446_t
+Valid prediction for GlimmerHMM_glimmerT_6012-T1
+Valid prediction for GlimmerHMM_glimmerT_6014-T1
+Valid prediction for Augustus_model.g5021.t1
+Valid prediction for GeneMark_model.6448_t
+Valid prediction for snap_scaffold_23-snap.3-T1
+Valid prediction for snap_scaffold_23-snap.6-T1
+Valid prediction for snap_scaffold_23-snap.7-T1
+Valid prediction for GlimmerHMM_glimmerT_6008-T1
+Valid prediction for GeneMark_model.6439_t
+Valid prediction for Augustus_model.g5023.t1
+Valid prediction for snap_scaffold_23-snap.1-T1
+Valid prediction for Augustus_model.g5015.t1
+Valid prediction for Augustus_model.g5019.t1
+Valid prediction for GeneMark_model.6441_t
+Valid prediction for Augustus_model.g5017.t1
+
+-loading the search evidence (protein and EST search results, strand: +)
+-scoring exons (strand: +)
+
+** Processing features (-)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: -)
+-loading gene prediction evidence. (strand: -)Valid prediction for Augustus_model.g5018.t1
+Valid prediction for snap_scaffold_23-snap.5-T1
+Couldn't classify 27, 118
+Sorry, prediction GeneMark_model.6449_t fails validation.
+(GAA)	 AG	27-118	GT	AAG
+(GCG)	 AG	184-326	GT	CAG
+(AGG)	 AG	393-516	GT	GCG
+(GCT)	 AG	589-748	GT	AGG
+(GAC)	 AG	817-1058	GT	ACG
+(CTC)	 AG	1122-1308	AC	GAA
+-recovered GeneMark_model.6449_t, terminal, 1122, 1308
+-recovered GeneMark_model.6449_t, internal, 27, 118
+-recovered GeneMark_model.6449_t, internal, 184, 326
+-recovered GeneMark_model.6449_t, internal, 393, 516
+-recovered GeneMark_model.6449_t, internal, 589, 748
+-recovered GeneMark_model.6449_t, internal, 817, 1058
+Valid prediction for GeneMark_model.6442_t
+Valid prediction for Augustus_model.g5020.t1
+Valid prediction for snap_scaffold_23-snap.11-T1
+add_exon() Sorry, snap_scaffold_23-snap.11-T1 393-796-terminal-1 is invalid.
+Valid prediction for GeneMark_model.6444_t
+Valid prediction for GeneMark_model.6440_t
+Valid prediction for Augustus_model.g5016.t1
+Valid prediction for GeneMark_model.6447_t
+Valid prediction for GeneMark_model.6445_t
+Couldn't classify 184, 326
+Sorry, prediction GlimmerHMM_glimmerT_6015-T1 fails validation.
+(GCG)	 AG	184-326	GT	CAG
+(AGG)	 AG	393-516	GT	GCG
+(GCT)	 AG	589-748	GT	AGG
+(GAC)	 AG	817-1058	GT	ACG
+(CTC)	 AG	1122-1308	AC	GAA
+-recovered GlimmerHMM_glimmerT_6015-T1, terminal, 1122, 1308
+-recovered GlimmerHMM_glimmerT_6015-T1, internal, 184, 326
+-recovered GlimmerHMM_glimmerT_6015-T1, internal, 393, 516
+-recovered GlimmerHMM_glimmerT_6015-T1, internal, 589, 748
+-recovered GlimmerHMM_glimmerT_6015-T1, internal, 817, 1058
+Couldn't classify 32977, 32985
+Sorry, prediction GeneMark_model.6438_t fails validation.
+(ATG)	 CC	32220-32245	GT	ATG
+(GTT)	 AG	32355-32522	GT	ACG
+(CTT)	 AG	32590-32785	GT	AGG
+(TCC)	 AG	32846-32896	GT	AGG
+(CTC)	 AG	32977-32985	GT	TTG
+-recovered GeneMark_model.6438_t, initial, 32220, 32245
+-recovered GeneMark_model.6438_t, internal, 32355, 32522
+-recovered GeneMark_model.6438_t, internal, 32590, 32785
+-recovered GeneMark_model.6438_t, internal, 32846, 32896
+-recovered GeneMark_model.6438_t, internal, 32977, 32985
+Valid prediction for GlimmerHMM_glimmerT_6009-T1
+Valid prediction for snap_scaffold_23-snap.4-T1
+Valid prediction for GlimmerHMM_glimmerT_6004-T1
+Valid prediction for snap_scaffold_23-snap.9-T1
+Valid prediction for snap_scaffold_23-snap.10-T1
+Couldn't classify 1, 118
+Sorry, prediction Augustus_model.g5024.t1 fails validation.
+(TTC)	 TA	1-118	GT	AAG
+(GCG)	 AG	184-326	GT	CAG
+(AGG)	 AG	393-516	GT	GCG
+(GCT)	 AG	589-748	GT	AGG
+(GAC)	 AG	817-1062	GC	GAG
+-recovered Augustus_model.g5024.t1, terminal, 817, 1062
+-recovered Augustus_model.g5024.t1, internal, 184, 326
+-recovered Augustus_model.g5024.t1, internal, 393, 516
+-recovered Augustus_model.g5024.t1, internal, 589, 748
+-recovered Augustus_model.g5024.t1, internal, 817, 1062
+Valid prediction for Augustus_model.g5022.t1
+Valid prediction for snap_scaffold_23-snap.8-T1
+Valid prediction for GlimmerHMM_glimmerT_6013-T1
+Valid prediction for GlimmerHMM_glimmerT_6006-T1
+Couldn't classify 32977, 32985
+Sorry, prediction Augustus_model.g5014.t1 fails validation.
+(ATG)	 TC	32193-32245	GT	ATG
+(GTT)	 AG	32355-32522	GT	ACG
+(CTT)	 AG	32590-32785	GT	AGG
+(TCC)	 AG	32846-32896	GT	AGG
+(CTC)	 AG	32977-32985	GT	TTG
+-recovered Augustus_model.g5014.t1, initial, 32193, 32245
+-recovered Augustus_model.g5014.t1, internal, 32355, 32522
+-recovered Augustus_model.g5014.t1, internal, 32590, 32785
+-recovered Augustus_model.g5014.t1, internal, 32846, 32896
+-recovered Augustus_model.g5014.t1, internal, 32977, 32985
+Valid prediction for snap_scaffold_23-snap.2-T1
+Valid prediction for GlimmerHMM_glimmerT_6011-T1
+
+-loading the search evidence (protein and EST search results, strand: -)
+-scoring exons (strand: -)
+-building DP trellis
+
+-building trellis in range 1 - 33009
+-exon list size: 211
+
+
+building trellis
+0.5    0.9    1.4    1.9    2.3    2.8    3.3    3.8    4.2    4.7    5.2    5.6    6.1    6.6    7.0    7.5    8.0    8.5    8.9    9.4    9.9    10.3    10.8    11.3    11.7    12.2    12.7    13.1    13.6    14.1    14.6    15.0    15.5    16.0    16.4    16.9    17.4    17.8    18.3    18.8    19.2    19.7    20.2    20.7    21.1    21.6    22.1    22.5    23.0    23.5    23.9    24.4    24.9    25.4    25.8    26.3    26.8    27.2    27.7    28.2    28.6    29.1    29.6    30.0    30.5    31.0    31.5    31.9    32.4    32.9    33.3    33.8    34.3    34.7    35.2    35.7    36.2    36.6    37.1    37.6    38.0    38.5    39.0    39.4    39.9    40.4    40.8    41.3    41.8    42.3    42.7    43.2    43.7    44.1    44.6    45.1    45.5    46.0    46.5    46.9    47.4    47.9    48.4    48.8    49.3    49.8    50.2    50.7    51.2    51.6    52.1    52.6    53.1    53.5    54.0    54.5    54.9    55.4    55.9    56.3    56.8    57.3    57.7    58.2    58.7    59.2    59.6    60.1    60.6    61.0    61.5    62.0    62.4    62.9    63.4    63.8    64.3    64.8    65.3    65.7    66.2    66.7    67.1    67.6    68.1    68.5    69.0    69.5    70.0    70.4    70.9    71.4    71.8    72.3    72.8    73.2    73.7    74.2    74.6    75.1    75.6    76.1    76.5    77.0    77.5    77.9    78.4    78.9    79.3    79.8    80.3    80.8    81.2    81.7    82.2    82.6    83.1    83.6    84.0    84.5    85.0    85.4    85.9    86.4    86.9    87.3    87.8    88.3    88.7    89.2    89.7    90.1    90.6    91.1    91.5    92.0    92.5    93.0    93.4    93.9    94.4    94.8    95.3    95.8    96.2    96.7    97.2    97.7    98.1    98.6    99.1    99.5    
+-found 11 predictions from path traversal
+GOT 5prime partial gene.
+
+-reporting highest scoring path thru the trellis.
+-found 11 predictions persist after filtering for low support

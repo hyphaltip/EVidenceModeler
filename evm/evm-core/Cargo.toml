@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow  = { workspace = true }
-log     = { workspace = true }
-memchr  = { workspace = true }
-phf     = { workspace = true }
-rayon   = { workspace = true }
+anyhow     = { workspace = true }
+log        = { workspace = true }
+memchr     = { workspace = true }
+phf        = { workspace = true }
+rayon      = { workspace = true }
+rustc-hash = "2"

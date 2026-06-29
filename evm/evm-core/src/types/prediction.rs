@@ -1,5 +1,6 @@
 //! EVM prediction objects.
 
+use crate::algo::introns::{make_intron_key, IntronScoreMap};
 use crate::types::exon::Exon;
 
 /// Run mode for a prediction search.
@@ -73,7 +74,7 @@ impl EvmPrediction {
     pub fn finalize(
         &mut self,
         exons: &[Exon],
-        introns_to_score: &std::collections::HashMap<String, f64>,
+        introns_to_score: &IntronScoreMap,
     ) {
         // Perl sorts the prediction's exons by end5 ascending.
         self.exon_indices.sort_by_key(|&i| exons[i].end5);
@@ -94,7 +95,7 @@ impl EvmPrediction {
             } else {
                 (b.end3.saturating_sub(1), a.end5 + 2)
             };
-            let key = format!("{}_{}", i5, i3);
+            let key = make_intron_key(i5, i3);
             if let Some(&s) = introns_to_score.get(&key) {
                 score += s;
             }

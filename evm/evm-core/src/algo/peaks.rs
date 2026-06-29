@@ -36,11 +36,10 @@ pub fn analyze_peaks(
             best_pos_so_far = i;
         }
 
-        let val = vector.get(leading_edge).copied().unwrap_or(0.0);
-        current_peak_score += val;
+        current_peak_score += vector[leading_edge];
 
         if trailing_edge > 0 {
-            current_peak_score -= vector.get(trailing_edge).copied().unwrap_or(0.0);
+            current_peak_score -= vector[trailing_edge];
         }
 
         if current_peak_score > best_score_so_far {
