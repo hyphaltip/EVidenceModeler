@@ -231,6 +231,8 @@ pub fn run_single_partition(
         dump_peaks(&dd.join("start_peaks"), &all_start_peaks);
         dump_peaks(&dd.join("end_peaks"), &all_end_peaks);
         dump_exon_list(&dd.join("exon_list.out"), &all_exons);
+        dump_vec(&dd.join("pred_fwd_intron_vec.dat"), &all_fwd_intron_vec);
+        dump_vec(&dd.join("pred_rev_intron_vec.dat"), &all_rev_intron_vec);
         log::info!("Debug dumps written to {}", dump_dir);
     }
 
