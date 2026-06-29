@@ -9,6 +9,53 @@ original design sketch.
 
 ---
 
+## 00g. SESSION HANDOFF (2026-06-29, session 6) — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
+(27 unit + 8 golden integration). Committed as `f499461`.**
+
+### What landed this session
+1. **Critical fix: intergenic scoring includes ALL ab-initio predictors from
+   weights file.** Previously `populate_intergenic_scores` only iterated over
+   ab-initio types that had CDS records in the current partition. Perl's
+   `populate_intergenic_regions` loops over `%PREDICTION_PROGS_CONTRIBUTE_INTERGENIC`
+   (populated from the weights file), so a predictor with no predictions in the
+   partition still contributes its weight to every intergenic position. This was
+   the dominant cause of parity gaps on real genome data.
+2. **IntergenicScores prefix-sum optimization.** Changed `IntergenicScores` from
+   a raw `Vec<f64>` to a struct with per-base scores + prefix-sum array, making
+   `calc_intergenic_score` O(1) instead of O(region length).
+3. **EVM_DUMP_DIR debug dump infrastructure.** Added `EVM_DUMP_DIR` env var to
+   `pipeline.rs` that dumps `intergenic.bps`, `exon_list.out`, `coding_vector.{+,-}.dat`,
+   `start_peaks`, `end_peaks`, `begins/ends.*.coords` in Perl-compatible format
+   for direct comparison.
+4. **Updated example weights to match production weights.** The golden `evm.out`
+   files in `example/Rhodotorula_sphaerocarpa/EVM/` were generated with production
+   weights (`weights.evm.txt`), not the `example/weights.txt` that had different
+   type classes and weights.
+5. **Comprehensive genome-scale parity assessment.** Ran Rust `evidence_modeler`
+   on all 138 partitions across 24 scaffolds of the real Rhodotorula genome.
+   Results:
+   - **91.2% exact matches** across 6560 predictions
+   - 539 structural differences (mostly minor boundary/score diffs)
+   - 38 Rust-only predictions, 37 Perl-only predictions
+   - 9 partitions (6.5%) with zero differences
+
+### What the next session must do
+1. **Investigate remaining 8.8% structural differences.** Most are minor
+   boundary or score differences in specific predictions. Use `EVM_DUMP_DIR` to
+   compare intermediate vectors (intergenic.bps, coding_vector, exon_list) and
+   identify the root cause.
+2. **Run full end-to-end `EVidenceModeler` orchestrator on real genome.** The
+   per-partition parity is 91.2%; the orchestrator's multi-contig path and
+   recombine DP need to be exercised together on a real dataset.
+3. **funannotate EVM contract integration test.** Swap Rust `evidence_modeler`
+   binary in for `evidence_modeler.pl` inside `funannotate-runEVM.py`.
+4. **CI / packaging (Phase F).** GitHub Actions: `cargo fmt --check`,
+   `cargo clippy -D warnings`, `cargo test`, golden integration tests.
+
+---
+
 ## 00f. SESSION HANDOFF (2026-06-29, session 5) — START HERE
 
 **Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
