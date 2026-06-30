@@ -1,18 +1,7 @@
 test:
-	./runMe.sh
-
-test_rust:
 	./runMe.rust.sh
 
-all: test test_docker test_singularity
-
-test_docker:
-	./runMe.Docker.sh
-
-test_singularity:
-	./runMe.Singularity.sh
-
+all: test
 
 clean:
-	sudo ./cleanMe.sh
-
+	./cleanMe.sh
