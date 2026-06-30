@@ -24,7 +24,7 @@ pub fn analyze_peaks(
 
     for i in 1..=seq_len {
         let leading_edge = i;
-        let trailing_edge = if i >= window_size { i - window_size } else { 0 };
+        let trailing_edge = i.saturating_sub(window_size);
 
         // Check if we've moved beyond the window
         if leading_edge.saturating_sub(best_pos_so_far) > window_size {

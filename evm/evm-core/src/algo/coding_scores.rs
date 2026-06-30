@@ -68,9 +68,9 @@ pub fn score_exons(
         // Add exon-specific contributions for TRANSCRIPT and OTHER_PREDICTION
         for (accession, ev_type) in &exon.evidence {
             let cls = ev_class_fn(ev_type);
-            let matches_class = cls.as_ref().is_some_and(|c| {
-                matches!(c, EvClass::Transcript | EvClass::OtherPrediction)
-            });
+            let matches_class = cls
+                .as_ref()
+                .is_some_and(|c| matches!(c, EvClass::Transcript | EvClass::OtherPrediction));
             if matches_class {
                 if let Some(w) = ev_weight_fn(ev_type) {
                     let mut contrib = 0.0;

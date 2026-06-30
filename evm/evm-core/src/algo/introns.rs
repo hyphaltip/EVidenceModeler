@@ -28,6 +28,12 @@ pub struct IntronScoreMap {
     pairs: Vec<(IntronKey, f64)>,
 }
 
+impl Default for IntronScoreMap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl IntronScoreMap {
     pub fn new() -> Self {
         Self { pairs: Vec::new() }
@@ -256,8 +262,14 @@ mod tests {
     fn intron_key_to_intron_span_shifts_acceptor() {
         // Perl `intron_key_to_intron_span`: '+' (end5 < end3) drops one base at
         // the acceptor (end3-1); '-' (end5 > end3) adds one (end3+1).
-        assert_eq!(intron_key_to_intron_span(make_intron_key(100, 200)), Some((100, 199)));
-        assert_eq!(intron_key_to_intron_span(make_intron_key(200, 100)), Some((200, 101)));
+        assert_eq!(
+            intron_key_to_intron_span(make_intron_key(100, 200)),
+            Some((100, 199))
+        );
+        assert_eq!(
+            intron_key_to_intron_span(make_intron_key(200, 100)),
+            Some((200, 101))
+        );
     }
 
     #[test]

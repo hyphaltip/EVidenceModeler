@@ -153,7 +153,11 @@ pub struct Exon {
 
 impl Exon {
     pub fn new(end5: u32, end3: u32) -> Self {
-        let (lend, rend) = if end5 <= end3 { (end5, end3) } else { (end3, end5) };
+        let (lend, rend) = if end5 <= end3 {
+            (end5, end3)
+        } else {
+            (end3, end5)
+        };
         Exon {
             end5,
             end3,

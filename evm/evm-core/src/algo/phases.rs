@@ -58,7 +58,7 @@ pub fn is_stop_codon(triplet: &[u8], stop_codons: &[[u8; 3]]) -> bool {
         triplet[1].to_ascii_uppercase(),
         triplet[2].to_ascii_uppercase(),
     ];
-    stop_codons.iter().any(|&c| c == t)
+    stop_codons.contains(&t)
 }
 
 #[cfg(test)]

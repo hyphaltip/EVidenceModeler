@@ -134,6 +134,10 @@ impl FeatureVec {
     pub fn len(&self) -> usize {
         self.data.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
 }
 
 /// Boolean mask vector (1-indexed). True = masked (repeat / N region).

@@ -150,7 +150,9 @@ pub fn generate_consensus_gene_predictions(
     // "!! Predictions spanning range" line and tail-recursion boundaries.
     let (pred_span_lend, pred_span_rend) = predictions
         .iter()
-        .fold((range_rend, range_lend), |(l, r), p| (l.min(p.lend), r.max(p.rend)));
+        .fold((range_rend, range_lend), |(l, r), p| {
+            (l.min(p.lend), r.max(p.rend))
+        });
 
     // Emit predictions: one "!!" range line for the call, then each prediction's
     // block followed by a blank line (Perl prints `toString() . "\n"`).
@@ -201,10 +203,7 @@ pub fn generate_consensus_gene_predictions(
         if params.min_gene_length_size_on_re_search > 0 {
             // Perl get_intergenic_regions operates on all predictions, including
             // eliminated models when --report_ELM is enabled.
-            let spans: Vec<(u32, u32)> = predictions
-                .iter()
-                .map(|p| (p.lend, p.rend))
-                .collect();
+            let spans: Vec<(u32, u32)> = predictions.iter().map(|p| (p.lend, p.rend)).collect();
             for (ig_l, ig_r) in get_intergenic_regions(&spans) {
                 let ig_len = ig_r.saturating_sub(ig_l) + 1;
                 if ig_len >= params.min_gene_length_size_on_re_search {

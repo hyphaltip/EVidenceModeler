@@ -231,6 +231,7 @@ pub fn load_prediction_data(
 }
 
 /// Add a new exon to the pool, or update evidence on an existing matching exon.
+#[allow(clippy::too_many_arguments)]
 fn add_or_update_exon(
     accession: &str,
     end5: u32,
@@ -298,6 +299,7 @@ fn add_or_update_exon(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn recover_partial_prediction(
     model_id: &str,
     coordsets: &[(u32, u32)],

@@ -123,7 +123,7 @@ pub fn translate(cds: &[u8], stop_codons: &[[u8; 3]]) -> String {
 
         if custom_stops {
             // Only the specified codons terminate translation
-            if stop_codons.iter().any(|&s| s == codon) {
+            if stop_codons.contains(&codon) {
                 protein.push('*');
                 break;
             }

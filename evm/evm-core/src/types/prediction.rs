@@ -71,11 +71,7 @@ impl EvmPrediction {
     /// exons and the intron score map — mirrors the Perl `EVM_prediction::_init`
     /// (prediction_score = Σ exon coding scores + Σ intron scores; introns keyed
     /// by donor/acceptor-adjusted coordinates).
-    pub fn finalize(
-        &mut self,
-        exons: &[Exon],
-        introns_to_score: &IntronScoreMap,
-    ) {
+    pub fn finalize(&mut self, exons: &[Exon], introns_to_score: &IntronScoreMap) {
         // Perl sorts the prediction's exons by end5 ascending.
         self.exon_indices.sort_by_key(|&i| exons[i].end5);
         if self.exon_indices.is_empty() {

@@ -5,7 +5,6 @@
 //! the intergenic vectors are built, and the trellis/consensus is invoked — so
 //! the two binaries can never drift apart (a risk flagged while building Phase C).
 
-use anyhow::Result;
 use crate::algo::consensus::{generate_consensus_gene_predictions, ConsensusParams};
 use crate::algo::intergenic::{
     augment_intergenic_from_start_stop_peaks, populate_intergenic_scores,
@@ -21,6 +20,7 @@ use crate::io::weights::read_weights_file;
 use crate::types::exon::{build_acceptable_linkages, Exon, Orientation};
 use crate::types::genome::{GenomeSequence, MaskVec};
 use crate::types::prediction::PredMode;
+use anyhow::Result;
 use std::io::Write;
 
 /// Tunables for one single-partition EVM run.
@@ -152,13 +152,19 @@ pub fn run_single_partition(
         std::fs::create_dir_all(dd).ok();
         if let Some(ref s) = fwd_state {
             dump_coding_vec(&dd.join("coding_vector.+.dat"), s);
-            dump_vec(&dd.join("introns_decomposed_to_vec.+.dat"), s.fwd_intron_vec.as_slice());
+            dump_vec(
+                &dd.join("introns_decomposed_to_vec.+.dat"),
+                s.fwd_intron_vec.as_slice(),
+            );
             dump_vec(&dd.join("begins.+.coords"), &s.begins);
             dump_vec(&dd.join("ends.+.coords"), &s.ends);
         }
         if let Some(ref s) = rev_state {
             dump_coding_vec(&dd.join("coding_vector.-.dat"), s);
-            dump_vec(&dd.join("introns_decomposed_to_vec.-.dat"), s.fwd_intron_vec.as_slice());
+            dump_vec(
+                &dd.join("introns_decomposed_to_vec.-.dat"),
+                s.fwd_intron_vec.as_slice(),
+            );
             dump_vec(&dd.join("begins.-.coords"), &s.begins);
             dump_vec(&dd.join("ends.-.coords"), &s.ends);
         }
@@ -313,8 +319,8 @@ fn dump_vec(path: &std::path::Path, data: &[f64]) {
 fn dump_coding_vec(path: &std::path::Path, state: &StrandState) {
     if let Ok(mut f) = std::fs::File::create(path) {
         let cs = &state.coding_scores;
-        for i in 0..cs.len() {
-            writeln!(f, "{}\t{}", i, cs[i]).ok();
+        for (i, val) in cs.iter().enumerate() {
+            writeln!(f, "{}\t{}", i, val).ok();
         }
     }
 }
@@ -331,19 +337,30 @@ fn dump_exon_list(path: &std::path::Path, exons: &[Exon]) {
     if let Ok(mut f) = std::fs::File::create(path) {
         for e in exons {
             let (l, r) = e.coords_sorted();
-            let mut evs: Vec<String> = e.evidence.iter().map(|(a, t)| format!("{{{};{}}}", a, t)).collect();
+            let mut evs: Vec<String> = e
+                .evidence
+                .iter()
+                .map(|(a, t)| format!("{{{};{}}}", a, t))
+                .collect();
             evs.sort();
             writeln!(
                 f,
                 "{}\t{}\t{}{}\t{}\t{}\t{}\tbase score: {}, score_per_base: {:.2}",
-                l, r,
+                l,
+                r,
                 e.exon_type.as_str(),
                 e.orientation.as_char(),
-                e.start_frame, e.end_frame,
+                e.start_frame,
+                e.end_frame,
                 evs.join(","),
                 e.base_score,
-                if e.length() > 0 { e.base_score / e.length() as f64 } else { 0.0 },
-            ).ok();
+                if e.length() > 0 {
+                    e.base_score / e.length() as f64
+                } else {
+                    0.0
+                },
+            )
+            .ok();
         }
     }
 }

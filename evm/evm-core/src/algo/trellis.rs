@@ -46,7 +46,7 @@ pub fn are_compatible_exons(
         return CompatResult::Incompatible;
     }
 
-    let reverse_strand = key_a >= TYPE_ORIENT_INITIAL_REV && key_a <= TYPE_ORIENT_TERMINAL_REV;
+    let reverse_strand = (TYPE_ORIENT_INITIAL_REV..=TYPE_ORIENT_TERMINAL_REV).contains(&key_a);
 
     if linkages.contains_phased(key_a, key_b) {
         // Check intron validity
@@ -64,7 +64,11 @@ pub fn are_compatible_exons(
         };
 
         // Check frame compatibility
-        let (before, after) = if reverse_strand { (exon_b, exon_a) } else { (exon_a, exon_b) };
+        let (before, after) = if reverse_strand {
+            (exon_b, exon_a)
+        } else {
+            (exon_a, exon_b)
+        };
         if !linkages.contains_frame_pair(before.end_frame, after.start_frame) {
             return CompatResult::Incompatible;
         }

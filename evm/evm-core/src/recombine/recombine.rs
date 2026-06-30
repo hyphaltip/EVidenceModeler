@@ -342,10 +342,18 @@ mod tests {
 
         let joined = join_intronic_preds(vec![outer, inner, non_overlap]);
         // Inner should be removed from top level and nested under outer.
-        assert_eq!(joined.len(), 2, "outer + non_overlap should remain at top level");
+        assert_eq!(
+            joined.len(),
+            2,
+            "outer + non_overlap should remain at top level"
+        );
         assert_eq!(joined[0].lend, 100);
         assert_eq!(joined[0].rend, 1000);
-        assert_eq!(joined[0].intronic_preds.len(), 1, "inner should be nested in outer");
+        assert_eq!(
+            joined[0].intronic_preds.len(),
+            1,
+            "inner should be nested in outer"
+        );
         assert_eq!(joined[0].intronic_preds[0].lend, 400);
         assert_eq!(joined[0].intronic_preds[0].rend, 500);
         // Outer length/path_score should absorb inner's contribution.

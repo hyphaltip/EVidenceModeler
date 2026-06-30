@@ -141,7 +141,10 @@ fn evm_out_to_gff3_emits_eliminated_source() {
     .unwrap();
     let got = fs::read_to_string(&out).unwrap();
     let want = fs::read_to_string(fixture("Contig1.with_elm.perl.EVM.gff3")).unwrap();
-    assert_eq!(got, want, "GFF3 output differs for eliminated-model fixture");
+    assert_eq!(
+        got, want,
+        "GFF3 output differs for eliminated-model fixture"
+    );
     let _ = fs::remove_file(&out);
 }
 

@@ -1,7 +1,9 @@
 //! Prediction filtering — remove low-support and degenerate gene models.
 
 use crate::algo::intergenic::{calc_intergenic_score, IntergenicScores};
-use crate::algo::introns::{make_intron_key, unpack_intron_key, IntronEvidenceMap, IntronKey, IntronVec};
+use crate::algo::introns::{
+    make_intron_key, unpack_intron_key, IntronEvidenceMap, IntronKey, IntronVec,
+};
 use crate::types::evidence::EvWeightMap;
 use crate::types::exon::{Exon, ExonType};
 use crate::types::genome::MaskVec;
