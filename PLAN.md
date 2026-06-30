@@ -9,6 +9,52 @@ original design sketch.
 
 ---
 
+## 00h. SESSION HANDOFF (2026-06-30, session 7) — START HERE
+
+**Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
+(27 unit + 8 golden integration). Committed as `5aba91c`.**
+
+### What landed this session
+1. **Funannotate+Rust integration tested end-to-end on real genome.**
+   - Fixed CLI arg mismatches in `funannotate-runEVM.py`:
+     - `convert_evm_outputs_to_gff3` → `convert_EVM_outputs_to_GFF3` (case)
+     - `evidence_modeler`: `--min-intron-length` → `--min_intron_length`
+     - `recombine_evm_outputs`: `--partitions-list` → `--partitions`,
+       `--evm-output-file` → `-O`
+     - `convert_EVM_outputs_to_GFF3`: same arg name fixes
+     - Removed `-o` flag; `worker()` redirects stdout to `evm.out`
+     - Added trailing `evm.out`/`evm.out.log` args for both engines
+   - Ran funannotate `runEVM.py` with Rust engine on real Rhodotorula genome
+     (143 partitions, 4 CPUs, ~2 min wall clock).
+   - Results: **99.6% gene-level parity** with golden Perl output
+     (6213/6241 exact coordinate matches, 6238 vs 6241 total genes).
+   - CDS parity: 38685/38958 exact matches (99.3%).
+   - Funannotate commit: `87cd2a4` on `target_1.9/rust_EVM_trinity_PASA`.
+
+2. **Created `PARITY_REPORT.md`** documenting full end-to-end accuracy:
+   - 99.4% gene-level parity (standalone Rust EVM)
+   - 97.0% protein sequence parity
+   - 99.6% gene-level parity (funannotate+Rust wrapper)
+   - All remaining diffs are partition boundary effects or same-score
+     tie-breaking (182 cases), not bugs.
+
+### What the next session must do
+1. **CI / packaging (Phase F).** GitHub Actions: `cargo fmt --check`,
+   `cargo clippy -D warnings`, `cargo test`, golden integration tests.
+   - Update `testing/runMe*.sh` to use Rust binaries; remove ParaFly
+     submodule once end-to-end parity is confirmed.
+   - Update `README.md` / `Changelog.txt` and version the binary.
+
+2. **Full `funannotate predict` pipeline test.** Run the complete
+   funannotate prediction pipeline (not just `runEVM.py`) with the Rust
+   EVM engine to verify end-to-end annotation output.
+
+3. **Real intron-nesting end-to-end.** Find or construct a multi-partition
+   dataset where one gene is fully enclosed within another gene's intron,
+   so `join_intronic_preds` nesting is exercised end-to-end.
+
+---
+
 ## 00g. SESSION HANDOFF (2026-06-29, session 6) — START HERE
 
 **Branch `rust-rewrite-completion`. Build clean (0 warnings), `cargo test` 35/35
