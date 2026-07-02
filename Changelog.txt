@@ -1,3 +1,11 @@
+# Release 2.5.0 (Rust)
+- Packaging, CI, and docs hardening for the Rust rewrite (funannotate
+  integration guide, module-file install instructions).
+- Resolved all clippy warnings for CI compliance.
+- Ported augustus_to_evm_gff3 and gff3_gene_prediction_file_validator from
+  EVidenceModeler_rust.
+- 99.6% gene-level parity with the Perl implementation.
+
 # Release 2.1.0 (Rust rewrite)
 - Full Rust port of the EVM pipeline: evidence_modeler, partition_evm_inputs,
   recombine_evm_outputs, convert_EVM_outputs_to_GFF3, gff3_file_to_proteins,

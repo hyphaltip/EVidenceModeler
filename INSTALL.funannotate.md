@@ -258,7 +258,7 @@ export PATH="/bigdata/stajichlab/$USER/bin:$PATH"
 
 ### Or use a module file
 
-Create a module file at `~/.modulefiles/rust-evm/2.1.0`:
+Create a module file at `~/.modulefiles/EVidenceModeler_rust/2.5.0`:
 
 ```tcl
 #%Module1.0
@@ -269,7 +269,7 @@ prepend-path PATH $prefix
 Then in your SLURM script:
 
 ```sh
-module load rust-evm/2.1.0
+module load EVidenceModeler_rust/2.5.0
 ```
 
 ---

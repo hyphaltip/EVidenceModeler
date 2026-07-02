@@ -19,7 +19,7 @@ use evm_core::partition::partition::{run_partition, InputFile};
 use evm_core::pipeline::{run_single_partition, SinglePartitionParams};
 use evm_core::recombine::recombine::recombine_outputs;
 
-const VERSION: &str = "EVidenceModeler-v2.1.0-rust";
+const VERSION: &str = "EVidenceModeler-v2.5.0-rust";
 
 /// CLI flags mirror the Perl `EVidenceModeler` driver `GetOptions` exactly,
 /// including its underscore/camelCase long names (`--sample_id`,
