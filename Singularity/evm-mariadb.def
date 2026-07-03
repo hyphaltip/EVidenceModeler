@@ -1,0 +1,107 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+# ===========================================================================
+# EVidenceModeler (Rust) + embedded MariaDB
+# ---------------------------------------------------------------------------
+# Bundles the Rust EVM binaries, the Perl/Python helper converters, and a
+# MariaDB server/client so a MySQL-compatible database can be run rootlessly
+# alongside downstream tools (PASA, funannotate) that require one.
+#
+# Build (run from the repository root so %files paths resolve):
+#   apptainer build evm-mariadb.sif Singularity/evm-mariadb.def
+#
+# Use the EVM engine:
+#   apptainer run evm-mariadb.sif EVidenceModeler --help
+#   apptainer exec evm-mariadb.sif evidence_modeler ...
+#
+# Use the embedded database (state lives on a host bind mount, NOT in the
+# read-only image):
+#   export EVM_DB_HOME=$PWD/mydb
+#   apptainer exec evm-mariadb.sif evm-mariadb init
+#   apptainer exec evm-mariadb.sif evm-mariadb start
+#   apptainer exec evm-mariadb.sif evm-mariadb pasa-conf mypasa_db pasa pasa
+#   apptainer exec evm-mariadb.sif evm-mariadb stop
+# ===========================================================================
+
+%files
+    evm                     /opt/build/evm
+    EvmUtils                /opt/evidencemodeler/EvmUtils
+    PerlLib                 /opt/evidencemodeler/PerlLib
+    Singularity/scripts/evm-mariadb   /usr/local/bin/evm-mariadb
+
+%post
+    set -eux
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Prevent MariaDB's postinst from trying to start a daemon during build.
+    printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d
+    chmod +x /usr/sbin/policy-rc.d
+
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        ca-certificates curl build-essential pkg-config \
+        mariadb-server mariadb-client \
+        perl liburi-perl libbio-perl-perl python3
+
+    # --- Build the Rust EVM binaries via a pinned rustup toolchain ---------
+    export RUSTUP_HOME=/opt/rustup CARGO_HOME=/opt/cargo
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+        | sh -s -- -y --default-toolchain stable --profile minimal
+    export PATH="/opt/cargo/bin:${PATH}"
+
+    cargo build --release --locked --manifest-path /opt/build/evm/Cargo.toml
+
+    for b in EVidenceModeler evidence_modeler partition_evm_inputs \
+             recombine_evm_outputs convert_EVM_outputs_to_GFF3 \
+             gff3_file_to_proteins gff3_gene_prediction_file_validator \
+             augustus_to_evm_gff3; do
+        install -m 0755 "/opt/build/evm/target/release/${b}" "/usr/local/bin/${b}"
+    done
+
+    chmod +x /usr/local/bin/evm-mariadb
+
+    # --- Slim the image ----------------------------------------------------
+    rm -rf /opt/build /opt/cargo /opt/rustup /usr/sbin/policy-rc.d
+    apt-get purge -y build-essential curl pkg-config
+    apt-get autoremove -y
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    export EVM_HOME=/opt/evidencemodeler
+    export PATH="/opt/evidencemodeler/EvmUtils:${PATH}"
+    export LC_ALL=C
+
+%runscript
+    exec EVidenceModeler "$@"
+
+# Named apps so `apptainer run --app <name>` is explicit.
+%apprun evm
+    exec EVidenceModeler "$@"
+
+%apphelp evm
+    The Rust EVidenceModeler orchestrator. Run: apptainer run --app evm IMAGE --help
+
+%apprun mariadb
+    exec evm-mariadb "$@"
+
+%apphelp mariadb
+    Manage the embedded rootless MariaDB instance. Set EVM_DB_HOME to a
+    host-writable path first. Subcommands: init, start, status, shell,
+    create-db, pasa-conf, stop, destroy. Run with --help for details.
+
+%labels
+    Author        Jason Stajich <jasonst@ucr.edu>
+    Tool          EVidenceModeler-Rust
+    Version       2.5.0
+    Includes      MariaDB-server MariaDB-client
+    Description   Rust EVidenceModeler with an embedded, rootless MariaDB
+
+%test
+    set -e
+    EVidenceModeler --version
+    command -v evidence_modeler
+    command -v evm-mariadb
+    command -v mariadbd || command -v mysqld
+    command -v mariadb   || command -v mysql

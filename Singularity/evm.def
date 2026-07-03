@@ -1,0 +1,65 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+# ===========================================================================
+# EVidenceModeler (Rust) -- lean image, no database.
+# ---------------------------------------------------------------------------
+# Build (run from the repository root so %files paths resolve):
+#   apptainer build evm.sif Singularity/evm.def
+#
+#   apptainer run evm.sif EVidenceModeler --help
+#   apptainer exec evm.sif evidence_modeler ...
+# ===========================================================================
+
+%files
+    evm         /opt/build/evm
+    EvmUtils    /opt/evidencemodeler/EvmUtils
+    PerlLib     /opt/evidencemodeler/PerlLib
+
+%post
+    set -eux
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        ca-certificates curl build-essential pkg-config \
+        perl liburi-perl libbio-perl-perl python3
+
+    export RUSTUP_HOME=/opt/rustup CARGO_HOME=/opt/cargo
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+        | sh -s -- -y --default-toolchain stable --profile minimal
+    export PATH="/opt/cargo/bin:${PATH}"
+
+    cargo build --release --locked --manifest-path /opt/build/evm/Cargo.toml
+
+    for b in EVidenceModeler evidence_modeler partition_evm_inputs \
+             recombine_evm_outputs convert_EVM_outputs_to_GFF3 \
+             gff3_file_to_proteins gff3_gene_prediction_file_validator \
+             augustus_to_evm_gff3; do
+        install -m 0755 "/opt/build/evm/target/release/${b}" "/usr/local/bin/${b}"
+    done
+
+    rm -rf /opt/build /opt/cargo /opt/rustup
+    apt-get purge -y build-essential curl pkg-config
+    apt-get autoremove -y
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    export EVM_HOME=/opt/evidencemodeler
+    export PATH="/opt/evidencemodeler/EvmUtils:${PATH}"
+    export LC_ALL=C
+
+%runscript
+    exec EVidenceModeler "$@"
+
+%labels
+    Author      Jason Stajich <jasonst@ucr.edu>
+    Tool        EVidenceModeler-Rust
+    Version     2.5.0
+    Description Rust EVidenceModeler (no database)
+
+%test
+    set -e
+    EVidenceModeler --version
+    command -v evidence_modeler
