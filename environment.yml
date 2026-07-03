@@ -1,0 +1,25 @@
+# Conda/mamba development environment for building the Rust EVidenceModeler
+# from source and running the Perl/Python helper converters.
+#
+#   conda env create -f environment.yml
+#   conda activate evidencemodeler-dev
+#   make               # builds evm/target/release/*
+#
+# For an *installed* package instead of a from-source build, use the conda
+# recipe under conda/ (conda build conda/) or `pixi install`.
+name: evidencemodeler-dev
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # --- Build toolchain (Rust engine) ---
+  - rust >=1.75
+  - c-compiler
+  - cxx-compiler
+  - make
+  # --- Runtime deps for the Perl/Python helper converters ---
+  - perl
+  - perl-db_file
+  - perl-uri
+  - perl-bioperl
+  - python >=3.8

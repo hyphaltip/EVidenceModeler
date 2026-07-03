@@ -1,0 +1,71 @@
+{% set name = "evidencemodeler" %}
+{% set version = "2.5.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  # Local build (default): builds from the checkout that contains this recipe.
+  path: ..
+  #
+  # For a released tarball (bioconda-style submission), replace `path` with:
+  # url: https://github.com/EVidenceModeler/EVidenceModeler/archive/refs/tags/EVidenceModeler-v{{ version }}.tar.gz
+  # sha256: <fill-in-on-release>
+
+build:
+  number: 0
+  # Compiled Rust binaries -> not noarch. One build per platform.
+  run_exports:
+    - {{ pin_subpackage(name, max_pin="x.x") }}
+
+requirements:
+  build:
+    # Cross-compilation aware C toolchain (libgcc/glibc link for the Rust bins)
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    # Rust toolchain provided by conda-forge; pulls a recent stable cargo/rustc
+    - {{ compiler('rust') }}
+    - make
+  host: []
+  run:
+    # The Rust binaries are self-contained; the deps below are only needed by
+    # the Perl/Python helper converters shipped under $PREFIX/opt/evidencemodeler.
+    - perl
+    - perl-db_file          # DB_File (Gene_obj_indexer / TiedHash)
+    - perl-uri              # URI::Escape
+    - perl-bioperl          # Bio::SearchIO (BPbtab / summarize_btab_tophits)
+    - python >=3.8          # miniprot_GFF_2_EVM_*.py converters
+
+test:
+  commands:
+    - EVidenceModeler --version
+    - evidence_modeler --help
+    - partition_evm_inputs --help
+    - recombine_evm_outputs --help
+    - convert_EVM_outputs_to_GFF3 --version
+    - gff3_file_to_proteins --version
+    # These two parse argv manually (no clap --help); just confirm on PATH.
+    - command -v gff3_gene_prediction_file_validator
+    - command -v augustus_to_evm_gff3
+    - test -d "$PREFIX/opt/evidencemodeler/EvmUtils"
+    - test -d "$PREFIX/opt/evidencemodeler/PerlLib"
+
+about:
+  home: https://github.com/EVidenceModeler/EVidenceModeler
+  license: BSD-3-Clause
+  license_file: LICENSE.md
+  summary: "EVidenceModeler (Rust): consensus gene structure annotation from multiple evidence sources"
+  description: |
+    A Rust port of EVidenceModeler that combines ab initio gene predictions
+    and protein/transcript alignment evidence into weighted consensus gene
+    models. Ships the eight self-contained Rust binaries (EVidenceModeler,
+    evidence_modeler, partition_evm_inputs, recombine_evm_outputs,
+    convert_EVM_outputs_to_GFF3, gff3_file_to_proteins,
+    gff3_gene_prediction_file_validator, augustus_to_evm_gff3) plus the
+    legacy Perl/Python format-conversion helpers under $PREFIX/opt.
+  dev_url: https://github.com/EVidenceModeler/EVidenceModeler
+
+extra:
+  recipe-maintainers:
+    - jasonstajich
