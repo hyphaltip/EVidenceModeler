@@ -1,84 +1,73 @@
-FROM ubuntu:20.04
-MAINTAINER bhaas@broadinstitute.org
+# syntax=docker/dockerfile:1
+#
+# Multi-stage build for the Rust EVidenceModeler.
+#   Stage 1 (builder): compiles the eight release binaries.
+#   Stage 2 (runtime): minimal image with only the runtime deps needed by the
+#                      Perl/Python helper converters (the Rust bins need none).
+#
+# Build context must be the repository root:
+#   docker build -f Docker/Dockerfile -t evidencemodeler:2.5.0 .
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG RUST_VERSION=1.83
+ARG EVM_VERSION=2.5.0
 
+# --------------------------------------------------------------------------- #
+# Stage 1: builder
+# --------------------------------------------------------------------------- #
+FROM rust:${RUST_VERSION}-slim-bookworm AS builder
 
-RUN apt-get -qq update && apt-get -qq -y install \
-    automake \
-    build-essential \
-    bzip2 \
-    cmake \
-    curl \
-    default-jre \
-    fort77 \
-    ftp \
-    g++ \
-    gcc \
-    gfortran \
-    git \
-    libblas-dev \
-    libbz2-dev \
-    libcairo2-dev \
-    libcurl4-openssl-dev \
-    libdb-dev \
-    libghc-zlib-dev \
-    libjpeg-dev \
-    liblzma-dev \
-    libncurses-dev \
-    libncurses5-dev \
-    libpcre3-dev \
-    libpng-dev \
-    libreadline-dev \
-    libreadline-dev \
-    libssl-dev \
-    libtbb-dev \
-    libx11-dev \
-    libxml2-dev \
-    libxt-dev \
-    libzmq3-dev \
-    make \
-    nano \
-    perl \
-    pkg-config \
-    python3 \
-    python3-dev \
-    python3-distutils \
-    python3-pip \
-    python3-setuptools \
-    rsync \
-    texlive-latex-base \
-    tzdata \
-   unzip \
-    wget \
-    x11-common \
-    zlib1g-dev
+WORKDIR /src
+# Copy only what the Rust build needs first, to maximize layer caching.
+COPY evm/ evm/
+RUN cargo build --release --locked --manifest-path evm/Cargo.toml
 
-## Perl stuff
-RUN curl -L https://cpanmin.us | perl - App::cpanminus
-RUN cpanm install DB_File
-RUN cpanm install URI::Escape
+# --------------------------------------------------------------------------- #
+# Stage 2: runtime
+# --------------------------------------------------------------------------- #
+FROM debian:bookworm-slim AS runtime
 
+ARG EVM_VERSION
+LABEL org.opencontainers.image.title="EVidenceModeler (Rust)" \
+      org.opencontainers.image.description="Consensus gene structure annotation from multiple evidence sources" \
+      org.opencontainers.image.version="${EVM_VERSION}" \
+      org.opencontainers.image.source="https://github.com/EVidenceModeler/EVidenceModeler" \
+      org.opencontainers.image.licenses="BSD-3-Clause"
 
-## set up tool config and deployment area:
+# Runtime deps for the Perl/Python helper converters only.
+#   perl            -> ships DB_File as a core module
+#   liburi-perl     -> URI::Escape
+#   libbio-perl-perl-> Bio::SearchIO (BPbtab / summarize_btab_tophits)
+#   python3         -> miniprot_GFF_2_EVM_*.py
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        perl \
+        liburi-perl \
+        libbio-perl-perl \
+        python3 \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV SRC /usr/local/src
-ENV BIN /usr/local/bin
+ENV EVM_HOME=/opt/evidencemodeler
+ENV PATH="/opt/evidencemodeler/EvmUtils:${PATH}"
 
+# Rust binaries -> /usr/local/bin
+COPY --from=builder \
+    /src/evm/target/release/EVidenceModeler \
+    /src/evm/target/release/evidence_modeler \
+    /src/evm/target/release/partition_evm_inputs \
+    /src/evm/target/release/recombine_evm_outputs \
+    /src/evm/target/release/convert_EVM_outputs_to_GFF3 \
+    /src/evm/target/release/gff3_file_to_proteins \
+    /src/evm/target/release/gff3_gene_prediction_file_validator \
+    /src/evm/target/release/augustus_to_evm_gff3 \
+    /usr/local/bin/
 
-## EVM
+# Perl/Python helper converters + Perl libraries
+COPY EvmUtils/ /opt/evidencemodeler/EvmUtils/
+COPY PerlLib/  /opt/evidencemodeler/PerlLib/
 
-WORKDIR $SRC
+# Non-root user for running the tools
+RUN useradd -m -s /bin/bash evm
+USER evm
+WORKDIR /home/evm
 
-ENV EVM_VERSION=2.1.0
-ENV EVM_CO=b59a70da3f91c98122d51ddbbebf1ec895c2955b
-
-RUN git clone https://github.com/EVidenceModeler/EVidenceModeler.git && \
-    cd EVidenceModeler && \
-    git checkout ${EVM_CO} && \
-    git submodule init && git submodule update && \
-    make && \
-    mv * $BIN/
-
-COPY Dockerfile $SRC/Dockerfile.$EVM_VERSION
-
+CMD ["EVidenceModeler", "--help"]
