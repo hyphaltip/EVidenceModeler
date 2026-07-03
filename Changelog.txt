@@ -1,4 +1,20 @@
 # Release 2.5.0 (Rust)
+- bugfix: augustus_GTF_to_EVM_GFF3.pl, augustus_merge_stop_codons_to_GFF3.pl,
+  and the Rust augustus_to_evm_gff3 port all corrupted Augustus gene models
+  run with --stopCodonExcludedFromCDS=False (funannotate's BUSCO training
+  default): the stop_codon feature already lies inside the emitted CDS span
+  in that mode, but the converters unconditionally re-added it as a second,
+  overlapping CDS/exon segment, producing a negative-length intron that made
+  downstream Augustus etraining reject the model. A stop_codon segment is
+  now only folded in when it does not already overlap an existing CDS
+  segment for that model; when it's a true adjacent segment (the historic
+  --stopCodonExcludedFromCDS=True case) it is still merged into one
+  continuous CDS span, matching Gene_obj::join_adjacent_exons(). The Rust
+  port additionally used to silently drop stop_codon segments outright
+  (never merging the adjacent case), truncating the CDS by 3bp; it now
+  mirrors the corrected Perl logic exactly. Verified against a real
+  funannotate BUSCO training run where 177/178 training models were
+  corrupted by this bug.
 - Packaging, CI, and docs hardening for the Rust rewrite (funannotate
   integration guide, module-file install instructions).
 - Resolved all clippy warnings for CI compliance.

@@ -10,9 +10,9 @@ struct GeneModel {
     contig: String,
     gene_id: String,
     trans_id: String,
-    cds_segments: Vec<(u32, u32)>, // (5' end, 3' end)
+    cds_segments: Vec<(u32, u32)>,  // (5' end, 3' end)
+    stop_segments: Vec<(u32, u32)>, // (5' end, 3' end), merged into cds_segments once parsing completes
     strand: char,
-    has_stop_codon: bool,
 }
 
 struct AugustusConverter {
@@ -87,8 +87,8 @@ impl AugustusConverter {
                     gene_id: format!("gene.{}", trans_id),
                     trans_id: trans_id.clone(),
                     cds_segments: Vec::new(),
+                    stop_segments: Vec::new(),
                     strand,
-                    has_stop_codon: false,
                 })
                 .cds_segments
                 .push((end5, end3));
@@ -146,18 +146,46 @@ impl AugustusConverter {
                 gene_id: gene_id_full,
                 trans_id: trans_id_full,
                 cds_segments: Vec::new(),
+                stop_segments: Vec::new(),
                 strand,
-                has_stop_codon: false,
             });
 
             if feat_type == "stop_codon" {
-                model.has_stop_codon = true;
+                model.stop_segments.push((end5, end3));
             } else {
                 model.cds_segments.push((end5, end3));
             }
         }
 
+        self.merge_stop_codons();
+
         Ok(())
+    }
+
+    /// Augustus can be run with --stopCodonExcludedFromCDS=True (stop_codon is
+    /// a separate segment immediately adjacent to the CDS, meant to be joined
+    /// onto it) or --stopCodonExcludedFromCDS=False (the stop codon is already
+    /// included within the CDS segment, and the stop_codon feature is purely
+    /// redundant annotation of those same 3 bp). A stop_codon segment must
+    /// only be folded into cds_segments when it does not already overlap an
+    /// existing CDS segment for that model; otherwise it introduces a
+    /// spurious overlapping/backwards CDS exon downstream.
+    fn merge_stop_codons(&mut self) {
+        for model in self.models.values_mut() {
+            for stop_seg in &model.stop_segments {
+                let (slo, shi) = (stop_seg.0.min(stop_seg.1), stop_seg.0.max(stop_seg.1));
+
+                let overlaps_existing_cds = model.cds_segments.iter().any(|cds_seg| {
+                    let (clo, chi) = (cds_seg.0.min(cds_seg.1), cds_seg.0.max(cds_seg.1));
+                    slo <= chi && clo <= shi
+                });
+
+                if !overlaps_existing_cds {
+                    model.cds_segments.push(*stop_seg);
+                }
+            }
+            model.stop_segments.clear();
+        }
     }
 
     fn generate_gff3_output(&self) {
@@ -189,9 +217,14 @@ impl AugustusConverter {
             return;
         }
 
-        // Sort CDS segments by 5' position
+        // Sort CDS segments by 5' position, then merge any that are
+        // genomically adjacent (e.g. a CDS ending right before a
+        // stop_codon segment kept separate by merge_stop_codons() because
+        // it didn't overlap) into a single continuous CDS span, mirroring
+        // Gene_obj::join_adjacent_exons() in the Perl EVM converter.
         let mut sorted_cds = model.cds_segments.clone();
-        sorted_cds.sort_by_key(|seg| seg.0);
+        sorted_cds.sort_by_key(|seg| seg.0.min(seg.1));
+        sorted_cds = merge_adjacent_segments(&sorted_cds, model.strand);
 
         // Build exons that encompass CDS segments
         let exons = build_exons_from_cds(&sorted_cds, model.strand);
@@ -245,6 +278,37 @@ impl AugustusConverter {
             }
         }
     }
+}
+
+/// Merge CDS segments that are genomically adjacent (no gap between them)
+/// into a single continuous segment, mirroring Gene_obj::join_adjacent_exons()
+/// in the Perl EVM converter. `segments` must already be sorted by genomic
+/// start position and given in end5/end3 form.
+fn merge_adjacent_segments(segments: &[(u32, u32)], strand: char) -> Vec<(u32, u32)> {
+    if segments.is_empty() {
+        return Vec::new();
+    }
+
+    let mut genomic: Vec<(u32, u32)> = segments
+        .iter()
+        .map(|(a, b)| ((*a).min(*b), (*a).max(*b)))
+        .collect();
+    genomic.sort_by_key(|seg| seg.0);
+
+    let mut merged = vec![genomic[0]];
+    for seg in &genomic[1..] {
+        let last = merged.last_mut().unwrap();
+        if seg.0 == last.1 + 1 {
+            last.1 = last.1.max(seg.1);
+        } else {
+            merged.push(*seg);
+        }
+    }
+
+    merged
+        .into_iter()
+        .map(|(lo, hi)| if strand == '+' { (lo, hi) } else { (hi, lo) })
+        .collect()
 }
 
 fn build_exons_from_cds(cds_segments: &[(u32, u32)], _strand: char) -> Vec<(u32, u32)> {
