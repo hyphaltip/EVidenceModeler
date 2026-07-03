@@ -1,0 +1,56 @@
+-successfully changed directories to /bigdata/stajichlab/shared/projects/Rhodotorula/Ref_genomes/annotation/Rhodotorula_sphaerocarpa_TFCN_83C-1/predict_misc/EVM/scaffold_5/scaffold_5_725043-742088
+
+-reading genomic sequence.
+
+** Processing features (+)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: +)
+-loading gene prediction evidence. (strand: +)Valid prediction for GeneMark_model.2485_t
+Valid prediction for snap_scaffold_5-snap.280-T1
+Valid prediction for GeneMark_model.2481_t
+Valid prediction for GlimmerHMM_glimmerT_2320-T1
+Valid prediction for Augustus_model.g1914.t1
+Valid prediction for Augustus_model.g1917.t1
+Valid prediction for GeneMark_model.2482_t
+Valid prediction for Augustus_model.g1911.t1
+Valid prediction for GlimmerHMM_glimmerT_2321-T1
+Valid prediction for GlimmerHMM_glimmerT_2318-T1
+Valid prediction for snap_scaffold_5-snap.277-T1
+Valid prediction for GlimmerHMM_glimmerT_2324-T1
+Valid prediction for Augustus_model.g1913.t1
+Valid prediction for GeneMark_model.2479_t
+
+-loading the search evidence (protein and EST search results, strand: +)
+-scoring exons (strand: +)
+
+** Processing features (-)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: -)
+-loading gene prediction evidence. (strand: -)Valid prediction for HiQ_model.g1916.t1
+Valid prediction for GlimmerHMM_glimmerT_2323-T1
+Valid prediction for snap_scaffold_5-snap.279-T1
+Valid prediction for Augustus_model.g1912.t1
+Valid prediction for GlimmerHMM_glimmerT_2319-T1
+Valid prediction for GeneMark_model.2484_t
+Valid prediction for Augustus_model.g1915.t1
+Valid prediction for snap_scaffold_5-snap.278-T1
+Valid prediction for GlimmerHMM_glimmerT_2322-T1
+Valid prediction for GeneMark_model.2483_t
+Valid prediction for GeneMark_model.2480_t
+
+-loading the search evidence (protein and EST search results, strand: -)
+-scoring exons (strand: -)
+-building DP trellis
+
+-building trellis in range 1 - 17046
+-exon list size: 67
+
+
+building trellis
+1.4    2.9    4.3    5.8    7.2    8.7    10.1    11.6    13.0    14.5    15.9    17.4    18.8    20.3    21.7    23.2    24.6    26.1    27.5    29.0    30.4    31.9    33.3    34.8    36.2    37.7    39.1    40.6    42.0    43.5    44.9    46.4    47.8    49.3    50.7    52.2    53.6    55.1    56.5    58.0    59.4    60.9    62.3    63.8    65.2    66.7    68.1    69.6    71.0    72.5    73.9    75.4    76.8    78.3    79.7    81.2    82.6    84.1    85.5    87.0    88.4    89.9    91.3    92.8    94.2    95.7    97.1    98.6    
+-found 7 predictions from path traversal
+
+-reporting highest scoring path thru the trellis.
+-found 7 predictions persist after filtering for low support

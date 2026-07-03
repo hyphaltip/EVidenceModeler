@@ -1,0 +1,775 @@
+!! Predictions spanning range 2832 - 162296 [R1]
+# EVM prediction: Mode:STANDARD S-ratio: 1.00 2832-3632 orient(+) score(1602.00) noncoding_equivalent(1602.00) raw_noncoding(1602.00) offset(0.00) 
+2832	3632	terminal+	1	3	{GlimmerHMM_glimmerT_2112-T1;GlimmerHMM},{snap_scaffold_5-snap.56-T1;snap}
+
+# EVM prediction: Mode:STANDARD S-ratio: 8.98 3936-7343 orient(+) score(12401.00) noncoding_equivalent(1380.25) raw_noncoding(1926.00) offset(545.75) 
+3936	4077	initial+	1	1	{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark},{GlimmerHMM_glimmerT_2113-T1;GlimmerHMM}
+4078	4206	INTRON			{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark}
+4207	4269	internal+	2	1	{GeneMark_model.2283_t;GeneMark}
+4270	4321	INTRON			{GeneMark_model.2283_t;GeneMark}
+4322	4528	internal+	2	1	{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark}
+4529	4594	INTRON			{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark},{GlimmerHMM_glimmerT_2113-T1;GlimmerHMM}
+4595	4759	internal+	2	1	{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark},{GlimmerHMM_glimmerT_2113-T1;GlimmerHMM}
+4760	4824	INTRON			{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark},{GlimmerHMM_glimmerT_2113-T1;GlimmerHMM}
+4825	7343	terminal+	2	3	{Augustus_model.g1732.t1;Augustus},{GeneMark_model.2283_t;GeneMark},{snap_scaffold_5-snap.57-T1;snap},{GlimmerHMM_glimmerT_2113-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.70 7572-8803 orient(-) score(3988.00) noncoding_equivalent(1079.21) raw_noncoding(1426.04) offset(346.83) 
+7649	7572	terminal-	4	6	{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+7710	7650	INTRON			{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+7831	7711	internal-	6	6	{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+7905	7832	INTRON			{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark},{GlimmerHMM_glimmerT_2114-T1;GlimmerHMM}
+8520	7906	internal-	6	5	{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+8580	8521	INTRON			{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+8621	8581	internal-	4	5	{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+8692	8622	INTRON			{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark}
+8803	8693	initial-	4	6	{Augustus_model.g1733.t1;Augustus},{GeneMark_model.2284_t;GeneMark},{GlimmerHMM_glimmerT_2114-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.59 9122-9948 orient(+) score(2393.00) noncoding_equivalent(1506.05) raw_noncoding(1913.00) offset(406.95) 
+9122	9124	initial+	1	3	{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9125	9200	INTRON			{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9201	9380	internal+	1	3	{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9381	9423	INTRON			{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9424	9486	internal+	1	3	{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9487	9565	INTRON			{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9566	9601	internal+	1	3	{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9602	9680	INTRON			{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9681	9821	internal+	1	3	{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9822	9891	INTRON			{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+9892	9948	terminal+	1	3	{GeneMark_model.2285_t;GeneMark},{GlimmerHMM_glimmerT_2115-T1;GlimmerHMM},{Augustus_model.g1734.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.47 10115-11494 orient(-) score(4117.00) noncoding_equivalent(1669.69) raw_noncoding(2385.00) offset(715.31) 
+10310	10115	terminal-	6	6	{Augustus_model.g1735.t1;Augustus},{GeneMark_model.2286_t;GeneMark},{GlimmerHMM_glimmerT_2116-T1;GlimmerHMM}
+10372	10311	INTRON			{Augustus_model.g1735.t1;Augustus},{GeneMark_model.2286_t;GeneMark},{GlimmerHMM_glimmerT_2116-T1;GlimmerHMM}
+10799	10373	internal-	5	5	{Augustus_model.g1735.t1;Augustus},{GeneMark_model.2286_t;GeneMark},{GlimmerHMM_glimmerT_2116-T1;GlimmerHMM}
+11089	10800	INTRON			{Augustus_model.g1735.t1;Augustus},{GeneMark_model.2286_t;GeneMark}
+11141	11090	internal-	4	4	{Augustus_model.g1735.t1;Augustus},{GeneMark_model.2286_t;GeneMark}
+11218	11142	INTRON			{Augustus_model.g1735.t1;Augustus},{GeneMark_model.2286_t;GeneMark},{snap_scaffold_5-snap.59-T1;snap}
+11494	11219	initial-	4	6	{GeneMark_model.2286_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.43 12895-14521 orient(+) score(4994.00) noncoding_equivalent(2058.52) raw_noncoding(2486.36) offset(427.84) 
+12895	12915	initial+	1	3	{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+12916	13017	INTRON			{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13018	13262	internal+	1	2	{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13263	13341	INTRON			{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13342	13400	internal+	3	1	{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13401	13475	INTRON			{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13476	13597	internal+	2	3	{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13598	13655	INTRON			{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+13656	14058	internal+	1	1	{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+14059	14129	INTRON			{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+14130	14521	terminal+	2	3	{GeneMark_model.2287_t;GeneMark},{Augustus_model.g1736.t1;Augustus},{GlimmerHMM_glimmerT_2117-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 4.33 14988-18118 orient(+) score(12165.00) noncoding_equivalent(2807.32) raw_noncoding(3386.00) offset(578.68) 
+14988	14994	initial+	1	1	{GeneMark_model.2288_t;GeneMark},{snap_scaffold_5-snap.61-T1;snap},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+14995	15069	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+15070	15917	internal+	2	3	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+15918	15974	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+15975	16082	internal+	1	3	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+16083	16149	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+16150	16594	internal+	1	1	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+16595	16655	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+16656	16807	internal+	2	3	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+16808	16870	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+16871	16943	internal+	1	1	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+16944	17008	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+17009	17041	internal+	2	1	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+17042	17104	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+17105	17292	internal+	2	3	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+17293	17378	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1408/Target=lcl|KQ954495_1_prot_KWU43103_1_4550;exonerate}
+17379	18005	internal+	1	3	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+18006	18067	INTRON			{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+18068	18118	terminal+	1	3	{GeneMark_model.2288_t;GeneMark},{Augustus_model.g1737.t1;Augustus},{GlimmerHMM_glimmerT_2118-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.42 18370-20946 orient(+) score(8053.00) noncoding_equivalent(3321.63) raw_noncoding(4109.00) offset(787.37) 
+18370	18557	initial+	1	2	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+18558	18661	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+18662	18870	internal+	3	1	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+18871	18937	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+18938	19101	internal+	2	3	{GeneMark_model.2289_t;GeneMark},{Augustus_model.g1738.t1;Augustus}
+19102	19163	INTRON			{GeneMark_model.2289_t;GeneMark},{Augustus_model.g1738.t1;Augustus}
+19164	19267	internal+	1	2	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+19268	19325	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+19326	19418	internal+	3	2	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+19419	19477	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+19478	20014	internal+	3	2	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20015	20075	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20076	20289	internal+	3	3	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20290	20348	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20349	20411	internal+	1	3	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20412	20481	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20482	20670	internal+	1	3	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20671	20743	INTRON			{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20744	20812	internal+	1	3	{GeneMark_model.2289_t;GeneMark},{GlimmerHMM_glimmerT_2119-T1;GlimmerHMM},{Augustus_model.g1738.t1;Augustus}
+20813	20880	INTRON			{GeneMark_model.2289_t;GeneMark},{Augustus_model.g1738.t1;Augustus}
+20881	20946	terminal+	1	3	{GeneMark_model.2289_t;GeneMark},{Augustus_model.g1738.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.26 21103-22419 orient(-) score(3951.00) noncoding_equivalent(1749.00) raw_noncoding(1983.00) offset(234.00) 
+21513	21103	terminal-	4	6	{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+21574	21514	INTRON			{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+21763	21575	internal-	4	6	{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+21851	21764	INTRON			{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+22280	21852	internal-	4	6	{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+22353	22281	INTRON			{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+22419	22354	initial-	4	6	{Augustus_model.g1739.t1;Augustus},{GeneMark_model.2290_t;GeneMark},{GlimmerHMM_glimmerT_2120-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 4.56 24620-28920 orient(+) score(14919.00) noncoding_equivalent(3271.34) raw_noncoding(3828.00) offset(556.66) 
+24620	24682	initial+	1	3	{Augustus_model.g1740.t1;Augustus}
+24683	24749	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+24750	24909	internal+	1	1	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+24910	24975	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+24976	25205	internal+	2	3	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+25206	25271	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+25272	25638	internal+	1	1	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+25639	25698	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+25699	26523	internal+	2	1	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+26524	26592	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+26593	27501	internal+	2	1	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+27502	27562	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+27563	27691	internal+	2	1	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+27692	27753	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+27754	27960	internal+	2	1	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+27961	28021	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+28022	28308	internal+	2	3	{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+28309	28374	INTRON			{Augustus_model.g1740.t1;Augustus},{GlimmerHMM_glimmerT_2121-T1;GlimmerHMM},{GeneMark_model.2291_t;GeneMark}
+28375	28552	internal+	1	1	{Augustus_model.g1740.t1;Augustus},{GeneMark_model.2291_t;GeneMark}
+28553	28612	INTRON			{GeneMark_model.2291_t;GeneMark}
+28613	28920	terminal+	2	3	{GeneMark_model.2291_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.75 29548-33680 orient(+) score(14103.00) noncoding_equivalent(3764.29) raw_noncoding(4307.00) offset(542.71) 
+29548	30370	initial+	1	1	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+30371	30433	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+30434	30802	internal+	2	1	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+30803	30866	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+30867	30937	internal+	2	3	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+30938	31003	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31004	31167	internal+	1	2	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31168	31229	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31230	31342	internal+	3	1	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31343	31403	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31404	31539	internal+	2	2	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31540	31604	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31605	31665	internal+	3	3	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+31666	31725	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{snap_scaffold_5-snap.68-T1;snap},{GeneMark_model.2292_t;GeneMark}
+31726	32162	internal+	1	2	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+32163	32228	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+32229	32246	internal+	3	2	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+32247	32314	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+32315	32457	internal+	3	1	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+32458	32514	INTRON			{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+32515	33680	terminal+	2	3	{GlimmerHMM_glimmerT_2122-T1;GlimmerHMM},{Augustus_model.g1741.t1;Augustus},{GeneMark_model.2292_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.51 33962-36241 orient(-) score(7230.00) noncoding_equivalent(2875.01) raw_noncoding(3531.66) offset(656.65) 
+34030	33962	terminal-	4	6	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+34108	34031	INTRON			{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+34186	34109	internal-	4	6	{Augustus_model.g1742.t1;Augustus},{GeneMark_model.2293_t;GeneMark}
+34268	34187	INTRON			{Augustus_model.g1742.t1;Augustus},{GeneMark_model.2293_t;GeneMark}
+34648	34269	internal-	5	6	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+34723	34649	INTRON			{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+34948	34724	internal-	5	4	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+35013	34949	INTRON			{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+35207	35014	internal-	6	4	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+35312	35208	INTRON			{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+35784	35313	internal-	5	5	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+35896	35785	INTRON			{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+36070	35897	internal-	5	4	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+36141	36071	INTRON			{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+36241	36142	initial-	4	4	{Augustus_model.g1742.t1;Augustus},{GlimmerHMM_glimmerT_2123-T1;GlimmerHMM},{GeneMark_model.2293_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 18.45 36380-37048 orient(+) score(2541.00) noncoding_equivalent(137.74) raw_noncoding(137.74) offset(0.00) 
+36380	37048	single+	1	3	{Augustus_model.g1743.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 4.58 38535-40593 orient(-) score(7279.00) noncoding_equivalent(1588.71) raw_noncoding(1864.00) offset(275.29) 
+39395	38535	terminal-	4	6	{snap_scaffold_5-snap.72-T1;snap},{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{GeneMark_model.2295_t;GeneMark}
+39468	39396	INTRON			{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+39597	39469	internal-	4	6	{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+39695	39598	INTRON			{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+40211	39696	internal-	4	6	{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+40282	40212	INTRON			{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+40363	40283	internal-	4	6	{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+40446	40364	INTRON			{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+40593	40447	initial-	4	6	{GlimmerHMM_glimmerT_2125-T1;GlimmerHMM},{Augustus_model.g1744.t1;Augustus},{GeneMark_model.2295_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.93 41215-42242 orient(-) score(4677.00) noncoding_equivalent(1596.47) raw_noncoding(2812.82) offset(1216.35) 
+41279	41215	terminal-	5	6	{GlimmerHMM_glimmerT_2126-T1;GlimmerHMM},{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark}
+41349	41280	INTRON			{GlimmerHMM_glimmerT_2126-T1;GlimmerHMM},{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+41485	41350	internal-	4	4	{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+41578	41486	INTRON			{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+41769	41579	internal-	5	6	{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+42047	41770	INTRON			{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+42086	42048	internal-	5	4	{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+42178	42087	INTRON			{HiQ_model.g1745.t1;HiQ},{GeneMark_model.2296_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2146/Target=lcl|PJQD01000021_1_prot_POY74808_1_2126;exonerate}
+42242	42179	initial-	4	4	{HiQ_model.g1745.t1;HiQ}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.80 42428-43070 orient(+) score(2096.00) noncoding_equivalent(749.52) raw_noncoding(786.70) offset(37.18) 
+42428	42516	initial+	1	2	{GlimmerHMM_glimmerT_2127-T1;GlimmerHMM},{Augustus_model.g1746.t1;Augustus},{GeneMark_model.2297_t;GeneMark}
+42517	42586	INTRON			{GlimmerHMM_glimmerT_2127-T1;GlimmerHMM},{Augustus_model.g1746.t1;Augustus},{GeneMark_model.2297_t;GeneMark}
+42587	42678	internal+	3	1	{GlimmerHMM_glimmerT_2127-T1;GlimmerHMM},{Augustus_model.g1746.t1;Augustus},{GeneMark_model.2297_t;GeneMark}
+42679	42750	INTRON			{GlimmerHMM_glimmerT_2127-T1;GlimmerHMM},{Augustus_model.g1746.t1;Augustus},{GeneMark_model.2297_t;GeneMark}
+42751	43070	terminal+	2	3	{GeneMark_model.2297_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 4.58 43362-44792 orient(+) score(4694.00) noncoding_equivalent(1025.83) raw_noncoding(1025.83) offset(0.00) 
+43362	44792	single+	1	3	{GeneMark_model.2298_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 7.86 45542-47701 orient(-) score(8000.00) noncoding_equivalent(1017.82) raw_noncoding(1093.36) offset(75.54) 
+46371	45542	terminal-	5	6	{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+46438	46372	INTRON			{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+46775	46439	internal-	4	4	{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+46852	46776	INTRON			{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+47164	46853	internal-	4	6	{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+47218	47165	INTRON			{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+47701	47219	initial-	4	6	{GeneMark_model.2299_t;GeneMark},{GlimmerHMM_glimmerT_2128-T1;GlimmerHMM},{Augustus_model.g1747.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.67 47800-49010 orient(+) score(3853.00) noncoding_equivalent(1441.75) raw_noncoding(2023.49) offset(581.74) 
+47800	47851	initial+	1	1	{Augustus_model.g1748.t1;Augustus},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+47852	47970	INTRON			{Augustus_model.g1748.t1;Augustus},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+47971	48292	internal+	2	2	{Augustus_model.g1748.t1;Augustus},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+48293	48370	INTRON			{Augustus_model.g1748.t1;Augustus},{GeneMark_model.2300_t;GeneMark}
+48371	48416	internal+	3	3	{Augustus_model.g1748.t1;Augustus}
+48417	48478	INTRON			{Augustus_model.g1748.t1;Augustus}
+48479	48546	internal+	1	2	{Augustus_model.g1748.t1;Augustus},{GeneMark_model.2300_t;GeneMark}
+48547	48616	INTRON			{Augustus_model.g1748.t1;Augustus},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+48617	48713	internal+	3	3	{Augustus_model.g1748.t1;Augustus},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+48714	48818	INTRON			{Augustus_model.g1748.t1;Augustus},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+48819	49010	terminal+	1	3	{snap_scaffold_5-snap.79-T1;snap},{GlimmerHMM_glimmerT_2129-T1;GlimmerHMM},{GeneMark_model.2300_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 7.16 49230-51348 orient(-) score(7544.00) noncoding_equivalent(1054.00) raw_noncoding(1060.00) offset(6.00) 
+50110	49230	terminal-	5	6	{Augustus_model.g1749.t1;Augustus},{GeneMark_model.2301_t;GeneMark},{GlimmerHMM_glimmerT_2130-T1;GlimmerHMM}
+50174	50111	INTRON			{Augustus_model.g1749.t1;Augustus},{GeneMark_model.2301_t;GeneMark},{GlimmerHMM_glimmerT_2130-T1;GlimmerHMM}
+51348	50175	initial-	4	4	{Augustus_model.g1749.t1;Augustus},{GeneMark_model.2301_t;GeneMark},{GlimmerHMM_glimmerT_2130-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.92 52360-53882 orient(+) score(4806.00) noncoding_equivalent(1643.31) raw_noncoding(1829.00) offset(185.69) 
+52360	52456	initial+	1	1	{GeneMark_model.2302_t;GeneMark}
+52457	52513	INTRON			{GlimmerHMM_glimmerT_2131-T1;GlimmerHMM},{Augustus_model.g1750.t1;Augustus},{GeneMark_model.2302_t;GeneMark}
+52514	53123	internal+	2	2	{GlimmerHMM_glimmerT_2131-T1;GlimmerHMM},{GeneMark_model.2302_t;GeneMark}
+53124	53187	INTRON			{GlimmerHMM_glimmerT_2131-T1;GlimmerHMM},{Augustus_model.g1750.t1;Augustus},{GeneMark_model.2302_t;GeneMark}
+53188	53512	internal+	3	3	{GlimmerHMM_glimmerT_2131-T1;GlimmerHMM},{Augustus_model.g1750.t1;Augustus},{GeneMark_model.2302_t;GeneMark}
+53513	53576	INTRON			{GlimmerHMM_glimmerT_2131-T1;GlimmerHMM},{Augustus_model.g1750.t1;Augustus},{GeneMark_model.2302_t;GeneMark}
+53577	53882	terminal+	1	3	{GlimmerHMM_glimmerT_2131-T1;GlimmerHMM},{Augustus_model.g1750.t1;Augustus},{GeneMark_model.2302_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.90 54805-58229 orient(+) score(10283.00) noncoding_equivalent(3540.58) raw_noncoding(4149.71) offset(609.14) 
+54805	55824	initial+	1	3	{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2303_t;GeneMark}
+55825	56050	INTRON			{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2303_t;GeneMark}
+56051	56483	internal+	1	1	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2132-T1;GlimmerHMM},{GeneMark_model.2303_t;GeneMark}
+56484	56548	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2132-T1;GlimmerHMM},{GeneMark_model.2303_t;GeneMark}
+56549	56947	internal+	2	1	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2132-T1;GlimmerHMM},{GeneMark_model.2303_t;GeneMark}
+56948	57005	INTRON			{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2303_t;GeneMark}
+57006	57202	internal+	2	3	{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2303_t;GeneMark}
+57203	57266	INTRON			{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2303_t;GeneMark}
+57267	58229	terminal+	1	3	{GeneMark_model.2303_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.90 58494-60821 orient(+) score(10140.00) noncoding_equivalent(2599.05) raw_noncoding(3174.00) offset(574.95) 
+58494	58554	initial+	1	1	{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark}
+58555	58645	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+58646	58718	internal+	2	2	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+58719	58819	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+58820	59394	internal+	3	1	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+59395	59459	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+59460	59479	internal+	2	3	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+59480	59543	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2133-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+59544	59806	internal+	1	2	{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+59807	59891	INTRON			{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+59892	60226	internal+	3	1	{Augustus_model.g1751.t1;Augustus},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+60227	60297	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2134-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+60298	60411	internal+	2	1	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2134-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+60412	60508	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2134-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+60509	60664	internal+	2	1	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2134-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+60665	60747	INTRON			{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2134-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark},{ev_type:exonerate/ID=match.2566964.980/Target=lcl|KQ954542_1_prot_KWU41349_1_6280;exonerate}
+60748	60821	terminal+	2	3	{Augustus_model.g1751.t1;Augustus},{GlimmerHMM_glimmerT_2134-T1;GlimmerHMM},{GeneMark_model.2304_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.62 60976-62854 orient(-) score(6170.00) noncoding_equivalent(2351.10) raw_noncoding(2805.14) offset(454.04) 
+61004	60976	terminal-	5	6	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+61067	61005	INTRON			{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+61280	61068	internal-	5	4	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+61356	61281	INTRON			{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+61596	61357	internal-	5	4	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+61663	61597	INTRON			{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+61782	61664	internal-	6	4	{Augustus_model.g1752.t1;Augustus},{GeneMark_model.2305_t;GeneMark}
+61848	61783	INTRON			{Augustus_model.g1752.t1;Augustus},{GeneMark_model.2305_t;GeneMark}
+62044	61849	internal-	5	5	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62108	62045	INTRON			{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62207	62109	internal-	5	4	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62267	62208	INTRON			{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62349	62268	internal-	4	4	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62412	62350	INTRON			{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62738	62413	internal-	5	6	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62802	62739	INTRON			{Augustus_model.g1752.t1;Augustus},{snap_scaffold_5-snap.87-T1;snap},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+62854	62803	initial-	4	4	{Augustus_model.g1752.t1;Augustus},{GlimmerHMM_glimmerT_2135-T1;GlimmerHMM},{GeneMark_model.2305_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 12.60 63554-70148 orient(+) score(24692.00) noncoding_equivalent(1959.88) raw_noncoding(2201.00) offset(241.12) 
+63554	64439	initial+	1	1	{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+64440	64501	INTRON			{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+64502	69049	internal+	2	1	{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+69050	69116	INTRON			{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+69117	69259	internal+	2	3	{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+69260	69317	INTRON			{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+69318	69795	internal+	1	1	{Augustus_model.g1753.t1;Augustus},{GlimmerHMM_glimmerT_2136-T1;GlimmerHMM},{GeneMark_model.2306_t;GeneMark}
+69796	69861	INTRON			{Augustus_model.g1753.t1;Augustus},{GeneMark_model.2306_t;GeneMark}
+69862	70148	terminal+	2	3	{Augustus_model.g1753.t1;Augustus},{GeneMark_model.2306_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 90.56 70507-71496 orient(-) score(3915.00) noncoding_equivalent(43.23) raw_noncoding(43.23) offset(0.00) 
+71496	70507	single-	4	6	{GlimmerHMM_glimmerT_2137-T1;GlimmerHMM},{GeneMark_model.2307_t;GeneMark},{Augustus_model.g1754.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.63 72862-74662 orient(-) score(5440.00) noncoding_equivalent(2068.00) raw_noncoding(2576.63) offset(508.63) 
+73158	72862	terminal-	4	6	{Augustus_model.g1755.t1;Augustus},{GlimmerHMM_glimmerT_2138-T1;GlimmerHMM},{GeneMark_model.2308_t;GeneMark}
+73249	73159	INTRON			{Augustus_model.g1755.t1;Augustus},{GlimmerHMM_glimmerT_2138-T1;GlimmerHMM},{GeneMark_model.2308_t;GeneMark}
+73778	73250	internal-	6	6	{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+73838	73779	INTRON			{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+74132	73839	internal-	6	5	{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+74194	74133	INTRON			{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+74270	74195	internal-	5	5	{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+74328	74271	INTRON			{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+74410	74329	internal-	4	4	{Augustus_model.g1755.t1;Augustus},{GeneMark_model.2308_t;GeneMark}
+74476	74411	INTRON			{Augustus_model.g1755.t1;Augustus},{GlimmerHMM_glimmerT_2139-T1;GlimmerHMM},{GeneMark_model.2308_t;GeneMark}
+74662	74477	initial-	4	6	{Augustus_model.g1755.t1;Augustus},{GlimmerHMM_glimmerT_2139-T1;GlimmerHMM},{GeneMark_model.2308_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.98 75006-76472 orient(+) score(6140.00) noncoding_equivalent(1543.39) raw_noncoding(2058.00) offset(514.61) 
+75006	75169	initial+	1	2	{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus}
+75170	75305	INTRON			{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+75306	75447	internal+	3	3	{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+75448	75508	INTRON			{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+75509	75979	internal+	1	3	{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+75980	76053	INTRON			{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+76054	76200	internal+	1	3	{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+76201	76388	INTRON			{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus},{ev_type:exonerate/ID=match.2566964.2090/Target=lcl|KQ954542_1_prot_KWU41354_1_6285;exonerate}
+76389	76472	terminal+	1	3	{GlimmerHMM_glimmerT_2140-T1;GlimmerHMM},{GeneMark_model.2309_t;GeneMark},{Augustus_model.g1756.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.74 77128-77988 orient(+) score(2319.00) noncoding_equivalent(1331.29) raw_noncoding(1704.57) offset(373.28) 
+77128	77308	initial+	1	1	{GlimmerHMM_glimmerT_2141-T1;GlimmerHMM},{GeneMark_model.2310_t;GeneMark},{Augustus_model.g1757.t1;Augustus}
+77309	77408	INTRON			{GlimmerHMM_glimmerT_2141-T1;GlimmerHMM},{GeneMark_model.2310_t;GeneMark},{Augustus_model.g1757.t1;Augustus}
+77409	77677	internal+	2	3	{GlimmerHMM_glimmerT_2141-T1;GlimmerHMM},{GeneMark_model.2310_t;GeneMark},{Augustus_model.g1757.t1;Augustus}
+77678	77748	INTRON			{GlimmerHMM_glimmerT_2141-T1;GlimmerHMM},{GeneMark_model.2310_t;GeneMark},{Augustus_model.g1757.t1;Augustus}
+77749	77856	internal+	1	3	{GlimmerHMM_glimmerT_2141-T1;GlimmerHMM},{GeneMark_model.2310_t;GeneMark},{Augustus_model.g1757.t1;Augustus}
+77857	77922	INTRON			{GeneMark_model.2310_t;GeneMark}
+77923	77988	terminal+	1	3	{GeneMark_model.2310_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.27 78328-79898 orient(+) score(3626.00) noncoding_equivalent(2845.44) raw_noncoding(4301.98) offset(1456.54) 
+78328	78435	initial+	1	3	{GeneMark_model.2311_t;GeneMark}
+78436	78495	INTRON			{GeneMark_model.2311_t;GeneMark}
+78496	78530	internal+	1	2	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78531	78606	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78607	78687	internal+	3	2	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78688	78745	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78746	78757	internal+	3	2	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78758	78819	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78820	78887	internal+	3	1	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78888	78946	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78947	78997	internal+	2	1	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+78998	79063	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79064	79133	internal+	2	2	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79134	79198	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79199	79305	internal+	3	1	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79306	79372	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79373	79432	internal+	2	1	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79433	79488	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79489	79514	internal+	2	3	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79515	79583	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79584	79722	internal+	1	1	{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+79723	79809	INTRON			{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2192/Target=lcl|PJQD01000021_1_prot_POY74823_1_2140;exonerate}
+79810	79898	terminal+	2	3	{GlimmerHMM_glimmerT_2141-T1;GlimmerHMM},{Augustus_model.g1757.t1;Augustus},{GeneMark_model.2311_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 6.89 80090-82306 orient(-) score(7854.00) noncoding_equivalent(1140.19) raw_noncoding(1206.19) offset(66.00) 
+81005	80090	terminal-	6	6	{Augustus_model.g1758.t1;Augustus},{GlimmerHMM_glimmerT_2142-T1;GlimmerHMM},{GeneMark_model.2312_t;GeneMark}
+81071	81006	INTRON			{Augustus_model.g1758.t1;Augustus},{GlimmerHMM_glimmerT_2142-T1;GlimmerHMM},{GeneMark_model.2312_t;GeneMark}
+82306	81072	initial-	4	5	{Augustus_model.g1758.t1;Augustus},{GlimmerHMM_glimmerT_2142-T1;GlimmerHMM},{GeneMark_model.2312_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.96 82703-84483 orient(+) score(5816.00) noncoding_equivalent(1469.52) raw_noncoding(1907.00) offset(437.48) 
+82703	82806	initial+	1	2	{GlimmerHMM_glimmerT_2143-T1;GlimmerHMM},{Augustus_model.g1759.t1;Augustus},{GeneMark_model.2313_t;GeneMark}
+82807	82865	INTRON			{GlimmerHMM_glimmerT_2143-T1;GlimmerHMM},{Augustus_model.g1759.t1;Augustus},{GeneMark_model.2313_t;GeneMark}
+82866	83047	internal+	3	1	{Augustus_model.g1759.t1;Augustus}
+83048	83107	INTRON			{Augustus_model.g1759.t1;Augustus}
+83108	83208	internal+	2	3	{Augustus_model.g1759.t1;Augustus}
+83209	83290	INTRON			{Augustus_model.g1759.t1;Augustus},{GeneMark_model.2313_t;GeneMark}
+83291	83561	internal+	1	1	{GlimmerHMM_glimmerT_2143-T1;GlimmerHMM},{Augustus_model.g1759.t1;Augustus},{GeneMark_model.2313_t;GeneMark}
+83562	83647	INTRON			{GlimmerHMM_glimmerT_2143-T1;GlimmerHMM},{Augustus_model.g1759.t1;Augustus},{GeneMark_model.2313_t;GeneMark}
+83648	84483	terminal+	2	3	{GlimmerHMM_glimmerT_2143-T1;GlimmerHMM},{Augustus_model.g1759.t1;Augustus},{GeneMark_model.2313_t;GeneMark},{snap_scaffold_5-snap.96-T1;snap}
+
+# EVM prediction: Mode:STANDARD S-ratio: 6.19 84682-87823 orient(-) score(11348.00) noncoding_equivalent(1833.03) raw_noncoding(2217.20) offset(384.17) 
+84744	84682	terminal-	4	6	{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+84820	84745	INTRON			{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+85639	84821	internal-	4	6	{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+85704	85640	INTRON			{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+85771	85705	internal-	6	6	{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+85830	85772	INTRON			{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+85939	85831	internal-	5	5	{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+85999	85940	INTRON			{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+86436	86000	internal-	6	4	{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+86497	86437	INTRON			{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+86719	86498	internal-	6	5	{Augustus_model.g1760.t1;Augustus},{GlimmerHMM_glimmerT_2144-T1;GlimmerHMM},{GeneMark_model.2314_t;GeneMark}
+86780	86720	INTRON			{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2314_t;GeneMark}
+87823	86781	initial-	4	5	{GeneMark_model.2314_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.75 88141-90119 orient(-) score(5036.00) noncoding_equivalent(2876.64) raw_noncoding(3583.16) offset(706.52) 
+88218	88141	terminal-	4	6	{GlimmerHMM_glimmerT_2145-T1;GlimmerHMM},{GeneMark_model.2315_t;GeneMark}
+88285	88219	INTRON			{GlimmerHMM_glimmerT_2145-T1;GlimmerHMM},{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+88897	88286	internal-	4	6	{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+88966	88898	INTRON			{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+89137	88967	internal-	4	6	{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+89200	89138	INTRON			{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+89457	89201	internal-	5	6	{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+89547	89458	INTRON			{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+89760	89548	internal-	5	4	{GeneMark_model.2315_t;GeneMark}
+89826	89761	INTRON			{GeneMark_model.2315_t;GeneMark}
+89995	89827	internal-	4	4	{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+90059	89996	INTRON			{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+90119	90060	initial-	4	6	{Augustus_model.g1760.t1;Augustus},{GeneMark_model.2315_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.57 90435-91751 orient(+) score(3375.00) noncoding_equivalent(2147.79) raw_noncoding(2675.76) offset(527.96) 
+90435	90441	initial+	1	1	{snap_scaffold_5-snap.100-T1;snap},{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark},{GlimmerHMM_glimmerT_2146-T1;GlimmerHMM}
+90442	90503	INTRON			{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark},{GlimmerHMM_glimmerT_2146-T1;GlimmerHMM}
+90504	90631	internal+	2	3	{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark},{GlimmerHMM_glimmerT_2146-T1;GlimmerHMM}
+90632	90708	INTRON			{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark}
+90709	90742	internal+	1	1	{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark}
+90743	90801	INTRON			{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark}
+90802	91109	internal+	2	3	{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark}
+91110	91174	INTRON			{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark}
+91175	91379	internal+	1	1	{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark},{GlimmerHMM_glimmerT_2146-T1;GlimmerHMM}
+91380	91449	INTRON			{Augustus_model.g1761.t1;Augustus},{GeneMark_model.2316_t;GeneMark},{GlimmerHMM_glimmerT_2146-T1;GlimmerHMM}
+91450	91751	terminal+	2	3	{GeneMark_model.2316_t;GeneMark},{GlimmerHMM_glimmerT_2146-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 9.11 91839-93185 orient(-) score(4854.00) noncoding_equivalent(532.83) raw_noncoding(532.83) offset(0.00) 
+93185	91839	single-	4	6	{GeneMark_model.2317_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.86 93309-94633 orient(+) score(3872.00) noncoding_equivalent(2083.11) raw_noncoding(2539.09) offset(455.98) 
+93309	93351	initial+	1	1	{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+93352	93563	INTRON			{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+93564	93677	internal+	2	1	{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+93678	93739	INTRON			{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+93740	93935	internal+	2	2	{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+93936	93989	INTRON			{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+93990	94350	internal+	3	3	{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+94351	94411	INTRON			{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+94412	94633	terminal+	1	3	{GlimmerHMM_glimmerT_2148-T1;GlimmerHMM},{Augustus_model.g1763.t1;Augustus},{GeneMark_model.2318_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.80 95026-96653 orient(+) score(5461.00) noncoding_equivalent(1438.53) raw_noncoding(1535.00) offset(96.47) 
+95026	95289	initial+	1	3	{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+95290	95353	INTRON			{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+95354	95609	internal+	1	1	{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+95610	95679	INTRON			{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+95680	95987	internal+	2	3	{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+95988	96053	INTRON			{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+96054	96653	terminal+	1	3	{GlimmerHMM_glimmerT_2149-T1;GlimmerHMM},{Augustus_model.g1764.t1;Augustus},{GeneMark_model.2319_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.87 96982-98568 orient(+) score(7990.00) noncoding_equivalent(2062.27) raw_noncoding(2658.00) offset(595.73) 
+96982	97191	initial+	1	3	{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM}
+97192	97273	INTRON			{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97274	97330	internal+	1	3	{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97331	97395	INTRON			{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97396	97471	internal+	1	1	{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97472	97544	INTRON			{Augustus_model.g1765.t1;Augustus},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97545	97728	internal+	2	2	{Augustus_model.g1765.t1;Augustus},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97729	97795	INTRON			{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97796	97863	internal+	3	1	{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97864	97936	INTRON			{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+97937	98232	internal+	2	3	{Augustus_model.g1765.t1;Augustus},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+98233	98301	INTRON			{Augustus_model.g1765.t1;Augustus},{snap_scaffold_5-snap.104-T1;snap},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.1978/Target=lcl|PJQD01000021_1_prot_POY74831_1_2148;exonerate},{ev_type:exonerate/ID=match.2566964.1984/Target=lcl|KQ954542_1_prot_KWU41362_1_6293;exonerate}
+98302	98568	terminal+	1	3	{Augustus_model.g1765.t1;Augustus},{snap_scaffold_5-snap.104-T1;snap},{GeneMark_model.2320_t;GeneMark},{GlimmerHMM_glimmerT_2150-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.78 98657-100779 orient(-) score(10863.00) noncoding_equivalent(3908.00) raw_noncoding(5135.00) offset(1227.00) 
+98740	98657	terminal-	4	6	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM}
+98805	98741	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+98950	98806	internal-	6	6	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99032	98951	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99213	99033	internal-	5	5	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99296	99214	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99465	99297	internal-	4	4	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99547	99466	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99660	99548	internal-	5	6	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99726	99661	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99834	99727	internal-	5	4	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+99929	99835	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+100048	99930	internal-	6	4	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+100120	100049	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+100494	100121	internal-	4	5	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+100590	100495	INTRON			{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.2046/Target=lcl|KQ954542_1_prot_KWU41363_1_6294;exonerate}
+100779	100591	initial-	4	6	{HiQ_model.g1766.t1;HiQ},{GeneMark_model.2321_t;GeneMark},{GlimmerHMM_glimmerT_2151-T1;GlimmerHMM}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.31 102713-107435 orient(+) score(17788.00) noncoding_equivalent(5368.52) raw_noncoding(6313.00) offset(944.48) 
+102713	102942	initial+	1	2	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+102943	103174	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+103175	103265	internal+	3	3	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+103266	103335	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+103336	103484	internal+	1	2	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+103485	103548	INTRON			{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+103549	104820	internal+	3	2	{GeneMark_model.2323_t;GeneMark}
+104821	104879	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+104880	105306	internal+	3	3	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+105307	105369	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+105370	106072	internal+	1	1	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+106073	106129	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+106130	106551	internal+	2	3	{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+106552	106615	INTRON			{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+106616	106749	internal+	1	2	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+106750	106812	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+106813	106933	internal+	3	3	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+106934	107001	INTRON			{snap_scaffold_5-snap.107-T1;snap},{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate},{ev_type:exonerate/ID=match.2566964.2063/Target=lcl|KQ954468_1_prot_KWU46116_1_1364;exonerate}
+107002	107171	internal+	1	2	{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate}
+107172	107235	INTRON			{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate}
+107236	107320	internal+	3	3	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate}
+107321	107393	INTRON			{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2066/Target=lcl|NW_017264933_1_prot_XP_018271419_1_3377;exonerate}
+107394	107435	terminal+	1	3	{GlimmerHMM_glimmerT_2152-T1;GlimmerHMM},{Augustus_model.g1767.t1;Augustus},{GeneMark_model.2323_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.10 107639-107961 orient(-) score(969.00) noncoding_equivalent(461.00) raw_noncoding(536.00) offset(75.00) 
+107772	107639	terminal-	5	6	{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1768.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+107843	107773	INTRON			{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1768.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+107961	107844	initial-	4	4	{Augustus_model.g1768.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.94 108246-109609 orient(-) score(3841.00) noncoding_equivalent(1981.27) raw_noncoding(2551.79) offset(570.52) 
+108278	108246	terminal-	4	6	{Augustus_model.g1769.t1;Augustus}
+108343	108279	INTRON			{Augustus_model.g1769.t1;Augustus}
+108365	108344	internal-	6	6	{Augustus_model.g1769.t1;Augustus}
+108431	108366	INTRON			{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+108650	108432	internal-	6	5	{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+108721	108651	INTRON			{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+108742	108722	internal-	6	5	{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+108809	108743	INTRON			{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+108883	108810	internal-	4	5	{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+108944	108884	INTRON			{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+109069	108945	internal-	5	6	{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+109125	109070	INTRON			{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+109609	109126	initial-	4	4	{GlimmerHMM_glimmerT_2153-T1;GlimmerHMM},{Augustus_model.g1769.t1;Augustus},{GeneMark_model.2324_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.08 110069-111641 orient(-) score(4767.00) noncoding_equivalent(2288.73) raw_noncoding(3124.00) offset(835.27) 
+110347	110069	terminal-	4	6	{Augustus_model.g1770.t1;Augustus},{snap_scaffold_5-snap.108-T1;snap},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110423	110348	INTRON			{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110547	110424	internal-	6	6	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110612	110548	INTRON			{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110670	110613	internal-	5	5	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110731	110671	INTRON			{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110782	110732	internal-	5	4	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110849	110783	INTRON			{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110865	110850	internal-	4	4	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+110926	110866	INTRON			{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+111003	110927	internal-	5	6	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+111061	111004	INTRON			{Augustus_model.g1770.t1;Augustus},{GeneMark_model.2325_t;GeneMark}
+111250	111062	internal-	5	4	{Augustus_model.g1770.t1;Augustus},{GeneMark_model.2325_t;GeneMark}
+111313	111251	INTRON			{Augustus_model.g1770.t1;Augustus},{GeneMark_model.2325_t;GeneMark}
+111346	111314	internal-	5	4	{Augustus_model.g1770.t1;Augustus},{GeneMark_model.2325_t;GeneMark}
+111435	111347	INTRON			{Augustus_model.g1770.t1;Augustus},{GeneMark_model.2325_t;GeneMark}
+111561	111436	internal-	5	4	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+111628	111562	INTRON			{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+111641	111629	initial-	4	4	{Augustus_model.g1770.t1;Augustus},{GlimmerHMM_glimmerT_2154-T1;GlimmerHMM},{GeneMark_model.2325_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.86 111870-113536 orient(+) score(5024.00) noncoding_equivalent(1758.66) raw_noncoding(1817.66) offset(59.00) 
+111870	112339	initial+	1	2	{GlimmerHMM_glimmerT_2155-T1;GlimmerHMM},{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2326_t;GeneMark}
+112340	112398	INTRON			{GlimmerHMM_glimmerT_2155-T1;GlimmerHMM},{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2326_t;GeneMark}
+112399	113536	terminal+	3	3	{GlimmerHMM_glimmerT_2155-T1;GlimmerHMM},{GeneMark_model.2326_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.25 113843-116704 orient(+) score(10036.00) noncoding_equivalent(4455.36) raw_noncoding(6877.70) offset(2422.34) 
+113843	113860	initial+	1	3	{GeneMark_model.2327_t;GeneMark}
+113861	114180	INTRON			{GeneMark_model.2327_t;GeneMark}
+114181	114265	internal+	1	1	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark}
+114266	114347	INTRON			{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114348	114393	internal+	2	2	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114394	114503	INTRON			{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114504	114541	internal+	3	1	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114542	114603	INTRON			{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114604	114731	internal+	2	3	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114732	114804	INTRON			{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114805	114826	internal+	1	1	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114827	114920	INTRON			{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114921	114960	internal+	2	2	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+114961	115036	INTRON			{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115037	115122	internal+	3	1	{Augustus_model.g1771.t1;Augustus},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115123	115192	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115193	115319	internal+	2	2	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115320	115388	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115389	115461	internal+	3	3	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115462	115522	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115523	115698	internal+	1	2	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115699	115761	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115762	115837	internal+	3	3	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115838	115904	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115905	115965	internal+	1	1	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+115966	116032	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116033	116230	internal+	2	1	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116231	116292	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116293	116347	internal+	2	2	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116348	116412	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116413	116479	internal+	3	3	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116480	116557	INTRON			{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2084/Target=lcl|KQ954468_1_prot_KWU46125_1_1373;exonerate}
+116558	116704	terminal+	1	3	{Augustus_model.g1771.t1;Augustus},{GlimmerHMM_glimmerT_2156-T1;GlimmerHMM},{GeneMark_model.2327_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 2.41 116878-117818 orient(-) score(3659.00) noncoding_equivalent(1517.00) raw_noncoding(1829.00) offset(312.00) 
+116997	116878	terminal-	4	6	{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark}
+117062	116998	INTRON			{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2128/Target=lcl|KQ954468_1_prot_KWU46126_1_1374;exonerate}
+117177	117063	internal-	6	6	{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2128/Target=lcl|KQ954468_1_prot_KWU46126_1_1374;exonerate}
+117255	117178	INTRON			{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark}
+117356	117256	internal-	4	5	{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark}
+117439	117357	INTRON			{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2128/Target=lcl|KQ954468_1_prot_KWU46126_1_1374;exonerate}
+117498	117440	internal-	5	6	{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2128/Target=lcl|KQ954468_1_prot_KWU46126_1_1374;exonerate}
+117568	117499	INTRON			{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2128/Target=lcl|KQ954468_1_prot_KWU46126_1_1374;exonerate}
+117818	117569	initial-	4	4	{Augustus_model.g1772.t1;Augustus},{GlimmerHMM_glimmerT_2157-T1;GlimmerHMM},{GeneMark_model.2328_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.79 118203-119448 orient(+) score(3379.00) noncoding_equivalent(1882.61) raw_noncoding(2176.00) offset(293.39) 
+118203	118311	initial+	1	1	{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{Augustus_model.g1773.t1;Augustus},{GeneMark_model.2329_t;GeneMark}
+118312	118380	INTRON			{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{Augustus_model.g1773.t1;Augustus},{GeneMark_model.2329_t;GeneMark}
+118381	118508	internal+	2	3	{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{Augustus_model.g1773.t1;Augustus},{GeneMark_model.2329_t;GeneMark}
+118509	118579	INTRON			{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{GeneMark_model.2329_t;GeneMark}
+118580	119197	internal+	1	3	{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{GeneMark_model.2329_t;GeneMark}
+119198	119271	INTRON			{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{Augustus_model.g1773.t1;Augustus},{GeneMark_model.2329_t;GeneMark}
+119272	119448	terminal+	1	3	{GlimmerHMM_glimmerT_2158-T1;GlimmerHMM},{Augustus_model.g1773.t1;Augustus},{GeneMark_model.2329_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.59 119690-121869 orient(-) score(5924.00) noncoding_equivalent(3718.43) raw_noncoding(5435.00) offset(1716.57) 
+119733	119690	terminal-	5	6	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+119801	119734	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+119855	119802	internal-	5	4	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+119918	119856	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+119972	119919	internal-	5	4	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120038	119973	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120272	120039	internal-	5	4	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120337	120273	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120400	120338	internal-	5	4	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120460	120401	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120492	120461	internal-	6	4	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120555	120493	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120600	120556	internal-	6	5	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120656	120601	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120710	120657	internal-	6	5	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120778	120711	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120853	120779	internal-	6	5	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+120913	120854	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+120952	120914	internal-	6	5	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+121030	120953	INTRON			{GeneMark_model.2330_t;GeneMark}
+121036	121031	internal-	6	5	{GeneMark_model.2330_t;GeneMark}
+121107	121037	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+121166	121108	internal-	4	5	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+121235	121167	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+121363	121236	internal-	5	6	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+121437	121364	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+121462	121438	internal-	4	4	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+121523	121463	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+121566	121524	internal-	6	6	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+121638	121567	INTRON			{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+121677	121639	internal-	6	5	{Augustus_model.g1774.t1;Augustus},{GeneMark_model.2330_t;GeneMark}
+121831	121678	INTRON			{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+121869	121832	initial-	4	5	{Augustus_model.g1774.t1;Augustus},{GlimmerHMM_glimmerT_2159-T1;GlimmerHMM},{GeneMark_model.2330_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.66 122186-123099 orient(+) score(3199.00) noncoding_equivalent(874.72) raw_noncoding(1094.00) offset(219.28) 
+122186	122199	initial+	1	2	{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{GeneMark_model.2331_t;GeneMark}
+122200	122264	INTRON			{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{GeneMark_model.2331_t;GeneMark}
+122265	122344	internal+	3	1	{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{GeneMark_model.2331_t;GeneMark}
+122345	122417	INTRON			{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{GeneMark_model.2331_t;GeneMark}
+122418	122570	internal+	2	1	{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{GeneMark_model.2331_t;GeneMark}
+122571	122647	INTRON			{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{GeneMark_model.2331_t;GeneMark}
+122648	123099	terminal+	2	3	{GlimmerHMM_glimmerT_2160-T1;GlimmerHMM},{Augustus_model.g1775.t1;Augustus},{snap_scaffold_5-snap.113-T1;snap},{GeneMark_model.2331_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 6.65 124339-133646 orient(-) score(33137.00) noncoding_equivalent(4986.44) raw_noncoding(5735.27) offset(748.82) 
+124509	124339	terminal-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+124579	124510	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+124651	124580	internal-	4	6	{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+124716	124652	INTRON			{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+124893	124717	internal-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+124951	124894	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+125095	124952	internal-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+125161	125096	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+125459	125162	internal-	6	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+125515	125460	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+128046	125516	internal-	4	5	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+128101	128047	INTRON			{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+128320	128102	internal-	4	6	{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+128393	128321	INTRON			{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+130538	128394	internal-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+130603	130539	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+133216	130604	internal-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+133290	133217	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+133425	133291	internal-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+133499	133426	INTRON			{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+133646	133500	initial-	4	6	{GlimmerHMM_glimmerT_2161-T1;GlimmerHMM},{GeneMark_model.2332_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 4.50 134075-135290 orient(-) score(4079.00) noncoding_equivalent(906.24) raw_noncoding(1055.14) offset(148.90) 
+134625	134075	terminal-	5	6	{GlimmerHMM_glimmerT_2162-T1;GlimmerHMM},{GeneMark_model.2333_t;GeneMark}
+134689	134626	INTRON			{GlimmerHMM_glimmerT_2162-T1;GlimmerHMM},{GeneMark_model.2333_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+134810	134690	internal-	4	4	{GeneMark_model.2333_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+134888	134811	INTRON			{GeneMark_model.2333_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+135290	134889	initial-	4	6	{GeneMark_model.2333_t;GeneMark},{Augustus_model.g1776.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.91 135837-139475 orient(-) score(12192.00) noncoding_equivalent(3118.93) raw_noncoding(3561.00) offset(442.07) 
+135929	135837	terminal-	4	6	{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+135996	135930	INTRON			{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+136056	135997	internal-	4	6	{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+136135	136057	INTRON			{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+137042	136136	internal-	6	6	{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+137116	137043	INTRON			{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+138521	137117	internal-	5	5	{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+138621	138522	INTRON			{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+138729	138622	internal-	5	4	{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+138862	138730	INTRON			{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+139475	138863	initial-	4	4	{GlimmerHMM_glimmerT_2163-T1;GlimmerHMM},{GeneMark_model.2334_t;GeneMark},{Augustus_model.g1777.t1;Augustus}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.06 139677-141772 orient(+) score(6609.00) noncoding_equivalent(2157.00) raw_noncoding(2366.00) offset(209.00) 
+139677	139731	initial+	1	1	{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{Augustus_model.g1778.t1;Augustus},{GeneMark_model.2335_t;GeneMark}
+139732	139809	INTRON			{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{Augustus_model.g1778.t1;Augustus},{GeneMark_model.2335_t;GeneMark}
+139810	140256	internal+	2	1	{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{GeneMark_model.2335_t;GeneMark}
+140257	140319	INTRON			{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{Augustus_model.g1778.t1;Augustus},{GeneMark_model.2335_t;GeneMark}
+140320	140772	internal+	2	1	{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{Augustus_model.g1778.t1;Augustus}
+140773	140828	INTRON			{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{Augustus_model.g1778.t1;Augustus},{GeneMark_model.2335_t;GeneMark}
+140829	141772	terminal+	2	3	{GlimmerHMM_glimmerT_2164-T1;GlimmerHMM},{GeneMark_model.2335_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.85 143398-145524 orient(-) score(5619.00) noncoding_equivalent(3032.10) raw_noncoding(3797.46) offset(765.36) 
+143555	143398	terminal-	5	6	{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2336_t;GeneMark}
+143817	143556	INTRON			{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2336_t;GeneMark}
+144758	143818	internal-	6	4	{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM}
+144834	144759	INTRON			{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2336_t;GeneMark}
+145134	144835	internal-	6	5	{Augustus_model.g1779.t1;Augustus},{GeneMark_model.2336_t;GeneMark}
+145198	145135	INTRON			{Augustus_model.g1779.t1;Augustus},{GeneMark_model.2336_t;GeneMark}
+145228	145199	internal-	6	5	{Augustus_model.g1779.t1;Augustus},{GeneMark_model.2336_t;GeneMark}
+145294	145229	INTRON			{Augustus_model.g1779.t1;Augustus},{GeneMark_model.2336_t;GeneMark}
+145524	145295	initial-	4	5	{GeneMark_model.2336_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.47 146005-148186 orient(-) score(5538.00) noncoding_equivalent(3762.61) raw_noncoding(5639.61) offset(1877.00) 
+146579	146005	terminal-	5	6	{GeneMark_model.2337_t;GeneMark}
+147391	146580	INTRON			{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM}
+147428	147392	internal-	4	4	{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM}
+147520	147429	INTRON			{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2337_t;GeneMark}
+147591	147521	internal-	5	6	{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2337_t;GeneMark}
+147720	147592	INTRON			{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2337_t;GeneMark}
+147901	147721	internal-	4	4	{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2337_t;GeneMark}
+147973	147902	INTRON			{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2337_t;GeneMark}
+148186	147974	initial-	4	6	{Augustus_model.g1779.t1;Augustus},{GlimmerHMM_glimmerT_2165-T1;GlimmerHMM},{GeneMark_model.2337_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 12.83 148647-153039 orient(-) score(16489.00) noncoding_equivalent(1285.57) raw_noncoding(1814.38) offset(528.81) 
+148819	148647	terminal-	5	6	{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+148891	148820	INTRON			{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+149429	148892	internal-	4	4	{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+149486	149430	INTRON			{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+149669	149487	internal-	4	6	{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+149741	149670	INTRON			{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+152532	149742	internal-	6	6	{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+152613	152533	INTRON			{Augustus_model.g1780.t1;Augustus},{GlimmerHMM_glimmerT_2166-T1;GlimmerHMM},{GeneMark_model.2338_t;GeneMark}
+152866	152614	internal-	5	5	{GeneMark_model.2338_t;GeneMark}
+153035	152867	INTRON			{snap_scaffold_5-snap.120-T1;snap}
+153039	153036	initial-	4	4	{snap_scaffold_5-snap.120-T1;snap}
+
+# EVM prediction: Mode:STANDARD S-ratio: 3.01 154535-155371 orient(+) score(3056.00) noncoding_equivalent(1014.52) raw_noncoding(1512.00) offset(497.48) 
+154535	154594	initial+	1	3	{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark}
+154595	154703	INTRON			{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark}
+154704	154801	internal+	1	2	{GlimmerHMM_glimmerT_2167-T1;GlimmerHMM},{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark}
+154802	154868	INTRON			{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2200/Target=lcl|KQ954468_1_prot_KWU46114_1_1362;exonerate}
+154869	154895	internal+	3	2	{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2200/Target=lcl|KQ954468_1_prot_KWU46114_1_1362;exonerate}
+154896	154962	INTRON			{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2200/Target=lcl|KQ954468_1_prot_KWU46114_1_1362;exonerate}
+154963	155012	internal+	3	1	{GlimmerHMM_glimmerT_2167-T1;GlimmerHMM},{Augustus_model.g1781.t1;Augustus},{GeneMark_model.2339_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2200/Target=lcl|KQ954468_1_prot_KWU46114_1_1362;exonerate}
+155013	155081	INTRON			{GlimmerHMM_glimmerT_2167-T1;GlimmerHMM},{Augustus_model.g1781.t1;Augustus},{snap_scaffold_5-snap.121-T1;snap},{GeneMark_model.2339_t;GeneMark},{ev_type:exonerate/ID=match.2566964.2200/Target=lcl|KQ954468_1_prot_KWU46114_1_1362;exonerate}
+155082	155371	terminal+	2	3	{GlimmerHMM_glimmerT_2167-T1;GlimmerHMM},{Augustus_model.g1781.t1;Augustus},{snap_scaffold_5-snap.121-T1;snap},{GeneMark_model.2339_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.90 155633-156690 orient(+) score(2940.00) noncoding_equivalent(1550.30) raw_noncoding(2096.00) offset(545.70) 
+155633	155723	initial+	1	1	{GlimmerHMM_glimmerT_2168-T1;GlimmerHMM},{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+155724	155826	INTRON			{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+155827	155849	internal+	2	3	{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+155850	155947	INTRON			{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+155948	156033	internal+	1	2	{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+156034	156101	INTRON			{GlimmerHMM_glimmerT_2168-T1;GlimmerHMM},{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+156102	156229	internal+	3	1	{GlimmerHMM_glimmerT_2168-T1;GlimmerHMM},{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+156230	156295	INTRON			{GlimmerHMM_glimmerT_2168-T1;GlimmerHMM},{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+156296	156690	terminal+	2	3	{GlimmerHMM_glimmerT_2168-T1;GlimmerHMM},{Augustus_model.g1782.t1;Augustus},{GeneMark_model.2340_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 4.50 159015-162296 orient(-) score(24672.00) noncoding_equivalent(5483.44) raw_noncoding(7749.00) offset(2265.56) 
+159328	159015	terminal-	5	6	{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM}
+159390	159329	INTRON			{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+159961	159391	internal-	4	4	{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+160082	159962	INTRON			{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+160353	160083	internal-	6	6	{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+161251	160354	INTRON			{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+161454	161252	internal-	4	5	{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+161531	161455	INTRON			{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM},{ev_type:exonerate/ID=match.2566964.431/Target=lcl|BJWK01000003_1_prot_GEM07352_1_1369;exonerate},{ev_type:exonerate/ID=match.2566964.449/Target=lcl|KQ954468_1_prot_KWU46110_1_1358;exonerate},{ev_type:exonerate/ID=match.2566964.437/Target=lcl|NW_017264933_1_prot_XP_018271478_1_3436;exonerate}
+162296	161532	initial-	4	6	{HiQ_model.g1783.t1;HiQ},{GeneMark_model.2341_t;GeneMark},{GlimmerHMM_glimmerT_2170-T1;GlimmerHMM}
+

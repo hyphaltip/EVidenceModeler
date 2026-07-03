@@ -1,0 +1,13 @@
+!! Predictions spanning range 31424 - 33447 [R1]
+# EVM prediction: Mode:STANDARD S-ratio: 1.73 31424-32041 orient(-) score(1565.00) noncoding_equivalent(907.05) raw_noncoding(1351.96) offset(444.91) 
+31648	31424	terminal-	4	6	{Augustus_model.g1820.t1;Augustus}
+31882	31649	INTRON			{Augustus_model.g1820.t1;Augustus},{GeneMark_model.2381_t;GeneMark}
+32041	31883	initial-	4	6	{Augustus_model.g1820.t1;Augustus},{GeneMark_model.2381_t;GeneMark}
+
+# EVM prediction: Mode:STANDARD S-ratio: 1.92 32236-33447 orient(+) score(3276.00) noncoding_equivalent(1706.00) raw_noncoding(2454.00) offset(748.00) 
+32236	32358	initial+	1	3	{GeneMark_model.2382_t;GeneMark},{Augustus_model.g1821.t1;Augustus},{GlimmerHMM_glimmerT_2227-T1;GlimmerHMM}
+32359	32427	INTRON			{GeneMark_model.2382_t;GeneMark},{Augustus_model.g1821.t1;Augustus},{GlimmerHMM_glimmerT_2227-T1;GlimmerHMM}
+32428	33087	internal+	1	3	{GeneMark_model.2382_t;GeneMark},{Augustus_model.g1821.t1;Augustus},{GlimmerHMM_glimmerT_2227-T1;GlimmerHMM}
+33088	33438	INTRON			{GeneMark_model.2382_t;GeneMark},{Augustus_model.g1821.t1;Augustus}
+33439	33447	terminal+	1	3	{GeneMark_model.2382_t;GeneMark},{Augustus_model.g1821.t1;Augustus}
+

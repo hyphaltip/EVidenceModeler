@@ -1,0 +1,82 @@
+-successfully changed directories to /bigdata/stajichlab/shared/projects/Rhodotorula/Ref_genomes/annotation/Rhodotorula_sphaerocarpa_TFCN_83C-1/predict_misc/EVM/scaffold_16/scaffold_16_1-14704
+
+-reading genomic sequence.
+
+** Processing features (+)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: +)
+-loading gene prediction evidence. (strand: +)Valid prediction for Augustus_model.g4687.t1
+Valid prediction for GlimmerHMM_glimmerT_5654-T1
+Valid prediction for GeneMark_model.6066_t
+Valid prediction for snap_scaffold_16-snap.3-T1
+
+-loading the search evidence (protein and EST search results, strand: +)
+-scoring exons (strand: +)
+
+** Processing features (-)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: -)
+-loading gene prediction evidence. (strand: -)Valid prediction for GlimmerHMM_glimmerT_5653-T1
+Valid prediction for GlimmerHMM_glimmerT_5655-T1
+Valid prediction for HiQ_model.g4688.t1
+Valid prediction for GeneMark_model.6065_t
+Valid prediction for snap_scaffold_16-snap.5-T1
+Valid prediction for GlimmerHMM_glimmerT_5652-T1
+Valid prediction for GeneMark_model.6067_t
+Valid prediction for snap_scaffold_16-snap.1-T1
+Valid prediction for snap_scaffold_16-snap.2-T1
+Valid prediction for snap_scaffold_16-snap.4-T1
+Valid prediction for Augustus_model.g4686.t1
+Couldn't classify 14315, 14409
+Sorry, prediction GeneMark_model.6064_t fails validation.
+(ATG)	 CC	12317-12367	GT	AGG
+(TTT)	 AG	12430-12485	GT	TCG
+(CTT)	 AG	12550-12718	GT	AGG
+(ATC)	 AG	12782-12912	GT	AAG
+(CTG)	 AG	12974-13080	GT	GGG
+(GCT)	 AG	13142-13418	GT	CGG
+(GAT)	 AG	13479-14080	GT	CGG
+(AGG)	 AG	14315-14409	GT	CGG
+-recovered GeneMark_model.6064_t, initial, 12317, 12367
+-recovered GeneMark_model.6064_t, internal, 12430, 12485
+-recovered GeneMark_model.6064_t, internal, 12550, 12718
+-recovered GeneMark_model.6064_t, internal, 12782, 12912
+-recovered GeneMark_model.6064_t, internal, 12974, 13080
+-recovered GeneMark_model.6064_t, internal, 13142, 13418
+-recovered GeneMark_model.6064_t, internal, 13479, 14080
+-recovered GeneMark_model.6064_t, internal, 14315, 14409
+Couldn't classify 14274, 14409
+Sorry, prediction Augustus_model.g4685.t1 fails validation.
+(ATG)	 CC	12317-12367	GT	AGG
+(TTT)	 AG	12430-12485	GT	TCG
+(CTT)	 AG	12550-12718	GT	AGG
+(ATC)	 AG	12782-12912	GT	AAG
+(CTG)	 AG	12974-13080	GT	GGG
+(GCT)	 AG	13142-13418	GT	CGG
+(GAT)	 AG	13479-14123	GT	GGG
+(AGG)	 AG	14274-14409	GT	CGG
+-recovered Augustus_model.g4685.t1, initial, 12317, 12367
+-recovered Augustus_model.g4685.t1, internal, 12430, 12485
+-recovered Augustus_model.g4685.t1, internal, 12550, 12718
+-recovered Augustus_model.g4685.t1, internal, 12782, 12912
+-recovered Augustus_model.g4685.t1, internal, 12974, 13080
+-recovered Augustus_model.g4685.t1, internal, 13142, 13418
+-recovered Augustus_model.g4685.t1, internal, 13479, 14123
+-recovered Augustus_model.g4685.t1, internal, 14274, 14409
+
+-loading the search evidence (protein and EST search results, strand: -)
+-scoring exons (strand: -)
+-building DP trellis
+
+-building trellis in range 1 - 14704
+-exon list size: 70
+
+
+building trellis
+1.4    2.8    4.2    5.6    6.9    8.3    9.7    11.1    12.5    13.9    15.3    16.7    18.1    19.4    20.8    22.2    23.6    25.0    26.4    27.8    29.2    30.6    31.9    33.3    34.7    36.1    37.5    38.9    40.3    41.7    43.1    44.4    45.8    47.2    48.6    50.0    51.4    52.8    54.2    55.6    56.9    58.3    59.7    61.1    62.5    63.9    65.3    66.7    68.1    69.4    70.8    72.2    73.6    75.0    76.4    77.8    79.2    80.6    81.9    83.3    84.7    86.1    87.5    88.9    90.3    91.7    93.1    94.4    95.8    97.2    98.6    
+-found 4 predictions from path traversal
+
+-reporting highest scoring path thru the trellis.
+-found 4 predictions persist after filtering for low support

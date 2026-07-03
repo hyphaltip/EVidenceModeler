@@ -1,0 +1,116 @@
+-successfully changed directories to /bigdata/stajichlab/shared/projects/Rhodotorula/Ref_genomes/annotation/Rhodotorula_sphaerocarpa_TFCN_83C-1/predict_misc/EVM/scaffold_1/scaffold_1_1686950-1771775
+
+-reading genomic sequence.
+
+** Processing features (+)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: +)
+-loading gene prediction evidence. (strand: +)Valid prediction for snap_scaffold_1-snap.690-T1
+Valid prediction for snap_scaffold_1-snap.699-T1
+Valid prediction for GlimmerHMM_glimmerT_604-T1
+Valid prediction for GeneMark_model.660_t
+Valid prediction for GeneMark_model.661_t
+Valid prediction for GlimmerHMM_glimmerT_607-T1
+Valid prediction for snap_scaffold_1-snap.700-T1
+Valid prediction for GeneMark_model.653_t
+Valid prediction for GlimmerHMM_glimmerT_609-T1
+Valid prediction for snap_scaffold_1-snap.679-T1
+Valid prediction for GlimmerHMM_glimmerT_592-T1
+Valid prediction for GlimmerHMM_glimmerT_612-T1
+Valid prediction for snap_scaffold_1-snap.704-T1
+Valid prediction for GeneMark_model.643_t
+Valid prediction for snap_scaffold_1-snap.684-T1
+Valid prediction for GeneMark_model.644_t
+Valid prediction for GlimmerHMM_glimmerT_597-T1
+Valid prediction for snap_scaffold_1-snap.680-T1
+Valid prediction for snap_scaffold_1-snap.692-T1
+Valid prediction for snap_scaffold_1-snap.694-T1
+Valid prediction for GlimmerHMM_glimmerT_590-T1
+Valid prediction for snap_scaffold_1-snap.695-T1
+Valid prediction for snap_scaffold_1-snap.676-T1
+Valid prediction for GeneMark_model.636_t
+Valid prediction for GlimmerHMM_glimmerT_593-T1
+Valid prediction for snap_scaffold_1-snap.706-T1
+Valid prediction for GlimmerHMM_glimmerT_603-T1
+Valid prediction for GeneMark_model.650_t
+Valid prediction for snap_scaffold_1-snap.693-T1
+Valid prediction for snap_scaffold_1-snap.703-T1
+Valid prediction for snap_scaffold_1-snap.685-T1
+Valid prediction for GlimmerHMM_glimmerT_596-T1
+Valid prediction for GeneMark_model.657_t
+Valid prediction for snap_scaffold_1-snap.691-T1
+Valid prediction for GeneMark_model.658_t
+Valid prediction for GeneMark_model.656_t
+Valid prediction for snap_scaffold_1-snap.675-T1
+Valid prediction for GeneMark_model.649_t
+Valid prediction for GeneMark_model.642_t
+Valid prediction for GeneMark_model.638_t
+Valid prediction for GlimmerHMM_glimmerT_610-T1
+Valid prediction for GeneMark_model.639_t
+Valid prediction for GlimmerHMM_glimmerT_598-T1
+
+-loading the search evidence (protein and EST search results, strand: +)
+-scoring exons (strand: +)
+
+** Processing features (-)
+
+-finding all potential splice sites, looking for GT/GC donors and AG acceptors.
+-finding all potential starts and stops. (strand: -)
+-loading gene prediction evidence. (strand: -)Valid prediction for GlimmerHMM_glimmerT_594-T1
+Valid prediction for snap_scaffold_1-snap.681-T1
+Valid prediction for snap_scaffold_1-snap.688-T1
+Valid prediction for snap_scaffold_1-snap.698-T1
+Valid prediction for snap_scaffold_1-snap.683-T1
+Valid prediction for snap_scaffold_1-snap.689-T1
+Valid prediction for snap_scaffold_1-snap.701-T1
+Valid prediction for GlimmerHMM_glimmerT_613-T1
+Valid prediction for GlimmerHMM_glimmerT_606-T1
+Valid prediction for GeneMark_model.662_t
+Valid prediction for GlimmerHMM_glimmerT_600-T1
+Valid prediction for GeneMark_model.654_t
+Valid prediction for snap_scaffold_1-snap.696-T1
+Valid prediction for GlimmerHMM_glimmerT_591-T1
+Valid prediction for snap_scaffold_1-snap.687-T1
+Valid prediction for GlimmerHMM_glimmerT_595-T1
+Valid prediction for snap_scaffold_1-snap.697-T1
+Valid prediction for snap_scaffold_1-snap.677-T1
+Sorry, intron length (8) is less than minimum required (10)
+Valid prediction for snap_scaffold_1-snap.705-T1
+Valid prediction for GeneMark_model.648_t
+Valid prediction for GlimmerHMM_glimmerT_605-T1
+Valid prediction for GlimmerHMM_glimmerT_608-T1
+Valid prediction for GeneMark_model.645_t
+Valid prediction for GeneMark_model.641_t
+Valid prediction for GeneMark_model.647_t
+Valid prediction for GeneMark_model.640_t
+Valid prediction for snap_scaffold_1-snap.707-T1
+Valid prediction for GeneMark_model.637_t
+Valid prediction for GlimmerHMM_glimmerT_602-T1
+Valid prediction for GeneMark_model.652_t
+Valid prediction for snap_scaffold_1-snap.682-T1
+Valid prediction for GeneMark_model.646_t
+Valid prediction for snap_scaffold_1-snap.678-T1
+Valid prediction for snap_scaffold_1-snap.702-T1
+Valid prediction for snap_scaffold_1-snap.686-T1
+Valid prediction for GeneMark_model.659_t
+Valid prediction for GlimmerHMM_glimmerT_601-T1
+Valid prediction for GlimmerHMM_glimmerT_599-T1
+Valid prediction for GeneMark_model.651_t
+Valid prediction for GeneMark_model.655_t
+
+-loading the search evidence (protein and EST search results, strand: -)
+-scoring exons (strand: -)
+-building DP trellis
+
+-building trellis in range 1 - 84826
+-exon list size: 316
+
+
+building trellis
+0.3    0.6    0.9    1.3    1.6    1.9    2.2    2.5    2.8    3.1    3.5    3.8    4.1    4.4    4.7    5.0    5.3    5.7    6.0    6.3    6.6    6.9    7.2    7.5    7.9    8.2    8.5    8.8    9.1    9.4    9.7    10.1    10.4    10.7    11.0    11.3    11.6    11.9    12.3    12.6    12.9    13.2    13.5    13.8    14.2    14.5    14.8    15.1    15.4    15.7    16.0    16.4    16.7    17.0    17.3    17.6    17.9    18.2    18.6    18.9    19.2    19.5    19.8    20.1    20.4    20.8    21.1    21.4    21.7    22.0    22.3    22.6    23.0    23.3    23.6    23.9    24.2    24.5    24.8    25.2    25.5    25.8    26.1    26.4    26.7    27.0    27.4    27.7    28.0    28.3    28.6    28.9    29.2    29.6    29.9    30.2    30.5    30.8    31.1    31.4    31.8    32.1    32.4    32.7    33.0    33.3    33.6    34.0    34.3    34.6    34.9    35.2    35.5    35.8    36.2    36.5    36.8    37.1    37.4    37.7    38.1    38.4    38.7    39.0    39.3    39.6    39.9    40.3    40.6    40.9    41.2    41.5    41.8    42.1    42.5    42.8    43.1    43.4    43.7    44.0    44.3    44.7    45.0    45.3    45.6    45.9    46.2    46.5    46.9    47.2    47.5    47.8    48.1    48.4    48.7    49.1    49.4    49.7    50.0    50.3    50.6    50.9    51.3    51.6    51.9    52.2    52.5    52.8    53.1    53.5    53.8    54.1    54.4    54.7    55.0    55.3    55.7    56.0    56.3    56.6    56.9    57.2    57.5    57.9    58.2    58.5    58.8    59.1    59.4    59.7    60.1    60.4    60.7    61.0    61.3    61.6    61.9    62.3    62.6    62.9    63.2    63.5    63.8    64.2    64.5    64.8    65.1    65.4    65.7    66.0    66.4    66.7    67.0    67.3    67.6    67.9    68.2    68.6    68.9    69.2    69.5    69.8    70.1    70.4    70.8    71.1    71.4    71.7    72.0    72.3    72.6    73.0    73.3    73.6    73.9    74.2    74.5    74.8    75.2    75.5    75.8    76.1    76.4    76.7    77.0    77.4    77.7    78.0    78.3    78.6    78.9    79.2    79.6    79.9    80.2    80.5    80.8    81.1    81.4    81.8    82.1    82.4    82.7    83.0    83.3    83.6    84.0    84.3    84.6    84.9    85.2    85.5    85.8    86.2    86.5    86.8    87.1    87.4    87.7    88.1    88.4    88.7    89.0    89.3    89.6    89.9    90.3    90.6    90.9    91.2    91.5    91.8    92.1    92.5    92.8    93.1    93.4    93.7    94.0    94.3    94.7    95.0    95.3    95.6    95.9    96.2    96.5    96.9    97.2    97.5    97.8    98.1    98.4    98.7    99.1    99.4    99.7    
+-found 26 predictions from path traversal
+GOT 5prime partial gene.
+
+-reporting highest scoring path thru the trellis.
+-found 26 predictions persist after filtering for low support
