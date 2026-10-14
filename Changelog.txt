@@ -21,6 +21,17 @@
 - Ported augustus_to_evm_gff3 and gff3_gene_prediction_file_validator from
   EVidenceModeler_rust.
 - 99.6% gene-level parity with the Perl implementation.
+- performance: convert_EVM_outputs_to_GFF3 and recombine_EVM_partial_outputs
+  now write through a BufWriter. Before, each writeln! was its own write
+  syscall (about 7 bytes per write in a measured run on a 241,057-contig
+  genome), which is slow on GPFS. Output content is unchanged.
+- convert_EVM_outputs_to_GFF3 logs progress (files done, files per second,
+  estimated seconds remaining) every 5000 contigs.
+- convert_EVM_outputs_to_GFF3 --skip_empty (off by default): a zero-byte
+  evm.out writes no evm.out.gff3, and a stale .gff3 from an earlier run is
+  removed. A missing evm.out is still an error. Note that an empty evm.out
+  can also mean the EVM run failed, because funannotate redirects stdout to
+  that file before it starts EVM.
 
 # Release 2.1.0 (Rust rewrite)
 - Full Rust port of the EVM pipeline: evidence_modeler, partition_evm_inputs,
