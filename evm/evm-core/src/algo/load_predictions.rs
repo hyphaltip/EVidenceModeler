@@ -10,7 +10,7 @@ use crate::types::evidence::{EvClass, EvWeightMap};
 use crate::types::exon::{end_frame, Exon, ExonPhase, ExonType, Orientation};
 use crate::types::genome::{FeatureVec, MaskVec, FEAT_ACCEPTOR, FEAT_DONOR, FEAT_START, FEAT_STOP};
 use anyhow::Result;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 /// Load CDS exon records from gene-prediction GFF3 and populate the exon pool.
 ///
@@ -33,7 +33,9 @@ pub fn load_prediction_data(
     genomic_seq_len: usize,
 ) -> Result<()> {
     // Group CDS records by model id (ev_type + Parent id)
-    let mut model_to_coords: HashMap<String, Vec<(u32, u32)>> = HashMap::new();
+    // Ordered map: models are added to the exon pool in this order, and ties
+    // are broken by pool order, so it must not depend on hash iteration order.
+    let mut model_to_coords: BTreeMap<String, Vec<(u32, u32)>> = BTreeMap::new();
     let mut model_to_entry: HashMap<String, (String, EvClass, f64)> = HashMap::new(); // model_id → (ev_type, class, weight)
 
     for rec in records {

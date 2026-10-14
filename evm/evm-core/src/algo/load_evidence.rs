@@ -9,7 +9,7 @@ use crate::io::gff3::Gff3Record;
 use crate::types::evidence::{EvClass, EvWeightMap, EvidenceChain};
 use crate::types::exon::{end_frame, Exon, ExonType, Orientation};
 use crate::types::genome::{FeatureVec, MaskVec, FEAT_ACCEPTOR, FEAT_DONOR};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 /// Parse evidence chains from a GFF3 file containing protein or transcript alignments.
 pub fn parse_evidence_chains(
@@ -18,7 +18,9 @@ pub fn parse_evidence_chains(
     ev_weights: &EvWeightMap,
     genomic_seq_len: usize,
 ) -> Vec<EvidenceChain> {
-    let mut acc_to_chain: HashMap<String, EvidenceChain> = HashMap::new();
+    // Ordered map: chain order feeds the exon pool, so it must not depend on
+    // hash iteration order.
+    let mut acc_to_chain: BTreeMap<String, EvidenceChain> = BTreeMap::new();
 
     for rec in records {
         let ev_type = &rec.source;
@@ -295,5 +297,54 @@ pub fn instantiate_evidence_based_exons(
             predicted_introns,
             genomic_seq_len,
         );
+    }
+}
+
+#[cfg(test)]
+mod determinism_tests {
+    use super::*;
+    use crate::io::gff3::Gff3Record;
+    use crate::types::evidence::{EvClass, EvEntry};
+
+    /// Chain order feeds the exon pool, and the trellis keeps the first of
+    /// equal-score ties, so it must not depend on hash iteration order.
+    #[test]
+    fn chain_order_is_stable_across_runs() {
+        let mut weights = EvWeightMap::new();
+        weights.insert(
+            "prot".to_string(),
+            EvEntry {
+                ev_class: EvClass::Protein,
+                weight: 1.0,
+            },
+        );
+        let records: Vec<Gff3Record> = (0..40)
+            .map(|i| {
+                let start = 100 + i * 500;
+                Gff3Record::parse(&format!(
+                    "c\tprot\tmatch_part\t{}\t{}\t.\t+\t.\tID=m{};Parent=p{}",
+                    start,
+                    start + 90,
+                    i,
+                    i
+                ))
+                .unwrap()
+            })
+            .collect();
+
+        let order = |_: usize| -> Vec<String> {
+            parse_evidence_chains('+', &records, &weights, 30_000)
+                .into_iter()
+                .map(|c| c.accession)
+                .collect()
+        };
+        let first = order(0);
+        assert_eq!(first.len(), 40);
+        for run in 1..30 {
+            assert_eq!(order(run), first, "chain order changed on run {}", run);
+        }
+        let mut sorted = first.clone();
+        sorted.sort();
+        assert_eq!(first, sorted, "chains should come out in key order");
     }
 }

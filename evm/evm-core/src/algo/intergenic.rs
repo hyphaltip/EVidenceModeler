@@ -1,7 +1,7 @@
 //! Intergenic region scoring.
 
 use crate::io::gff3::Gff3Record;
-use crate::types::evidence::EvWeightMap;
+use crate::types::evidence::{EvEntry, EvWeightMap};
 use crate::types::exon::{Exon, ExonType};
 use crate::types::genome::MaskVec;
 use std::collections::HashMap;
@@ -126,7 +126,11 @@ pub fn populate_intergenic_scores(
     // loops over %PREDICTION_PROGS_CONTRIBUTE_INTERGENIC (populated from the
     // weights file), so a predictor with no predictions in the current partition
     // still contributes its weight to every intergenic position.
-    for (ev_type, entry) in ev_weights {
+    // Sorted by type name: floating-point addition into `ig` is order
+    // dependent, and HashMap iteration order differs from run to run.
+    let mut weight_entries: Vec<(&String, &EvEntry)> = ev_weights.iter().collect();
+    weight_entries.sort_by(|a, b| a.0.cmp(b.0));
+    for (ev_type, entry) in weight_entries {
         if !entry.ev_class.is_abinitio() {
             continue;
         }
@@ -140,7 +144,8 @@ pub fn populate_intergenic_scores(
         };
         spans.push((0, 0));
         spans.push((seq_len as u32, seq_len as u32));
-        spans.sort_by_key(|&(l, _)| l);
+        // Full (lend, rend) order so equal-lend spans cannot tie at random.
+        spans.sort_unstable();
 
         for w in spans.windows(2) {
             let lend_intergenic = w[0].1;
@@ -374,4 +379,45 @@ pub fn get_intergenic_regions(
         }
     }
     regions
+}
+
+#[cfg(test)]
+mod determinism_tests {
+    use super::*;
+    use crate::io::gff3::Gff3Record;
+    use crate::types::evidence::{EvClass, EvEntry};
+    use crate::types::genome::MaskVec;
+
+    /// Per-base scores add one weight per ab-initio type. Floating-point
+    /// addition is not associative (1e16 + 1.0 loses the 1.0), so the type
+    /// order must be fixed.
+    #[test]
+    fn intergenic_scores_are_bit_identical_across_runs() {
+        // Rebuilt per run: each HashMap instance has its own iteration order.
+        let make_weights = || {
+            let mut weights = EvWeightMap::new();
+            for (name, w) in [("a", 1e16), ("b", 1.0), ("c", 1.0), ("d", 1.0), ("e", 1.0)] {
+                weights.insert(
+                    name.to_string(),
+                    EvEntry {
+                        ev_class: EvClass::AbinitioPrediction,
+                        weight: w,
+                    },
+                );
+            }
+            weights
+        };
+        // No predictions: every type scores the whole sequence.
+        let records: Vec<Gff3Record> = Vec::new();
+        let mask = MaskVec::new(200);
+        let sum_bits = |_: usize| -> u64 {
+            let weights = make_weights();
+            let s = populate_intergenic_scores(200, &records, &weights, &mask, 1.0);
+            s.per_base[100].to_bits()
+        };
+        let first = sum_bits(0);
+        for run in 1..40 {
+            assert_eq!(sum_bits(run), first, "score bits changed on run {}", run);
+        }
+    }
 }
