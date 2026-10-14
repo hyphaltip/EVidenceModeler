@@ -5,6 +5,7 @@
 use crate::io::partitions::PartitionEntry;
 use crate::types::prediction::{PartitionPred, PredClass};
 use anyhow::{Context, Result};
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, Write};
@@ -216,9 +217,13 @@ pub fn combine_predictions(mut preds: Vec<PartitionPred>) -> Vec<PartitionPred> 
 }
 
 /// Run recombination for all contigs listed in `entries`.
+///
+/// Each base directory is independent and writes only its own output file, so
+/// directories are processed in parallel (rayon global pool).
 pub fn recombine_outputs(entries: &[PartitionEntry], output_file_name: &str) -> Result<()> {
-    // Group entries by base_dir
-    let mut base_to_partitions: HashMap<String, Vec<(String, u32)>> = HashMap::new();
+    // Group entries by base_dir, keeping first-seen listing order.
+    let mut index: HashMap<&str, usize> = HashMap::new();
+    let mut groups: Vec<(&str, Vec<(&str, u32)>)> = Vec::new();
     for entry in entries {
         if entry.is_partitioned {
             if let Some(pdir) = &entry.partition_dir {
@@ -229,42 +234,51 @@ pub fn recombine_outputs(entries: &[PartitionEntry], output_file_name: &str) -> 
                 let lend = extract_partition_lend(pdir).ok_or_else(|| {
                     anyhow::anyhow!("Error, cannot extract coords from partition dir {}", pdir)
                 })?;
-                base_to_partitions
-                    .entry(entry.base_dir.clone())
-                    .or_default()
-                    .push((pdir.clone(), lend));
+                let i = *index.entry(entry.base_dir.as_str()).or_insert_with(|| {
+                    groups.push((entry.base_dir.as_str(), Vec::new()));
+                    groups.len() - 1
+                });
+                groups[i].1.push((pdir.as_str(), lend));
             }
         }
     }
 
-    for (base_dir, partition_dirs) in &base_to_partitions {
-        let mut all_preds: Vec<PartitionPred> = Vec::new();
-        for (pdir, lend) in partition_dirs {
-            let output_path = format!("{}/{}", pdir, output_file_name);
-            parse_and_add_predictions(&output_path, *lend, &mut all_preds)?;
-        }
-
-        let final_preds = combine_predictions(all_preds);
-        let out_path = format!("{}/{}", base_dir, output_file_name);
-        let mut out = std::io::BufWriter::new(
-            fs::File::create(&out_path).with_context(|| format!("Cannot create {}", out_path))?,
-        );
-
-        log::debug!("Writing combined output to {}", out_path);
-        // Perl prints "$pred_text\n" — pred.text already ends in '\n', so the
-        // extra newline yields a blank line separating predictions (which
-        // EVM_to_GFF3 relies on to delimit gene models).
-        for pred in &final_preds {
-            writeln!(out, "{}", pred.text)?;
-            for nested in &pred.intronic_preds {
-                writeln!(out, "!! Intron-containing prediction")?;
-                writeln!(out, "{}", nested.text)?;
+    log::info!(
+        "Recombining {} contigs on {} threads",
+        groups.len(),
+        rayon::current_num_threads()
+    );
+    groups
+        .par_iter()
+        .try_for_each(|(base_dir, partition_dirs)| -> Result<()> {
+            let mut all_preds: Vec<PartitionPred> = Vec::new();
+            for (pdir, lend) in partition_dirs {
+                let output_path = format!("{}/{}", pdir, output_file_name);
+                parse_and_add_predictions(&output_path, *lend, &mut all_preds)?;
             }
-        }
-        out.flush()
-            .with_context(|| format!("Cannot write {}", out_path))?;
-    }
-    Ok(())
+
+            let final_preds = combine_predictions(all_preds);
+            let out_path = format!("{}/{}", base_dir, output_file_name);
+            let mut out = std::io::BufWriter::new(
+                fs::File::create(&out_path)
+                    .with_context(|| format!("Cannot create {}", out_path))?,
+            );
+
+            log::debug!("Writing combined output to {}", out_path);
+            // Perl prints "$pred_text\n" — pred.text already ends in '\n', so the
+            // extra newline yields a blank line separating predictions (which
+            // EVM_to_GFF3 relies on to delimit gene models).
+            for pred in &final_preds {
+                writeln!(out, "{}", pred.text)?;
+                for nested in &pred.intronic_preds {
+                    writeln!(out, "!! Intron-containing prediction")?;
+                    writeln!(out, "{}", nested.text)?;
+                }
+            }
+            out.flush()
+                .with_context(|| format!("Cannot write {}", out_path))?;
+            Ok(())
+        })
 }
 
 fn extract_partition_lend(pdir: &str) -> Option<u32> {

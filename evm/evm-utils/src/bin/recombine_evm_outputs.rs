@@ -21,11 +21,16 @@ struct Cli {
     /// EVM output filename within each partition dir (default: evm.out)
     #[arg(long = "output_file_name", short = 'O', default_value = "evm.out")]
     evm_output_file: String,
+
+    /// Worker threads (default: RAYON_NUM_THREADS, else the CPUs available)
+    #[arg(long = "threads", default_value_t = 0)]
+    threads: usize,
 }
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     let cli = Cli::parse();
+    evm_core::threads::init_thread_pool(cli.threads);
 
     let entries = read_partitions_file(&cli.partitions_list)?;
     recombine_outputs(&entries, &cli.evm_output_file)?;

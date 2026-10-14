@@ -7,7 +7,8 @@
 
 use crate::io::partitions::PartitionEntry;
 use anyhow::{Context, Result};
-use std::collections::BTreeMap;
+use rayon::prelude::*;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::io::{BufRead, BufWriter, Write};
 
@@ -51,13 +52,15 @@ struct Model {
 pub fn evm_output_to_gff3(evm_file: &str, contig_id: &str, output_path: &str) -> Result<()> {
     let f =
         fs::File::open(evm_file).with_context(|| format!("Cannot open EVM output {}", evm_file))?;
-    let reader = std::io::BufReader::new(f);
-    // Buffered: emit_model issues many small writeln! calls, and each would
-    // otherwise be its own write syscall (a metadata-heavy round trip on GPFS).
-    let mut out = BufWriter::new(
-        fs::File::create(output_path)
-            .with_context(|| format!("Cannot create GFF3 output {}", output_path))?,
-    );
+    let bytes = evm_reader_to_gff3(std::io::BufReader::new(f), contig_id)?;
+    // One write per file instead of one per GFF3 line.
+    fs::write(output_path, &bytes)
+        .with_context(|| format!("Cannot create GFF3 output {}", output_path))
+}
+
+/// Parse EVM output text and return the GFF3 bytes for `contig_id`.
+fn evm_reader_to_gff3<R: BufRead>(reader: R, contig_id: &str) -> Result<Vec<u8>> {
+    let mut out: Vec<u8> = Vec::new();
 
     // Mirror EVM_to_GFF3.pl's scan: model_id starts at 1 and increments on each
     // blank line; '#' header lines set the current model's ev_type; numeric
@@ -124,10 +127,7 @@ pub fn evm_output_to_gff3(evm_file: &str, contig_id: &str, output_path: &str) ->
         }
         emit_model(&mut out, contig_id, *mid, model)?;
     }
-    out.flush()
-        .with_context(|| format!("Cannot write GFF3 output {}", output_path))?;
-
-    Ok(())
+    Ok(out)
 }
 
 /// Emit one gene model (gene + mRNA + interleaved exon/CDS rows) in GFF3.
@@ -183,12 +183,22 @@ fn emit_model(out: &mut dyn Write, contig: &str, model_id: u32, model: &Model) -
     Ok(())
 }
 
-/// Log conversion progress every this many entries.
-const PROGRESS_INTERVAL: usize = 5000;
+/// Entries converted per parallel batch. Batches bound memory when a
+/// concatenated output is requested and give regular progress lines.
+const CHUNK_SIZE: usize = 4096;
+
+/// Options for [`convert_all_to_gff3_opts`].
+#[derive(Debug, Clone, Default)]
+pub struct ConvertOptions {
+    /// Write no `.gff3` for a zero-byte `evm.out` and remove a stale one.
+    pub skip_empty: bool,
+    /// Also write every converted GFF3, in partitions-listing order, to this file.
+    pub concat_out: Option<String>,
+}
 
 /// Convert EVM outputs for all entries to GFF3.
 pub fn convert_all_to_gff3(entries: &[PartitionEntry], output_file_name: &str) -> Result<()> {
-    convert_all_to_gff3_with(entries, output_file_name, false)
+    convert_all_to_gff3_opts(entries, output_file_name, &ConvertOptions::default())
 }
 
 /// Like [`convert_all_to_gff3`]. With `skip_empty`, an `evm.out` of zero bytes
@@ -200,47 +210,126 @@ pub fn convert_all_to_gff3_with(
     output_file_name: &str,
     skip_empty: bool,
 ) -> Result<()> {
-    use std::collections::HashMap;
-    let mut base_dirs: HashMap<String, String> = HashMap::new();
-    for entry in entries {
-        base_dirs.insert(entry.accession.clone(), entry.base_dir.clone());
-    }
-    let total = base_dirs.len();
-    let start = std::time::Instant::now();
-    let mut skipped = 0usize;
-    log::info!("Converting {} EVM outputs to GFF3", total);
-    for (i, (accession, base_dir)) in base_dirs.iter().enumerate() {
-        if i > 0 && i % PROGRESS_INTERVAL == 0 {
-            let secs = start.elapsed().as_secs_f64();
-            let rate = i as f64 / secs.max(1e-9);
-            log::info!(
-                "GFF3 conversion: {}/{} done, {:.1} files/s, ~{:.0} s remaining",
-                i,
-                total,
-                rate,
-                (total - i) as f64 / rate
-            );
-        }
-        let evm_file = format!("{}/{}", base_dir, output_file_name);
-        let gff3_file = format!("{}/{}.gff3", base_dir, output_file_name);
-        if skip_empty {
-            let meta = fs::metadata(&evm_file)
-                .with_context(|| format!("Cannot stat EVM output {}", evm_file))?;
-            if meta.len() == 0 {
-                match fs::remove_file(&gff3_file) {
-                    Ok(()) => {}
-                    Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-                    Err(e) => {
-                        return Err(e).with_context(|| format!("Cannot remove stale {}", gff3_file))
-                    }
+    let opts = ConvertOptions {
+        skip_empty,
+        concat_out: None,
+    };
+    convert_all_to_gff3_opts(entries, output_file_name, &opts)
+}
+
+enum Outcome {
+    Skipped,
+    /// GFF3 bytes; empty unless the caller asked for them.
+    Converted(Vec<u8>),
+}
+
+fn convert_one(
+    accession: &str,
+    base_dir: &str,
+    output_file_name: &str,
+    skip_empty: bool,
+    keep_bytes: bool,
+) -> Result<Outcome> {
+    let evm_file = format!("{}/{}", base_dir, output_file_name);
+    let gff3_file = format!("{}/{}.gff3", base_dir, output_file_name);
+    // One open serves the existence check, the size check and the read.
+    let f = fs::File::open(&evm_file)
+        .with_context(|| format!("Cannot open EVM output {}", evm_file))?;
+    if skip_empty {
+        let len = f
+            .metadata()
+            .with_context(|| format!("Cannot stat EVM output {}", evm_file))?
+            .len();
+        if len == 0 {
+            match fs::remove_file(&gff3_file) {
+                Ok(()) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+                Err(e) => {
+                    return Err(e).with_context(|| format!("Cannot remove stale {}", gff3_file))
                 }
-                skipped += 1;
-                continue;
+            }
+            return Ok(Outcome::Skipped);
+        }
+    }
+    let bytes = evm_reader_to_gff3(std::io::BufReader::new(f), accession)?;
+    fs::write(&gff3_file, &bytes)
+        .with_context(|| format!("Cannot create GFF3 output {}", gff3_file))?;
+    Ok(Outcome::Converted(if keep_bytes {
+        bytes
+    } else {
+        Vec::new()
+    }))
+}
+
+/// Convert all entries in parallel (rayon global pool). Output is identical to
+/// a serial run: each contig writes only its own files, and the optional
+/// concatenated file is written in partitions-listing order.
+pub fn convert_all_to_gff3_opts(
+    entries: &[PartitionEntry],
+    output_file_name: &str,
+    opts: &ConvertOptions,
+) -> Result<()> {
+    // One conversion per accession, in first-seen listing order; a later
+    // duplicate accession replaces the base_dir, as the old HashMap did.
+    let mut index: HashMap<&str, usize> = HashMap::new();
+    let mut work: Vec<(&str, &str)> = Vec::new();
+    for entry in entries {
+        match index.get(entry.accession.as_str()) {
+            Some(&i) => work[i].1 = entry.base_dir.as_str(),
+            None => {
+                index.insert(entry.accession.as_str(), work.len());
+                work.push((entry.accession.as_str(), entry.base_dir.as_str()));
             }
         }
-        evm_output_to_gff3(&evm_file, accession, &gff3_file)?;
     }
-    if skip_empty {
+
+    let mut concat = match &opts.concat_out {
+        Some(path) => Some(BufWriter::new(
+            fs::File::create(path)
+                .with_context(|| format!("Cannot create concatenated GFF3 {}", path))?,
+        )),
+        None => None,
+    };
+    let keep_bytes = concat.is_some();
+
+    let total = work.len();
+    let start = std::time::Instant::now();
+    let mut skipped = 0usize;
+    let mut done = 0usize;
+    log::info!(
+        "Converting {} EVM outputs to GFF3 on {} threads",
+        total,
+        rayon::current_num_threads()
+    );
+    for chunk in work.chunks(CHUNK_SIZE) {
+        let outcomes: Vec<Outcome> = chunk
+            .par_iter()
+            .map(|&(acc, dir)| convert_one(acc, dir, output_file_name, opts.skip_empty, keep_bytes))
+            .collect::<Result<Vec<_>>>()?;
+        for outcome in outcomes {
+            match outcome {
+                Outcome::Skipped => skipped += 1,
+                Outcome::Converted(bytes) => {
+                    if let Some(w) = concat.as_mut() {
+                        w.write_all(&bytes)?;
+                    }
+                }
+            }
+        }
+        done += chunk.len();
+        let rate = done as f64 / start.elapsed().as_secs_f64().max(1e-9);
+        log::info!(
+            "GFF3 conversion: {}/{} done, {:.1} files/s, ~{:.0} s remaining",
+            done,
+            total,
+            rate,
+            (total - done) as f64 / rate
+        );
+    }
+    if let Some(mut w) = concat {
+        w.flush().context("Cannot write concatenated GFF3")?;
+    }
+    if opts.skip_empty {
         log::info!("Skipped {} of {} empty EVM outputs", skipped, total);
     }
     Ok(())

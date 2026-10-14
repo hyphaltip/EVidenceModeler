@@ -4,5 +4,6 @@ pub mod io;
 pub mod partition;
 pub mod pipeline;
 pub mod recombine;
+pub mod threads;
 pub mod translate;
 pub mod types;

@@ -6,7 +6,7 @@
 use anyhow::Result;
 use clap::Parser;
 
-use evm_core::gff3_convert::evm_to_gff3::convert_all_to_gff3_with;
+use evm_core::gff3_convert::evm_to_gff3::{convert_all_to_gff3_opts, ConvertOptions};
 use evm_core::io::partitions::read_partitions_file;
 
 #[derive(Parser, Debug)]
@@ -29,6 +29,14 @@ struct Cli {
     #[arg(long = "skip_empty")]
     skip_empty: bool,
 
+    /// Also write all converted GFF3, in partitions-listing order, to this file
+    #[arg(long = "concat_out")]
+    concat_out: Option<String>,
+
+    /// Worker threads (default: RAYON_NUM_THREADS, else the CPUs available)
+    #[arg(long = "threads", default_value_t = 0)]
+    threads: usize,
+
     /// Genome FASTA (accepted for Perl CLI parity; not used by the Rust converter)
     #[arg(long = "genome")]
     _genome: Option<String>,
@@ -37,9 +45,14 @@ struct Cli {
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     let cli = Cli::parse();
+    evm_core::threads::init_thread_pool(cli.threads);
 
     let entries = read_partitions_file(&cli.partitions)?;
-    convert_all_to_gff3_with(&entries, &cli.output_file_name, cli.skip_empty)?;
+    let opts = ConvertOptions {
+        skip_empty: cli.skip_empty,
+        concat_out: cli.concat_out,
+    };
+    convert_all_to_gff3_opts(&entries, &cli.output_file_name, &opts)?;
 
     eprintln!("GFF3 conversion complete.");
     Ok(())
