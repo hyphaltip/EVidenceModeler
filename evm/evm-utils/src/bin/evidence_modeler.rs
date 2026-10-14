@@ -7,7 +7,7 @@
 use anyhow::Result;
 use clap::Parser;
 use std::fs;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 
 use evm_core::pipeline::{run_single_partition, SinglePartitionParams};
 
@@ -109,19 +109,17 @@ fn main() -> Result<()> {
         &params,
     )?;
 
-    match &cli.output {
-        Some(path) => {
-            let mut f = fs::File::create(path)?;
-            for block in &output {
-                write!(f, "{}", block)?;
-            }
-        }
-        None => {
-            for block in &output {
-                print!("{}", block);
-            }
-        }
+    // Buffered. funannotate runs this with stdout redirected to evm.out, and
+    // Rust's stdout flushes on every newline, so print! per block was one write
+    // syscall per line.
+    let mut out: Box<dyn Write> = match &cli.output {
+        Some(path) => Box::new(BufWriter::new(fs::File::create(path)?)),
+        None => Box::new(BufWriter::new(std::io::stdout().lock())),
+    };
+    for block in &output {
+        out.write_all(block.as_bytes())?;
     }
+    out.flush()?;
 
     Ok(())
 }

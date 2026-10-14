@@ -32,6 +32,25 @@
   removed. A missing evm.out is still an error. Note that an empty evm.out
   can also mean the EVM run failed, because funannotate redirects stdout to
   that file before it starts EVM.
+- convert_EVM_outputs_to_GFF3 and recombine_evm_outputs now process contigs in
+  parallel (rayon). New --threads N (default: RAYON_NUM_THREADS, else the CPUs
+  available). Work follows the partitions-listing order instead of hash order,
+  and each contig writes only its own files, so the per-contig output is the
+  same as a serial run (tested across the 4096-entry batch boundary).
+- convert_EVM_outputs_to_GFF3 --concat_out FILE writes every converted GFF3 to
+  one file in listing order, so a caller need not walk the tree and copy each
+  evm.out.gff3. The order can differ from a filesystem-order walk; the content
+  is the same.
+- bugfix: results no longer depend on hash iteration order. Evidence chains and
+  prediction models entered the exon pool in std HashMap order, and the trellis
+  keeps the first of equal-score ties. The intergenic score was a floating-point
+  sum over ab-initio types in hash order, so its low bits changed from run to
+  run. Both now use a fixed order (key order; type-name order). The golden Perl
+  fixtures are unchanged.
+- evidence_modeler writes evm.out through a buffer. funannotate redirects stdout
+  to evm.out, and Rust stdout flushes on every newline, so each line was a
+  separate write. evm-cli writes its pep, cds, bed and merged GFF3 files through
+  a buffer too.
 
 # Release 2.1.0 (Rust rewrite)
 - Full Rust port of the EVM pipeline: evidence_modeler, partition_evm_inputs,

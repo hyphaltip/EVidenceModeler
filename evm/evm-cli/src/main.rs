@@ -7,7 +7,7 @@ use clap::Parser;
 use log::{info, warn};
 use rayon::prelude::*;
 use std::fs;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::path::Path;
 
 use evm_core::gff3_convert::evm_to_gff3::convert_all_to_gff3;
@@ -301,13 +301,14 @@ fn main() -> Result<()> {
         info!("Extracting protein sequences...");
         let default_stops: Vec<[u8; 3]> = vec![*b"TAA", *b"TGA", *b"TAG"];
         let seqs = extract_sequences(&final_gff3, genome_path, &SeqType::Prot, &default_stops)?;
-        let mut out = fs::File::create(&pep_file)?;
+        let mut out = BufWriter::new(fs::File::create(&pep_file)?);
         for (hdr, seq) in &seqs {
             writeln!(out, ">{}", hdr)?;
             for chunk in seq.as_bytes().chunks(60) {
                 writeln!(out, "{}", std::str::from_utf8(chunk).unwrap())?;
             }
         }
+        out.flush()?;
         fs::write(&pep_ckpt, "")?;
     }
 
@@ -318,13 +319,14 @@ fn main() -> Result<()> {
         info!("Extracting CDS sequences...");
         let default_stops: Vec<[u8; 3]> = vec![*b"TAA", *b"TGA", *b"TAG"];
         let seqs = extract_sequences(&final_gff3, genome_path, &SeqType::Cds, &default_stops)?;
-        let mut out = fs::File::create(&cds_file)?;
+        let mut out = BufWriter::new(fs::File::create(&cds_file)?);
         for (hdr, seq) in &seqs {
             writeln!(out, ">{}", hdr)?;
             for chunk in seq.as_bytes().chunks(60) {
                 writeln!(out, "{}", std::str::from_utf8(chunk).unwrap())?;
             }
         }
+        out.flush()?;
         fs::write(&cds_ckpt, "")?;
     }
 
@@ -334,10 +336,11 @@ fn main() -> Result<()> {
     if !Path::new(&bed_ckpt).exists() && Path::new(&final_gff3).exists() {
         info!("Generating BED file...");
         let bed_lines = gff3_to_bed(&final_gff3)?;
-        let mut out = fs::File::create(&bed_file)?;
+        let mut out = BufWriter::new(fs::File::create(&bed_file)?);
         for line in &bed_lines {
             writeln!(out, "{}", line)?;
         }
+        out.flush()?;
         fs::write(&bed_ckpt, "")?;
     }
 
@@ -437,10 +440,11 @@ fn run_evm_on_partition(
         &params,
     )?;
 
-    let mut out_file = fs::File::create(&output_path)?;
+    let mut out_file = BufWriter::new(fs::File::create(&output_path)?);
     for block in &output {
-        write!(out_file, "{}", block)?;
+        out_file.write_all(block.as_bytes())?;
     }
+    out_file.flush()?;
 
     fs::write(&ckpt, "")?;
     Ok(())
@@ -454,16 +458,17 @@ fn concatenate_gff3_outputs(
 ) -> Result<()> {
     use std::collections::HashSet;
     let mut seen_dirs: HashSet<String> = HashSet::new();
-    let mut out = fs::File::create(output_path)?;
+    let mut out = BufWriter::new(fs::File::create(output_path)?);
 
     for entry in entries {
         if seen_dirs.insert(entry.base_dir.clone()) {
             let gff3 = format!("{}/evm.out.gff3", entry.base_dir);
             if Path::new(&gff3).exists() {
                 let content = fs::read_to_string(&gff3)?;
-                write!(out, "{}", content)?;
+                out.write_all(content.as_bytes())?;
             }
         }
     }
+    out.flush()?;
     Ok(())
 }
