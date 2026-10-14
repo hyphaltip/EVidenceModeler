@@ -9,7 +9,7 @@ use crate::io::partitions::PartitionEntry;
 use anyhow::{Context, Result};
 use std::collections::BTreeMap;
 use std::fs;
-use std::io::{BufRead, Write};
+use std::io::{BufRead, BufWriter, Write};
 
 /// EVM exon start-frame [1..=6] → GFF3 CDS phase [0,1,2].
 ///
@@ -52,8 +52,12 @@ pub fn evm_output_to_gff3(evm_file: &str, contig_id: &str, output_path: &str) ->
     let f =
         fs::File::open(evm_file).with_context(|| format!("Cannot open EVM output {}", evm_file))?;
     let reader = std::io::BufReader::new(f);
-    let mut out = fs::File::create(output_path)
-        .with_context(|| format!("Cannot create GFF3 output {}", output_path))?;
+    // Buffered: emit_model issues many small writeln! calls, and each would
+    // otherwise be its own write syscall (a metadata-heavy round trip on GPFS).
+    let mut out = BufWriter::new(
+        fs::File::create(output_path)
+            .with_context(|| format!("Cannot create GFF3 output {}", output_path))?,
+    );
 
     // Mirror EVM_to_GFF3.pl's scan: model_id starts at 1 and increments on each
     // blank line; '#' header lines set the current model's ev_type; numeric
@@ -120,6 +124,8 @@ pub fn evm_output_to_gff3(evm_file: &str, contig_id: &str, output_path: &str) ->
         }
         emit_model(&mut out, contig_id, *mid, model)?;
     }
+    out.flush()
+        .with_context(|| format!("Cannot write GFF3 output {}", output_path))?;
 
     Ok(())
 }
@@ -177,17 +183,121 @@ fn emit_model(out: &mut dyn Write, contig: &str, model_id: u32, model: &Model) -
     Ok(())
 }
 
+/// Log conversion progress every this many entries.
+const PROGRESS_INTERVAL: usize = 5000;
+
 /// Convert EVM outputs for all entries to GFF3.
 pub fn convert_all_to_gff3(entries: &[PartitionEntry], output_file_name: &str) -> Result<()> {
+    convert_all_to_gff3_with(entries, output_file_name, false)
+}
+
+/// Like [`convert_all_to_gff3`]. With `skip_empty`, an `evm.out` of zero bytes
+/// (no models, or a failed EVM run that left only the stdout redirect) writes
+/// no `.gff3`, and any stale `.gff3` from an earlier run is removed. A missing
+/// `evm.out` stays an error either way.
+pub fn convert_all_to_gff3_with(
+    entries: &[PartitionEntry],
+    output_file_name: &str,
+    skip_empty: bool,
+) -> Result<()> {
     use std::collections::HashMap;
     let mut base_dirs: HashMap<String, String> = HashMap::new();
     for entry in entries {
         base_dirs.insert(entry.accession.clone(), entry.base_dir.clone());
     }
-    for (accession, base_dir) in &base_dirs {
+    let total = base_dirs.len();
+    let start = std::time::Instant::now();
+    let mut skipped = 0usize;
+    log::info!("Converting {} EVM outputs to GFF3", total);
+    for (i, (accession, base_dir)) in base_dirs.iter().enumerate() {
+        if i > 0 && i % PROGRESS_INTERVAL == 0 {
+            let secs = start.elapsed().as_secs_f64();
+            let rate = i as f64 / secs.max(1e-9);
+            log::info!(
+                "GFF3 conversion: {}/{} done, {:.1} files/s, ~{:.0} s remaining",
+                i,
+                total,
+                rate,
+                (total - i) as f64 / rate
+            );
+        }
         let evm_file = format!("{}/{}", base_dir, output_file_name);
         let gff3_file = format!("{}/{}.gff3", base_dir, output_file_name);
+        if skip_empty {
+            let meta = fs::metadata(&evm_file)
+                .with_context(|| format!("Cannot stat EVM output {}", evm_file))?;
+            if meta.len() == 0 {
+                match fs::remove_file(&gff3_file) {
+                    Ok(()) => {}
+                    Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+                    Err(e) => {
+                        return Err(e).with_context(|| format!("Cannot remove stale {}", gff3_file))
+                    }
+                }
+                skipped += 1;
+                continue;
+            }
+        }
         evm_output_to_gff3(&evm_file, accession, &gff3_file)?;
     }
+    if skip_empty {
+        log::info!("Skipped {} of {} empty EVM outputs", skipped, total);
+    }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn entry(acc: &str, dir: &std::path::Path) -> PartitionEntry {
+        PartitionEntry {
+            accession: acc.to_string(),
+            base_dir: dir.to_string_lossy().into_owned(),
+            is_partitioned: false,
+            partition_dir: None,
+        }
+    }
+
+    fn scratch(name: &str) -> std::path::PathBuf {
+        let d = std::env::temp_dir().join(format!("evm_gff3_{}_{}", name, std::process::id()));
+        let _ = fs::remove_dir_all(&d);
+        fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    const ONE_MODEL: &str = "# EVM prediction: Mode:STANDARD S-ratio: 1.00 1-100 orient(+) score(1.0) noncoding_equivalent(0.0) raw_coding_score(1.0) raw_noncoding_score(0.0) offset(0)\n1\t99\tINITIAL\t1\t+\t{}\n\n";
+
+    #[test]
+    fn skip_empty_skips_zero_byte_output_and_removes_stale_gff3() {
+        let d = scratch("skip");
+        fs::write(d.join("evm.out"), "").unwrap();
+        fs::write(d.join("evm.out.gff3"), "stale\n").unwrap();
+        convert_all_to_gff3_with(&[entry("c1", &d)], "evm.out", true).unwrap();
+        assert!(!d.join("evm.out.gff3").exists());
+        let _ = fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn default_still_writes_gff3_for_empty_output() {
+        let d = scratch("default");
+        fs::write(d.join("evm.out"), "").unwrap();
+        convert_all_to_gff3_with(&[entry("c1", &d)], "evm.out", false).unwrap();
+        assert!(d.join("evm.out.gff3").exists());
+        let _ = fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn skip_empty_still_converts_nonempty_and_errors_on_missing() {
+        let d = scratch("nonempty");
+        fs::write(d.join("evm.out"), ONE_MODEL).unwrap();
+        convert_all_to_gff3_with(&[entry("c1", &d)], "evm.out", true).unwrap();
+        let gff = fs::read_to_string(d.join("evm.out.gff3")).unwrap();
+        assert!(gff.contains("\tgene\t"));
+
+        let m = scratch("missing");
+        assert!(convert_all_to_gff3_with(&[entry("c2", &m)], "evm.out", true).is_err());
+        let _ = fs::remove_dir_all(&d);
+        let _ = fs::remove_dir_all(&m);
+    }
 }

@@ -6,7 +6,7 @@
 use anyhow::Result;
 use clap::Parser;
 
-use evm_core::gff3_convert::evm_to_gff3::convert_all_to_gff3;
+use evm_core::gff3_convert::evm_to_gff3::convert_all_to_gff3_with;
 use evm_core::io::partitions::read_partitions_file;
 
 #[derive(Parser, Debug)]
@@ -24,6 +24,11 @@ struct Cli {
     #[arg(long = "output_file_name", short = 'O', default_value = "evm.out")]
     output_file_name: String,
 
+    /// Skip zero-byte EVM outputs: write no .gff3 for them (and remove a stale one).
+    /// A missing EVM output file is still an error.
+    #[arg(long = "skip_empty")]
+    skip_empty: bool,
+
     /// Genome FASTA (accepted for Perl CLI parity; not used by the Rust converter)
     #[arg(long = "genome")]
     _genome: Option<String>,
@@ -34,7 +39,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     let entries = read_partitions_file(&cli.partitions)?;
-    convert_all_to_gff3(&entries, &cli.output_file_name)?;
+    convert_all_to_gff3_with(&entries, &cli.output_file_name, cli.skip_empty)?;
 
     eprintln!("GFF3 conversion complete.");
     Ok(())

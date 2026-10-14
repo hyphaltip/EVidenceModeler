@@ -246,8 +246,9 @@ pub fn recombine_outputs(entries: &[PartitionEntry], output_file_name: &str) -> 
 
         let final_preds = combine_predictions(all_preds);
         let out_path = format!("{}/{}", base_dir, output_file_name);
-        let mut out =
-            fs::File::create(&out_path).with_context(|| format!("Cannot create {}", out_path))?;
+        let mut out = std::io::BufWriter::new(
+            fs::File::create(&out_path).with_context(|| format!("Cannot create {}", out_path))?,
+        );
 
         log::debug!("Writing combined output to {}", out_path);
         // Perl prints "$pred_text\n" — pred.text already ends in '\n', so the
@@ -260,6 +261,8 @@ pub fn recombine_outputs(entries: &[PartitionEntry], output_file_name: &str) -> 
                 writeln!(out, "{}", nested.text)?;
             }
         }
+        out.flush()
+            .with_context(|| format!("Cannot write {}", out_path))?;
     }
     Ok(())
 }
